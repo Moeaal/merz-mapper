@@ -1,0 +1,21 @@
+# Large data lives on the SSD + OneDrive, not in git
+data/*
+!data/.gitkeep
+*.db3
+*.mcap
+*.bag
+*.pgm
+*.posegraph
+*.data
+# ROS 2 build output
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+# Models and Python clutter
+*.pt
+*.engine
+*.onnx
+__pycache__/
+.venv/
+.vscode/
+.idea/
