@@ -27,7 +27,17 @@ are in the proposal and not repeated here.
 | N4 | roadmap_explorer, https://index.ros.org/r/roadmap_explorer/ | Frontier-based + roadmap; Humble tested | 2026-11-02 |
 | N5 | Husarion exploration tutorial, https://husarion.com/tutorials/ros2-tutorials/10-exploration/ | Worked example: slam_toolbox + nav2 + explore_lite + sllidar_ros2 | 2026-11-02 |
 
+## Related work (found via Consensus, 2026-11-02 - read before citing)
+| Tag | Source | Key finding |
+| --- | --- | --- |
+| L1 | C. Case et al., "Autonomous sign reading for semantic mapping," Proc. IEEE ICRA, 2011 | Closest prior work: SLAM map annotated with room numbers read from wall signs; named locations recognised in 84% of cases |
+| L2 | D. Balaban et al., "Automatic sign reading and localization for semantic mapping with an office robot," arXiv, 2022 | YOLOv5 sign detection + text recognition; placards localised from RGB-D point cloud; reports placement accuracy and text correctness |
+| L3 | X. Song et al., "Semantic mapping techniques for indoor mobile robots: Review and prospect," Measurement and Control, 2024 | Recent review for the literature-review section |
+| L4 | R. Alqobali et al., "A real-time semantic map production system for indoor robot navigation," Sensors, 2024 | LiDAR + YOLO in ROS; reports object localisation error - useful comparison for O4 |
+
+## Tool notes
+- Context7 does not index `robot_localization` (checked 2026-11-02); use docs.ros.org for ROS packages.
+
 ## To find (for literature review)
-- Semantic mapping with door-sign OCR on mobile robots (recent IEEE/RA-L papers).
 - Evaluation methods for 2D occupancy map accuracy against floor plans.
 - Robot-built maps for indoor wayfinding / QR-anchored navigation.

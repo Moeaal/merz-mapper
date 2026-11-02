@@ -8,7 +8,8 @@
 **Last updated:** 2026-11-02 | **Phase:** Proposal + hardware procurement (pre-O1)
 
 ## Where things stand
-- Repo: folder skeleton, logbook/meeting templates, decisions log. **No ROS 2 code yet.**
+- Repo: folder skeleton, templates, memory docs, Claude Code config (PR #1, awaiting review). **No ROS 2 code yet.**
+- Claude setup: 4 skills enabled on claude.ai (brain, navigation-estimation, perception-jetson, ros2-engineering-skills); Context7 + Consensus connected.
 - Nothing is IMPLEMENTED or TESTED. Every robot capability is PLANNED.
 - Hardware: chosen (see `HARDWARE_REGISTER.md`), not yet received/integrated.
 - Rover model: **UNKNOWN** - blocks URDF, odometry source, power and mounting.
