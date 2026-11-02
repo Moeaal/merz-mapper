@@ -16,3 +16,4 @@ Never delete a row; mark it SUPERSEDED and add a new one.
 | 8 | 2026-11-02 | Parts on Rover_Parts_List.xlsx ordered by supervisor | Supervisor placed order | - | Student report, 2026-11-02 | CONFIRMED |
 | 9 | 2026-11-02 | Rover base: university-built simple rover (not a commercial model) | Provided by department | Commercial base | Supervisor | CONFIRMED (spec to inspect on receipt) |
 | 10 | 2026-11-02 | No wheel encoders: heading from D455 IMU gyro; linear motion from LIDAR scan-matching odometry; EKF fuses IMU + scan odometry | Supervisor: encoders may complicate fusion (skid-steer slip) | Encoders fused for vx only | Supervisor suggestion; see OPEN_ISSUES #15 | PROPOSED - confirm 2026-11-02 meeting |
+| 11 | 2026-11-02 | Learn/practise ROS 2 on a Raspberry Pi 5 (Ubuntu), not laptop dual-boot | Laptop install blocked by BitLocker decryption failure | Laptop dual-boot; WSL2 on laptop | Logbook 2026-11-02 | DECIDED |

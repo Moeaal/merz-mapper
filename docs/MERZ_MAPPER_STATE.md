@@ -14,7 +14,7 @@
 - Hardware: parts list ordered by supervisor (2026-11-02); delivery date TBC. Gamepad, mast, mounts, checkerboard, QR posters not yet ordered.
 - Rover: university-built simple rover; spec unknown until received.
 - Encoders: supervisor suggests none (decisions #10, PROPOSED) -> odometry from LIDAR scan matching + D455 IMU.
-- Practice: supervisor's YOLO webcam script in `tools/yolo_practice/` (not robot code).
+- Practice: supervisor's YOLO webcam script in `tools/yolo_practice/` (not robot code); Raspberry Pi 5 with Ubuntu + ROS 2 installed for learning (distro to confirm). Laptop dual-boot abandoned (BitLocker).
 
 ## Key dates
 | What | Date | Notes |
@@ -30,8 +30,9 @@
 1. Meeting 2026-11-02: questions in `docs/meetings/2026-11-02.md` (delivery dates, rover handover, encoders, distro).
 2. Fix proposal before D1 (OPEN_ISSUES #6-9, #15: remove "wheel odometry" if no encoders).
 3. Order remaining parts (gamepad, mast, mounts, checkerboard, QR posters).
-4. Inspect rover on arrival; fill HARDWARE_REGISTER.
-5. Flash Jetson, install ROS 2, bring up each sensor one at a time, record bags.
+4. ROS 2 tutorials on the Pi 5 (nodes, topics, launch).
+5. Inspect rover on arrival; fill HARDWARE_REGISTER.
+6. Flash Jetson, install ROS 2, bring up each sensor one at a time, record bags.
 
 ## Active blockers
 - Rover spec unknown until received (OPEN_ISSUES #1).
