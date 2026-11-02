@@ -6,7 +6,7 @@ bottom; don't delete them.
 
 | # | Issue | Severity | Proposed solution | Status |
 | --- | --- | --- | --- | --- |
-| 1 | Rover model unknown: no info on wheel encoders, battery life, mounting space, existing computer | HIGH (blocks O1) | Ask supervisor this week; if no encoders, rely on LIDAR scan-matching + IMU and say so in report | ASK SUPERVISOR |
+| 1 | Rover is university-built; spec unknown until received (controller interface, encoders, battery, mounting, existing computer) | HIGH (blocks O1) | Get handover date; inspect on arrival and fill HARDWARE_REGISTER | OPEN |
 | 2 | JetPack / ROS 2 distro undecided | HIGH (blocks O1) | JetPack 6.2 (Ubuntu 22.04) + ROS 2 Humble: mature, apt-installable on Jetson; Humble support ends May 2027, which covers the project. JetPack 7.2 + Jazzy is newer but less proven on Orin Nano | ASK SUPERVISOR |
 | 3 | RealSense on JetPack 6 often needs a source build (RSUSB/libuvc backend) and gets USB power/detection errors | MED | Budget a full day; build librealsense with RSUSB; use powered hub; check firmware version; log exact versions | OPEN |
 | 4 | Glass walls/doors are invisible or noisy to the 2D LIDAR | MED (O2 wall accuracy, safety) | Keep-out zones (already in spec) + depth camera into Nav2 costmap; mark glass in evaluation | OPEN |
@@ -19,4 +19,5 @@ bottom; don't delete them.
 | 11 | Poster date: slides say "Friday 23 Feb 2027" but it is a Tuesday | LOW | Confirm with module leader | ASK SUPERVISOR |
 | 12 | Slides say report submission "May 2026" (clearly 2027) | LOW | Confirm date | OPEN |
 | 13 | Frontier exploration package not chosen | MED (O2) | Test explore_lite first in sim; fall back to frontier_exploration_ros2 | OPEN |
+| 15 | No-encoder plan: an IMU gives good yaw rate but NOT distance travelled (integrating accelerometer drifts within seconds). Linear motion must come from LIDAR scan matching. Proposal O1 and project text still say "wheel odometry" | HIGH (D1 wording, O1, O8) | Confirm with supervisor; use scan-matching odometry (e.g. rf2o, verify Humble support) + IMU in EKF; update proposal before 13 Nov; O8 comparison becomes IMU+scan fusion vs scan-only | ASK SUPERVISOR |
 | 14 | Ground truth for 0.15 m wall target: need a floor plan of Merz Court | MED (O2, O8) | Ask estates/supervisor for a CAD/PDF plan; else laser-meter survey of chosen corridors | ASK SUPERVISOR |

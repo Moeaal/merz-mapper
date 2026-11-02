@@ -18,7 +18,7 @@ Student: Mohammed Abdulaal | Supervisor: Dr Nick Wright
 | `docs/OPEN_ISSUES.md` | Problems, severity, proposed fixes | all |
 | `docs/RESEARCH_INDEX.md` | Verified sources and key findings | O8, D4 |
 | `ros2_ws/src/` | ROS 2 packages, created with `ros2 pkg create` when needed | O1-O6 |
-| `tools/` | Calibration and evaluation scripts | O8 |
+| `tools/` | Calibration and evaluation scripts; `yolo_practice/` = supervisor practice script | O3, O8 |
 | `data/` | Rosbags, maps, photos - NOT committed (see .gitignore) | - |
 | `report/` | Poster (D2) and report (D4) drafts | D2, D4 |
 | `web/` | FastAPI + demonstrator website (from April) | O7 |

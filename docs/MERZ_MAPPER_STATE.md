@@ -11,8 +11,10 @@
 - Repo: folder skeleton, templates, memory docs, Claude Code config (PR #1 merged 2026-11-02). **No ROS 2 code yet.**
 - Claude setup: 4 skills enabled on claude.ai (brain, navigation-estimation, perception-jetson, ros2-engineering-skills); Context7 + Consensus connected.
 - Nothing is IMPLEMENTED or TESTED. Every robot capability is PLANNED.
-- Hardware: chosen (see `HARDWARE_REGISTER.md`), not yet received/integrated.
-- Rover model: **UNKNOWN** - blocks URDF, odometry source, power and mounting.
+- Hardware: parts list ordered by supervisor (2026-11-02); delivery date TBC. Gamepad, mast, mounts, checkerboard, QR posters not yet ordered.
+- Rover: university-built simple rover; spec unknown until received.
+- Encoders: supervisor suggests none (decisions #10, PROPOSED) -> odometry from LIDAR scan matching + D455 IMU.
+- Practice: supervisor's YOLO webcam script in `tools/yolo_practice/` (not robot code).
 
 ## Key dates
 | What | Date | Notes |
@@ -25,15 +27,16 @@
 | D3 demo, D4 report | May 2027 | TBC |
 
 ## Immediate next tasks (to G1)
-1. Confirm rover model + what it includes (encoders? battery? existing computer?).
-2. Decide JetPack/ROS 2 distro with supervisor (see OPEN_ISSUES #2).
-3. Fix proposal issues before D1 (OPEN_ISSUES #6, #7, #8).
-4. Order remaining parts (parts list is missing gamepad, mast, mounts, checkerboard).
+1. Meeting 2026-11-02: questions in `docs/meetings/2026-11-02.md` (delivery dates, rover handover, encoders, distro).
+2. Fix proposal before D1 (OPEN_ISSUES #6-9, #15: remove "wheel odometry" if no encoders).
+3. Order remaining parts (gamepad, mast, mounts, checkerboard, QR posters).
+4. Inspect rover on arrival; fill HARDWARE_REGISTER.
 5. Flash Jetson, install ROS 2, bring up each sensor one at a time, record bags.
 
 ## Active blockers
-- Rover model unknown (OPEN_ISSUES #1).
+- Rover spec unknown until received (OPEN_ISSUES #1).
 - ROS 2 distro / JetPack undecided (OPEN_ISSUES #2).
+- Parts delivery date unknown.
 
 ## Memory files
 `docs/decisions.md` (engineering decisions) | `docs/HARDWARE_REGISTER.md` |

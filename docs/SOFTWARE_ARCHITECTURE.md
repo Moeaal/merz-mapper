@@ -17,7 +17,7 @@ when a logbook entry records the result.
 ## Planned data flow
 ```
 RPLIDAR S2 --/scan--> SLAM Toolbox --/map, map->odom--> Nav2 <-- frontier explorer
-Wheel odom --/wheel/odom--\
+Scan odom  --/odom_scan--\   (LIDAR scan matching; wheel odom only if encoders exist - decisions #10)
 D455 IMU  --/imu---------> robot_localization EKF --/odometry/filtered, odom->base_link
 D455 depth/colour --\
 C920 image ---------> merz_perception --detections + text--> merz_semantic_map --> SQLite
@@ -43,4 +43,4 @@ C920 image ---------> merz_perception --detections + text--> merz_semantic_map -
 
 ## Dependencies
 ROS 2 distro TBD (decisions #6), slam_toolbox, nav2, robot_localization,
-explore_lite (TBD, decisions #7), librealsense2, TensorRT (JetPack), PaddleOCR, SQLite, FastAPI.
+explore_lite (TBD, decisions #7), laser scan-matching odometry (TBD, decisions #10), librealsense2, TensorRT (JetPack), PaddleOCR, SQLite, FastAPI.
