@@ -11,7 +11,12 @@ Student: Mohammed Abdulaal | Supervisor: Dr Nick Wright
 | --- | --- | --- |
 | `docs/logbook/` | One entry per day worked (copy `TEMPLATE.md`) | all |
 | `docs/meetings/` | Supervisor meeting minutes (copy `TEMPLATE.md`) | all |
-| `docs/decisions.md` | One line per decision + reason | all |
+| `docs/MERZ_MAPPER_STATE.md` | Current phase, next tasks, blockers (read first) | all |
+| `docs/decisions.md` | Engineering decisions: reason, alternatives, evidence, status | all |
+| `docs/HARDWARE_REGISTER.md` | Confirmed specs, drivers, power, integration status | O1 |
+| `docs/SOFTWARE_ARCHITECTURE.md` | Packages, nodes, topics, TF, data flow | O1-O6 |
+| `docs/OPEN_ISSUES.md` | Problems, severity, proposed fixes | all |
+| `docs/RESEARCH_INDEX.md` | Verified sources and key findings | O8, D4 |
 | `ros2_ws/src/` | ROS 2 packages, created with `ros2 pkg create` when needed | O1-O6 |
 | `tools/` | Calibration and evaluation scripts | O8 |
 | `data/` | Rosbags, maps, photos - NOT committed (see .gitignore) | - |

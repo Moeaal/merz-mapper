@@ -19,3 +19,6 @@ __pycache__/
 .venv/
 .vscode/
 .idea/
+# Personal Claude Code settings (shared settings are in .claude/settings.json)
+.claude/settings.local.json
+CLAUDE.local.md
