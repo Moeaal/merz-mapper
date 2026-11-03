@@ -109,7 +109,6 @@ class MerzDatabase:
         self.connection.commit()
 
     def upsert_entrance(self, entrance_id: str, name: str, x: float, y: float, yaw: float = 0.0) -> None:
-        # An upsert, not INSERT OR REPLACE: replacing deletes the row first, which foreign keys in access_zones forbid.
         self.connection.execute(
             """INSERT INTO entrances (id, name, x, y, yaw) VALUES (?, ?, ?, ?, ?)
                ON CONFLICT(id) DO UPDATE SET name=excluded.name, x=excluded.x, y=excluded.y, yaw=excluded.yaw""",

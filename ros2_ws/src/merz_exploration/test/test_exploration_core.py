@@ -153,7 +153,7 @@ def test_saved_map_to_database_round_trip(tmp_path):
         assert database.connection.execute('SELECT name FROM entrances').fetchall() == [('East door',)]
         assert database.connection.execute('SELECT landmark_id FROM access_zones').fetchall() == [(1,)]
 
-    # Recomputing offline must work: this once failed a foreign key check on the existing entrance.
+    # Recomputing offline must work, and update the existing entrance.
     assert store_zone(path, database_path, 'east', 'East entrance', -0.5, -1.0).landmark_ids == [1]
     with MerzDatabase(database_path) as database:
         assert database.connection.execute('SELECT name FROM entrances').fetchall() == [('East entrance',)]
