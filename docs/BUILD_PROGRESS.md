@@ -1,4 +1,4 @@
-﻿# Build progress
+# Build progress
 
 Tracks `docs/BUILD_ALL_PROMPT.md`. To resume: `Continue docs/BUILD_ALL_PROMPT.md from docs/BUILD_PROGRESS.md.`
 
@@ -7,7 +7,7 @@ Tracks `docs/BUILD_ALL_PROMPT.md`. To resume: `Continue docs/BUILD_ALL_PROMPT.md
 
 ## Phases (ticked when the commit is pushed)
 - [x] 1. Workspace + interfaces
-- [ ] 2. Robot description
+- [x] 2. Robot description
 - [ ] 3. Sensor bringup + teleop
 - [ ] 4. Odometry, EKF, SLAM
 - [ ] 5. Perception

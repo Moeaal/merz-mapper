@@ -1,0 +1,42 @@
+# Sensor poses relative to base_link. All values are PLACEHOLDERS until measured on the rover.
+# Units: metres and radians. REP 103: x forward, y left, z up. roll/pitch/yaw are fixed-axis about x, y, z.
+#
+# base_link is on the floor, at the centre of rotation of the rover. That makes z the plain height
+# above the floor, which is the easiest number to measure.
+#
+# Why this matters: an error here goes directly into every landmark position (objective O4).
+
+base:
+  # TODO: measure on rover. Only used to draw the box in RViz. The Nav2 footprint is in nav2.yaml.
+  length: 0.50
+  width: 0.40
+  height: 0.20
+  ground_clearance: 0.05
+
+laser:
+  # TODO: measure on rover. Origin = centre of the LIDAR's optical window. It must be level (roll, pitch = 0).
+  x: 0.10
+  y: 0.0
+  z: 0.30
+  roll: 0.0
+  pitch: 0.0
+  yaw: 0.0
+
+camera_link:
+  # TODO: measure on rover. D455 reference point, facing forward. From this frame the RealSense driver
+  # publishes its factory-calibrated optical and IMU frames.
+  x: 0.20
+  y: 0.0
+  z: 0.35
+  roll: 0.0
+  pitch: 0.0
+  yaw: 0.0
+
+sign_camera:
+  # TODO: measure on rover. C920 on the mast at about 1.5 m. Pitch is positive when tilted downwards.
+  x: 0.0
+  y: 0.0
+  z: 1.50
+  roll: 0.0
+  pitch: 0.0
+  yaw: 0.0
