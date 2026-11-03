@@ -1,0 +1,16 @@
+# Third-party packages built from source. On the Jetson, from ros2_ws/:
+#   vcs import src < merz.repos
+# Versions are branch names, not pins: record the exact commit in the logbook when first built.
+repositories:
+  third_party/sllidar_ros2:
+    type: git
+    url: https://github.com/Slamtec/sllidar_ros2.git
+    version: main
+  third_party/rf2o_laser_odometry:
+    type: git
+    url: https://github.com/MAPIRlab/rf2o_laser_odometry.git
+    version: ros2
+  third_party/m-explore-ros2:
+    type: git
+    url: https://github.com/robo-friends/m-explore-ros2.git
+    version: main

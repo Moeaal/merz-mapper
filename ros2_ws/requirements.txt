@@ -1,0 +1,11 @@
+# Pure-Python dependencies that rosdep does not cover well, or that the core modules need on Windows.
+# On the Jetson: pip install -r requirements.txt  (only after ROS 2 is installed).
+numpy>=1.21,<3
+pyyaml>=5.4
+opencv-python-headless>=4.5   # On the Jetson prefer the apt python3-opencv and skip this line.
+pyserial>=3.5                 # merz_base serial backend
+
+# Heavy perception packages are deliberately NOT here: install them when needed.
+#   Laptop:  pip install ultralytics
+#   Jetson:  see tools/export_tensorrt.md (the torch build must match JetPack)
+#   OCR:     pip install paddleocr paddlepaddle   (or the fallback: rapidocr-onnxruntime)
