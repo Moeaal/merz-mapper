@@ -1,5 +1,7 @@
-"""Make this package importable in tests on Windows, where it has not been installed by colcon."""
+"""Make this package, and merz_semantic_map which it uses, importable in tests on Windows."""
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+PACKAGE = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PACKAGE))
+sys.path.insert(0, str(PACKAGE.parent / 'merz_semantic_map'))

@@ -12,7 +12,7 @@ Tracks `docs/BUILD_ALL_PROMPT.md`. To resume: `Continue docs/BUILD_ALL_PROMPT.md
 - [x] 4. Odometry, EKF, SLAM
 - [x] 5. Perception
 - [x] 6. Semantic map + SQLite
-- [ ] 7. Exploration + access zones
+- [x] 7. Exploration + access zones
 - [ ] 8. Nav2 + full autonomy launch
 - [ ] 9. Evaluation tools
 - [ ] 10. Website + QR posters
