@@ -17,7 +17,7 @@ Tracks `docs/BUILD_ALL_PROMPT.md`. To resume: `Continue docs/BUILD_ALL_PROMPT.md
 - [x] 9. Evaluation tools
 - [x] 10. Website + QR posters
 - [x] 11. Rover base driver
-- [ ] 12. Build guide
+- [x] 12. Build guide
 - [ ] 13. Final check
 
 ## Environment notes
