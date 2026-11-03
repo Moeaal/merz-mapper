@@ -26,6 +26,11 @@ are in the proposal and not repeated here.
 | N3 | frontier_exploration_ros2, https://discourse.openrobotics.org/t/frontier-exploration-ros2-modern-autonomous-exploration-system-for-ros-2/57222 | Tested on Humble + Jazzy with Nav2 + SLAM Toolbox; author reports shorter paths than m-explore (author's own benchmark) | 2026-11-02 |
 | N4 | roadmap_explorer, https://index.ros.org/r/roadmap_explorer/ | Frontier-based + roadmap; Humble tested | 2026-11-02 |
 | N5 | Husarion exploration tutorial, https://husarion.com/tutorials/ros2-tutorials/10-exploration/ | Worked example: slam_toolbox + nav2 + explore_lite + sllidar_ros2 | 2026-11-02 |
+| N6 | rf2o_laser_odometry `ros2` branch, https://github.com/MAPIRlab/rf2o_laser_odometry | GPL-3.0. Params: laser_scan_topic, odom_topic, publish_tf, base_frame_id, odom_frame_id, init_pose_from_topic, freq. Source: `publish()` sets **no covariance**. README does not name a ROS 2 distro, so Humble support is unconfirmed upstream | 2026-11-03 |
+| N7 | Build log (anecdotal), https://hackmd.io/@ming0071/SJ61ZNg2R | Reports building rf2o on Humble from the Adlink-ROS `humble-devel` branch: the fallback | 2026-11-03 |
+| N8 | sllidar_ros2 `launch/sllidar_s2_launch.py`, https://github.com/Slamtec/sllidar_ros2 | S2: serial_baudrate 1000000, scan_mode DenseBoost, executable sllidar_node | 2026-11-03 |
+| N9 | m-explore-ros2 README and `explore/config/params.yaml`, https://github.com/robo-friends/m-explore-ros2 | Package explore_lite, executable explore; topics explore/resume (Bool), explore/frontiers (markers); stock params incl. min_frontier_size 0.75, progress_timeout 30 | 2026-11-03 |
+| N10 | Ultralytics TensorRT page, https://docs.ultralytics.com/integrations/tensorrt/ | `format="engine"`; `YOLO("x.engine")` loads for inference; NVIDIA GPU needed; engines are hardware- and runtime-specific; current versions use `quantize=16/8` in place of deprecated `half`/`int8` | 2026-11-03 |
 
 ## Related work (found via Consensus, 2026-11-02 - read before citing)
 | Tag | Source | Key finding |

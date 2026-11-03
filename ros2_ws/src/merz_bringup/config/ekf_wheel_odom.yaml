@@ -1,0 +1,15 @@
+# OPTIONAL extra EKF input, off by default: only used with use_wheel_odom:=true (decisions #10).
+# Only for a rover that turns out to have encoders. Forward speed only: on a skid-steer base, the wheels
+# slip during turns, so their yaw rate is poor.
+# The wheel driver must NOT publish odom->base_link itself.
+ekf_filter_node:
+  ros__parameters:
+    odom1: /wheel/odometry
+    odom1_config: [false, false, false,
+                   false, false, false,
+                   true,  false, false,
+                   false, false, false,
+                   false, false, false]
+    odom1_queue_size: 5
+    odom1_differential: false
+    odom1_relative: false

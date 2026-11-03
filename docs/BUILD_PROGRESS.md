@@ -9,7 +9,7 @@ Tracks `docs/BUILD_ALL_PROMPT.md`. To resume: `Continue docs/BUILD_ALL_PROMPT.md
 - [x] 1. Workspace + interfaces
 - [x] 2. Robot description
 - [x] 3. Sensor bringup + teleop
-- [ ] 4. Odometry, EKF, SLAM
+- [x] 4. Odometry, EKF, SLAM
 - [ ] 5. Perception
 - [ ] 6. Semantic map + SQLite
 - [ ] 7. Exploration + access zones
