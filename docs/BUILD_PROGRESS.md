@@ -14,7 +14,7 @@ Tracks `docs/BUILD_ALL_PROMPT.md`. To resume: `Continue docs/BUILD_ALL_PROMPT.md
 - [x] 6. Semantic map + SQLite
 - [x] 7. Exploration + access zones
 - [x] 8. Nav2 + full autonomy launch
-- [ ] 9. Evaluation tools
+- [x] 9. Evaluation tools
 - [ ] 10. Website + QR posters
 - [ ] 11. Rover base driver
 - [ ] 12. Build guide
