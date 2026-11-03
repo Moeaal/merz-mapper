@@ -1,0 +1,5 @@
+# Logitech C920, appears as /dev/c920. ATTR{index}=="0" selects the capture node, not the metadata node.
+# The product ID varies by C920 revision (082d and 08e5 are both listed here).
+# Check the real one with: lsusb | grep -i logitech
+SUBSYSTEM=="video4linux", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", ATTR{index}=="0", MODE:="0666", SYMLINK+="c920"
+SUBSYSTEM=="video4linux", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="08e5", ATTR{index}=="0", MODE:="0666", SYMLINK+="c920"

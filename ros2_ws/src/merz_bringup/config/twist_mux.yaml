@@ -1,0 +1,18 @@
+# Command arbitration: the highest-priority input that is still publishing wins.
+# Holding the deadman with sticks centred publishes zero velocity at priority 100, which is how the
+# operator halts autonomy. Software stopping is not enough on its own: see the safety checklist in
+# the merz_bringup README and keep a physical power cut within reach.
+#
+# Topic chain: Nav2 -> /cmd_vel -+
+#              gamepad -> /cmd_vel_teleop -+-> twist_mux -> /cmd_vel_mux -> merz_base
+twist_mux:
+  ros__parameters:
+    topics:
+      navigation:
+        topic: cmd_vel
+        timeout: 0.5     # seconds without a message before this input is ignored
+        priority: 10
+      teleop:
+        topic: cmd_vel_teleop
+        timeout: 0.5
+        priority: 100

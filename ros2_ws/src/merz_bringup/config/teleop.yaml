@@ -1,0 +1,20 @@
+# Gamepad teleop. The gamepad is not yet bought, so axis and button numbers are guesses.
+# TODO: measure on rover (run `ros2 topic echo /joy` and press each control).
+joy_node:
+  ros__parameters:
+    deadzone: 0.1
+    autorepeat_rate: 20.0   # keeps publishing while held, which keeps twist_mux on the teleop input
+
+teleop_node:
+  ros__parameters:
+    require_enable_button: true   # deadman: the robot only moves under teleop while this is held
+    enable_button: 4              # TODO: measure on rover (left shoulder on most pads)
+    enable_turbo_button: -1       # no turbo: the spec limit is 0.5 m/s
+    axis_linear:
+      x: 1                        # TODO: measure on rover
+    scale_linear:
+      x: 0.3                      # m/s. Slower than the limit, as scan matching likes gentle motion. TODO: tune
+    axis_angular:
+      yaw: 3                      # TODO: measure on rover
+    scale_angular:
+      yaw: 0.6                    # rad/s. TODO: tune

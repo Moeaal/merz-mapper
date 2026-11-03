@@ -1,0 +1,4 @@
+# RealSense D455: lets a normal user open the camera. The driver finds it by serial number, so no symlink.
+# librealsense ships a fuller rules file (99-realsense-libusb.rules): when building from source, install
+# that one as well, as the BUILD_GUIDE describes. Check the ID with: lsusb | grep -i intel
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="8086", ATTRS{idProduct}=="0b5c", MODE:="0666", GROUP:="plugdev"

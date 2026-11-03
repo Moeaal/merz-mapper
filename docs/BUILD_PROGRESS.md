@@ -8,7 +8,7 @@ Tracks `docs/BUILD_ALL_PROMPT.md`. To resume: `Continue docs/BUILD_ALL_PROMPT.md
 ## Phases (ticked when the commit is pushed)
 - [x] 1. Workspace + interfaces
 - [x] 2. Robot description
-- [ ] 3. Sensor bringup + teleop
+- [x] 3. Sensor bringup + teleop
 - [ ] 4. Odometry, EKF, SLAM
 - [ ] 5. Perception
 - [ ] 6. Semantic map + SQLite
