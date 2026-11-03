@@ -19,7 +19,7 @@ DRIVER RUNNING / CALIBRATED / ON ROVER.
 | Laser distance meter | 40 m+ | - | - | battery | ORDERED by supervisor (Nov 2026; delivery date TBC) |
 
 ## Notes
-- 2026-11-02: supervisor ordered everything on `Rover_Parts_List.xlsx`. Gamepad, mast,
+- 2026-11-02: supervisor ordered everything on `Rover_Parts_List.xlsx`; delivery expected within a few days, rover arriving with the parts. Rover CAD to be shared by supervisor (for mount design). Gamepad, mast,
   mounts, checkerboard and QR posters were not on that list.
 - Proposal Table 2 says D455 range "0.4-6 m"; Intel lists **0.6-6 m** ideal
   range (one distributor says 0.4 m). Use 0.6-6 m in submissions [H2].

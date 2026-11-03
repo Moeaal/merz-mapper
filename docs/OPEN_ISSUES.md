@@ -6,7 +6,7 @@ bottom; don't delete them.
 
 | # | Issue | Severity | Proposed solution | Status |
 | --- | --- | --- | --- | --- |
-| 1 | Rover is university-built; spec unknown until received (controller interface, encoders, battery, mounting, existing computer) | HIGH (blocks O1) | Get handover date; inspect on arrival and fill HARDWARE_REGISTER | OPEN |
+| 1 | Rover is university-built; spec unknown until received (controller interface, encoders, battery, mounting, existing computer) | HIGH (blocks O1) | Arriving with parts (expected early Nov); CAD from supervisor; inspect on arrival and fill HARDWARE_REGISTER | OPEN |
 | 2 | JetPack / ROS 2 distro undecided | HIGH (blocks O1) | JetPack 6.2 (Ubuntu 22.04) + ROS 2 Humble: mature, apt-installable on Jetson; Humble support ends May 2027, which covers the project. JetPack 7.2 + Jazzy is newer but less proven on Orin Nano | ASK SUPERVISOR |
 | 3 | RealSense on JetPack 6 often needs a source build (RSUSB/libuvc backend) and gets USB power/detection errors | MED | Budget a full day; build librealsense with RSUSB; use powered hub; check firmware version; log exact versions | OPEN |
 | 4 | Glass walls/doors are invisible or noisy to the 2D LIDAR | MED (O2 wall accuracy, safety) | Keep-out zones (already in spec) + depth camera into Nav2 costmap; mark glass in evaluation | OPEN |

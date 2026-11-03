@@ -5,14 +5,15 @@
 > **TESTED** (measured result logged), **PLANNED** (in proposal), **PROPOSED**
 > (suggested, not agreed), **UNKNOWN**.
 
-**Last updated:** 2026-11-02 | **Phase:** Proposal + hardware procurement (pre-O1)
+**Last updated:** 2026-11-03 | **Phase:** Proposal + hardware procurement (pre-O1)
 
 ## Where things stand
 - Repo: folder skeleton, templates, memory docs, Claude Code config (PR #1 merged 2026-11-02). **No ROS 2 code yet.**
 - Claude setup: 4 skills enabled on claude.ai (brain, navigation-estimation, perception-jetson, ros2-engineering-skills); Context7 + Consensus connected.
 - Nothing is IMPLEMENTED or TESTED. Every robot capability is PLANNED.
-- Hardware: parts list ordered by supervisor (2026-11-02); delivery date TBC. Gamepad, mast, mounts, checkerboard, QR posters not yet ordered.
+- Hardware: parts list ordered by supervisor; delivery expected within days of 3 Nov, rover arriving with them; rover CAD to be shared. Gamepad, mast, mounts, checkerboard, QR posters not yet ordered.
 - Rover: university-built simple rover; spec unknown until received.
+- Confirmed 2026-11-02: QR + phone image-to-image navigation for demonstrator (decisions #12); Claude use allowed (#13).
 - Encoders: supervisor suggests none (decisions #10, PROPOSED) -> odometry from LIDAR scan matching + D455 IMU.
 - Practice: supervisor's YOLO webcam script in `tools/yolo_practice/` (not robot code); Raspberry Pi 5 with Ubuntu + ROS 2 installed for learning (distro to confirm). Laptop dual-boot abandoned (BitLocker).
 
@@ -27,17 +28,17 @@
 | D3 demo, D4 report | May 2027 | TBC |
 
 ## Immediate next tasks (to G1)
-1. Meeting 2026-11-02: questions in `docs/meetings/2026-11-02.md` (delivery dates, rover handover, encoders, distro).
-2. Fix proposal before D1 (OPEN_ISSUES #6-9, #15: remove "wheel odometry" if no encoders).
-3. Order remaining parts (gamepad, mast, mounts, checkerboard, QR posters).
-4. ROS 2 tutorials on the Pi 5 (nodes, topics, launch).
-5. Inspect rover on arrival; fill HARDWARE_REGISTER.
+1. Send proposal draft to Dr Wright before next meeting; fix OPEN_ISSUES #6-9 first. D1 due 13 Nov 14:00.
+2. ROS 2 tutorials on the Pi 5 (nodes, topics, launch).
+3. 3D design of mast/sensor mounts once rover CAD arrives.
+4. Inspect parts and rover on arrival; fill HARDWARE_REGISTER.
+5. Next meeting: encoders (#10), distro, floor plan, test permission, unlisted parts (see minutes 2026-11-02 "Not covered").
 6. Flash Jetson, install ROS 2, bring up each sensor one at a time, record bags.
 
 ## Active blockers
 - Rover spec unknown until received (OPEN_ISSUES #1).
 - ROS 2 distro / JetPack undecided (OPEN_ISSUES #2).
-- Parts delivery date unknown.
+- Encoder plan and proposal wording ("wheel odometry") unresolved until next meeting (OPEN_ISSUES #15).
 
 ## Memory files
 `docs/decisions.md` (engineering decisions) | `docs/HARDWARE_REGISTER.md` |
