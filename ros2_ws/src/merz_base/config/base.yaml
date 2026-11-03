@@ -1,0 +1,36 @@
+# Rover base driver. The rover is not yet known (OPEN_ISSUES #1), so every value here is a placeholder.
+# The default backend is mock, so nothing can move until someone chooses a real backend on purpose.
+base_node:
+  ros__parameters:
+    backend: mock                    # mock, serial or gpio. TODO: measure on rover
+    update_rate_hz: 20.0
+    command_timeout_s: 0.5           # stops the motors if no command arrives for this long
+
+    # Limits. TODO: measure on rover.
+    max_linear_m_s: 0.5              # spec limit
+    max_angular_rad_s: 1.0
+    max_linear_accel_m_s2: 0.5
+    max_angular_accel_rad_s2: 1.0
+    track_width_m: 0.40              # TODO: measure on rover. Effective width on a skid-steer: identify from fixed turns
+    full_speed_m_s: 1.0              # TODO: measure on rover. Wheel speed at full output
+
+    # (a) Serial motor controller. TODO: measure on rover, from the controller's manual.
+    serial_port: /dev/merz_motors    # TODO: measure on rover (add a udev rule once the device is known)
+    serial_baud: 115200              # TODO: measure on rover
+    # Fields: {left} {right} (scaled floats), {left_int} {right_int} (rounded). Newlines must be double-quoted YAML.
+    serial_drive_format: "M {left:.3f} {right:.3f}\n"   # TODO: measure on rover
+    serial_stop_command: "M 0 0\n"                      # TODO: measure on rover
+    serial_scale: 1.0                                   # TODO: measure on rover. 255 for a -255..255 controller
+
+    # (b) Jetson GPIO PWM to an H-bridge. -1 means not set, and the node refuses to start.
+    # TODO: measure on rover. Physical BOARD pin numbers. Before use: enable PWM with
+    #   sudo /opt/nvidia/jetson-io/jetson-io.py
+    # and check every pin against NVIDIA's Orin Nano developer kit pinout. Jetson pins are 3.3 V logic: check the
+    # H-bridge input levels and share a ground. Never power a motor from the header.
+    gpio_left_pwm: -1
+    gpio_left_forward: -1
+    gpio_left_reverse: -1
+    gpio_right_pwm: -1
+    gpio_right_forward: -1
+    gpio_right_reverse: -1
+    gpio_pwm_frequency_hz: 1000.0    # TODO: measure on rover (see the H-bridge datasheet)
