@@ -49,8 +49,32 @@ Each EKF setting and why it is that value is in the comments of `config/ekf.yaml
 | `process_noise_covariance` | Trust in the motion model | **Yes**: square-path test |
 | `max_laser_range` in `slam.yaml` | Below 30 m, to limit noise from glass | **Yes**: check in the real corridors |
 
+## Navigation and the full run
+- `navigation.launch.py`: Nav2. Stock planner and controller values, limited to 0.5 m/s, no reversing. Spin and BackUp
+  recoveries are removed until tested on the rover (`behavior_trees/`). Keep-out: `maps/README.md`.
+- `explore_from_entrance.launch.py entrance:=<name>`: everything together. Add `perception:=false` until a model is
+  trained. At the end `mission_node` saves `~/merz_data/maps/<entrance>_<time>.*`; the database is
+  `~/merz_data/merz.sqlite`.
+
+## Safety checklist: before any autonomous motion
+Software stops are not proof the wheels stop. These checks have not yet been done on the real rover.
+- [ ] A person is beside the rover at all times, with the gamepad, within reach of a **physical power cut**.
+- [ ] The power cut has been tried while the wheels are turning.
+- [ ] First run with the **wheels off the ground**: test that the deadman stops teleop, that holding it halts autonomy,
+      and that killing the base node or `/cmd_vel_mux` stops the motors within `command_timeout_s`.
+- [ ] Footprint and speed limits in `nav2.yaml` measured, not placeholders. First runs at reduced `max_vel_x`.
+- [ ] TF checked in RViz: scan lines up with the walls and the rover faces the right way.
+- [ ] Test area clear, permission to test obtained (minutes 2026-11-02), and people nearby informed.
+- [ ] Glass walls and doors have keep-out zones, with the mask checked in RViz against the live map.
+- [ ] Battery charged, and low-battery behaviour known. Nothing in the software monitors the battery.
+- [ ] No stairs or drops in the test area. **The sensors are not set up to detect a floor edge.**
+
 ## Unit tests that pass on Windows
 - `test/test_sensor_config.py`: teleop priority above navigation, short mux timeouts, deadman required, teleop speed
   within limits, driver paths matching the udev symlinks.
 - `test/test_localisation.py`: covariance layout, plausibility gate, EKF owns `odom->base_link` and rf2o does not,
   fused axes, wheel odometry off by default.
+- `test/test_navigation_config.py`: speed limit, no reversing, frames and odometry topic, moving recoveries removed,
+  footprints equal, keep-out wired up, unknown space allowed for frontier goals.
+
+**Not covered on Windows:** any launch file running, and whether Nav2 accepts these parameters.

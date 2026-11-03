@@ -27,6 +27,12 @@
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>merz_base</exec_depend>
+  <exec_depend>merz_exploration</exec_depend>
+  <exec_depend>merz_perception</exec_depend>
+  <exec_depend>merz_semantic_map</exec_depend>
+  <exec_depend>rf2o_laser_odometry</exec_depend>
+  <exec_depend>sllidar_ros2</exec_depend>
 
   <test_depend>python3-pytest</test_depend>
 
