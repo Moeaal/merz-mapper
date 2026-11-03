@@ -43,4 +43,4 @@
 ## Memory files
 `docs/decisions.md` (engineering decisions) | `docs/HARDWARE_REGISTER.md` |
 `docs/SOFTWARE_ARCHITECTURE.md` | `docs/OPEN_ISSUES.md` | `docs/RESEARCH_INDEX.md` |
-`docs/logbook/` | `docs/meetings/`
+`docs/logbook/` | `docs/meetings/` | `docs/CLAUDE_CODE_ROADMAP.md` (code build plan, stage prompts)
