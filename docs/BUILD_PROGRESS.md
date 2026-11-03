@@ -10,7 +10,7 @@ Tracks `docs/BUILD_ALL_PROMPT.md`. To resume: `Continue docs/BUILD_ALL_PROMPT.md
 - [x] 2. Robot description
 - [x] 3. Sensor bringup + teleop
 - [x] 4. Odometry, EKF, SLAM
-- [ ] 5. Perception
+- [x] 5. Perception
 - [ ] 6. Semantic map + SQLite
 - [ ] 7. Exploration + access zones
 - [ ] 8. Nav2 + full autonomy launch
