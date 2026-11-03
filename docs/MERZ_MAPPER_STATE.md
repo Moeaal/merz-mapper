@@ -8,9 +8,9 @@
 **Last updated:** 2026-11-03 | **Phase:** Proposal + hardware procurement (pre-O1)
 
 ## Where things stand
-- Repo: folder skeleton, templates, memory docs, Claude Code config (PR #1 merged 2026-11-02). **No ROS 2 code yet.**
+- Repo: memory docs, Claude Code config (PR #1 merged 2026-11-02). **All pre-hardware code written on branch `build/all-code` (2026-11-03), awaiting the student's review: not merged.**
 - Claude setup: 4 skills enabled on claude.ai (brain, navigation-estimation, perception-jetson, ros2-engineering-skills); Context7 + Consensus connected.
-- Nothing is IMPLEMENTED or TESTED. Every robot capability is PLANNED.
+- Code status: all packages, website and evaluation tools are **IMPLEMENTED; nothing is TESTED**. No `colcon build` has been run and nothing has run on hardware; only pure-Python unit tests, on Windows (`docs/BUILD_PROGRESS.md`). Poses, footprint, limits, covariances and motor interface are placeholders; no trained model exists. Next: `docs/BUILD_GUIDE.md`.
 - Hardware: parts list ordered by supervisor; delivery expected within days of 3 Nov, rover arriving with them; rover CAD to be shared. Gamepad, mast, mounts, checkerboard, QR posters not yet ordered.
 - Rover: university-built simple rover; spec unknown until received.
 - Confirmed 2026-11-02: QR + phone image-to-image navigation for demonstrator (decisions #12); Claude use allowed (#13).
@@ -29,7 +29,7 @@
 
 ## Immediate next tasks (to G1)
 1. Send proposal draft to Dr Wright before next meeting; fix OPEN_ISSUES #6-9 first. D1 due 13 Nov 14:00.
-2. ROS 2 tutorials on the Pi 5 (nodes, topics, launch).
+2. ROS 2 tutorials on the Pi 5 (nodes, topics, launch). Review the `build/all-code` pull request; first real check is `colcon build` on the Pi, including rf2o (decisions #14).
 3. 3D design of mast/sensor mounts once rover CAD arrives.
 4. Inspect parts and rover on arrival; fill HARDWARE_REGISTER.
 5. Next meeting: encoders (#10), distro, floor plan, test permission, unlisted parts (see minutes 2026-11-02 "Not covered").
@@ -43,4 +43,4 @@
 ## Memory files
 `docs/decisions.md` (engineering decisions) | `docs/HARDWARE_REGISTER.md` |
 `docs/SOFTWARE_ARCHITECTURE.md` | `docs/OPEN_ISSUES.md` | `docs/RESEARCH_INDEX.md` |
-`docs/logbook/` | `docs/meetings/` | `docs/CLAUDE_CODE_ROADMAP.md` (code build plan, stage prompts)
+`docs/logbook/` | `docs/meetings/` | `docs/CLAUDE_CODE_ROADMAP.md` (code build plan, stage prompts) | `docs/BUILD_GUIDE.md` (hardware procedure) | `docs/BUILD_PROGRESS.md` | `docs/EXPERIMENTS.md` | `docs/DATABASE_SCHEMA.md`

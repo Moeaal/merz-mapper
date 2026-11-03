@@ -18,7 +18,7 @@ Tracks `docs/BUILD_ALL_PROMPT.md`. To resume: `Continue docs/BUILD_ALL_PROMPT.md
 - [x] 10. Website + QR posters
 - [x] 11. Rover base driver
 - [x] 12. Build guide
-- [ ] 13. Final check
+- [x] 13. Final check
 
 ## Environment notes
 - Python 3.12 (decisions #4) is **not installed** on the laptop; only 3.14.7 is.
@@ -34,4 +34,34 @@ py -3.12 -m venv .venv
 ```
 
 ## Test summary
-Filled in at phase 13.
+Run on 2026-11-03, on Windows, in a clean venv installed from `requirements-dev.txt`, Python 3.14.7 (`python -m pytest`):
+```
+337 passed, 4 skipped
+```
+| Tests | Count |
+| --- | --- |
+| `merz_description/test/test_urdf.py` | 6 |
+| `merz_bringup/test/` (config, localisation, navigation) | 32 |
+| `merz_perception/test/test_perception_core.py` | 40 |
+| `merz_semantic_map/test/test_semantic_core.py` | 36 |
+| `merz_exploration/test/test_exploration_core.py` | 33 |
+| `merz_base/test/test_base_core.py` | 31 |
+| `tools/test_extract_frames.py` | 7 |
+| `tools/eval/test_eval.py` | 22 |
+| `web/test_web.py` | 28 |
+| `tools/test_static_refs.py` (cross-file consistency) | 102 |
+
+**The 4 skipped files need ROS 2. They are written but have never been run: a skip is not a pass. Run them on the Jetson or Pi:**
+`merz_base/test/test_ros_base_node.py`, `merz_bringup/test/test_ros_launch_files.py`,
+`merz_bringup/test/test_ros_scan_odom_relay.py`, `merz_semantic_map/test/test_ros_landmark_node.py`.
+
+## Final checks
+- **Launch references:** `tools/test_static_refs.py` reads each of the 16 launch files and checks its config files, included launch files and
+  executables exist, and YAML sections match node names. Also checks YAML keys, message fields and declared dependencies.
+- **Those checks were tested:** 11 deliberate faults were added one at a time to a scratch copy, and all 11 were caught.
+- **`launch_validator.py`** (ros2-engineering-skills), all launch files: 0 errors, 19 warnings. All warnings are arguments without a
+  description, left as they are.
+- **Website:** run locally with the sample data, API checked live, page checked at 360 px wide in headless Chrome. No real phone yet.
+- **Not checked, as it needs ROS:** `colcon build`; every node and launch file actually running; third-party parameter and topic names
+  (the Nav2 plugin list and DWB parameters were written from memory of Humble's defaults, with only a summary of the file available to
+  check against); anything on hardware.

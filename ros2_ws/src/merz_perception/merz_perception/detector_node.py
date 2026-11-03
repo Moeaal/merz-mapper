@@ -4,7 +4,7 @@ import time
 from cv_bridge import CvBridge
 import rclpy
 from rclpy.node import Node
-from rclpy.qos import qos_profile_sensor_data
+from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
 from sensor_msgs.msg import Image
 
 from merz_interfaces.msg import Detection as DetectionMsg
@@ -28,8 +28,7 @@ class DetectorNode(Node):
         self._bridge = CvBridge()
         self._publisher = self.create_publisher(DetectionArray, 'detections', 10)
         # Depth 1: if inference falls behind, process the newest image instead of a growing backlog.
-        qos = qos_profile_sensor_data
-        qos.depth = 1
+        qos = QoSProfile(reliability=ReliabilityPolicy.BEST_EFFORT, history=HistoryPolicy.KEEP_LAST, depth=1)
         self.create_subscription(Image, 'image', self._on_image, qos)
 
     def _on_image(self, msg: Image) -> None:

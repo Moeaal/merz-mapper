@@ -3,7 +3,6 @@ import math
 from pathlib import Path
 
 from builtin_interfaces.msg import Time
-import cv2
 from cv_bridge import CvBridge
 from geometry_msgs.msg import Point
 from message_filters import ApproximateTimeSynchronizer, Subscriber
