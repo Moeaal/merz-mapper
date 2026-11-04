@@ -5,8 +5,8 @@ import pytest
 import yaml
 
 from merz_base.backends import HBridgePins, JetsonGpioBackend, MockBackend, SerialBackend, make_backend
-from merz_base.base_controller import BaseController, BaseLimits
-from merz_base.kinematics import normalised, wheel_speeds
+from merz_base.base_controller import BaseController, BaseLimits, check_update_rate
+from merz_base.kinematics import normalised, normalised_pair, wheel_speeds
 
 PACKAGE = Path(__file__).resolve().parents[1]
 LIMITS = BaseLimits(max_linear_m_s=0.5, max_angular_rad_s=1.0, max_linear_accel_m_s2=1.0,
@@ -32,6 +32,61 @@ def test_normalised_clamps_to_full_scale():
     assert normalised(0.5, 1.0) == 0.5
     assert normalised(3.0, 1.0) == 1.0
     assert normalised(-3.0, 1.0) == -1.0
+
+
+def test_saturated_wheels_are_scaled_together_so_the_turn_radius_is_kept():
+    # 0.8 m/s with 1 rad/s on a 0.4 m track asks for 0.6 and 1.0 m/s; at 0.5 m/s full speed both are past full scale.
+    left, right = normalised_pair(0.6, 1.0, 0.5)
+    assert right == pytest.approx(1.0)
+    assert left / right == pytest.approx(0.6 / 1.0)      # same ratio, so the same arc
+
+
+def test_unsaturated_wheels_are_unchanged():
+    assert normalised_pair(0.2, -0.3, 1.0) == pytest.approx((0.2, -0.3))
+
+
+def test_controller_output_keeps_the_commanded_arc_when_a_wheel_saturates():
+    backend = MockBackend()
+    limits = BaseLimits(max_linear_m_s=0.5, max_angular_rad_s=2.0, max_linear_accel_m_s2=100.0,
+                        max_angular_accel_rad_s2=100.0, track_width_m=0.4, full_speed_m_s=0.5, command_timeout_s=0.5)
+    base = BaseController(limits, backend)
+    base.on_command(0.5, 2.0, 0.0)                        # wheels 0.1 and 0.9 m/s: the right is past 0.5
+    base.update(0.0)
+    base.update(0.1)
+    left, right = backend.commands[-1]
+    assert max(abs(left), abs(right)) == pytest.approx(1.0)
+    assert left / right == pytest.approx(0.1 / 0.9)
+
+
+# ---- limit validation
+LIMIT_FIELDS = ('max_linear_m_s', 'max_angular_rad_s', 'max_linear_accel_m_s2', 'max_angular_accel_rad_s2',
+                'track_width_m', 'full_speed_m_s', 'command_timeout_s')
+
+
+@pytest.mark.parametrize('name', LIMIT_FIELDS)
+@pytest.mark.parametrize('bad', [0.0, -0.5, float('nan'), float('inf')])
+def test_limits_that_are_not_finite_and_positive_are_refused(name, bad):
+    values = {field: getattr(LIMITS, field) for field in LIMIT_FIELDS}
+    values[name] = bad
+    with pytest.raises(ValueError, match=name):
+        BaseLimits(**values)
+
+
+def test_a_negative_speed_limit_cannot_reach_the_controller():
+    # Before validation, a sign slip in base.yaml inverted the clamp: max(0.5, min(-0.5, v)) is 0.5 for any v,
+    # so a zero command drove the rover forward at 0.5 m/s.
+    with pytest.raises(ValueError):
+        BaseLimits(-0.5, 1.0, 1.0, 2.0, 0.4, 1.0, 0.5)
+
+
+@pytest.mark.parametrize('bad', [0.0, -20.0, float('nan'), float('inf')])
+def test_bad_update_rates_are_refused(bad):
+    with pytest.raises(ValueError, match='update_rate_hz'):
+        check_update_rate(bad)
+
+
+def test_update_rate_gives_the_timer_period():
+    assert check_update_rate(20.0) == pytest.approx(0.05)
 
 
 # ---- timeout

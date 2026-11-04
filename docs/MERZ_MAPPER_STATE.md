@@ -5,10 +5,11 @@
 > **TESTED** (measured result logged), **PLANNED** (in proposal), **PROPOSED**
 > (suggested, not agreed), **UNKNOWN**.
 
-**Last updated:** 2026-11-03 | **Phase:** Proposal + hardware procurement (pre-O1)
+**Last updated:** 2026-11-04 | **Phase:** Proposal + hardware procurement (pre-O1)
 
 ## Where things stand
-- Repo: memory docs, Claude Code config (PR #1 merged 2026-11-02). **All pre-hardware code written on branch `build/all-code` (2026-11-03), awaiting the student's review: not merged.**
+- Repo: memory docs, Claude Code config (PR #1 merged 2026-11-02). All pre-hardware code written on `build/all-code` (2026-11-03), merged to `main` via PR #2.
+- Safety review of `ros2_ws` (2026-11-04, branch `build/safety-review`): 3 bugs fixed with tests (limit validation in `merz_base`, wheel saturation changing the arc, blocking TF lookup in `landmark_node`); 12 open findings in `docs/REVIEW.md`, two **High**: no stop path independent of the Jetson (decisions #18, PROPOSED) and untested wireless-gamepad link loss. Unit tests only (L0-L1); nothing run on ROS or hardware.
 - Claude setup: 4 skills enabled on claude.ai (brain, navigation-estimation, perception-jetson, ros2-engineering-skills); Context7 + Consensus connected.
 - Code status: all packages, website and evaluation tools are **IMPLEMENTED; nothing is TESTED**. No `colcon build` has been run and nothing has run on hardware; only pure-Python unit tests, on Windows (`docs/BUILD_PROGRESS.md`). Poses, footprint, limits, covariances and motor interface are placeholders; no trained model exists. Next: `docs/BUILD_GUIDE.md`.
 - Hardware: parts list ordered by supervisor; delivery expected within days of 3 Nov, rover arriving with them; rover CAD to be shared. Gamepad, mast, mounts, checkerboard, QR posters not yet ordered.
