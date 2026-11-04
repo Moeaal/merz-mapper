@@ -1,11 +1,12 @@
 """Limits and the command timeout. All time is passed in, so behaviour can be tested exactly. No ROS imports."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+import math
+from dataclasses import dataclass, fields
 from typing import Optional
 
 from merz_base.backends import MotorBackend
-from merz_base.kinematics import normalised, wheel_speeds
+from merz_base.kinematics import normalised_pair, wheel_speeds
 
 MAX_RAMP_STEP_S = 0.2   # the longest time one update may count towards the acceleration ramp
 
@@ -19,6 +20,22 @@ class BaseLimits:
     track_width_m: float             # effective width on a skid-steer rover
     full_speed_m_s: float            # wheel speed at full motor output
     command_timeout_s: float
+
+    def __post_init__(self) -> None:
+        # Every limit must be a finite number above zero. A negative speed limit would invert the clamp and drive the
+        # rover at that speed whatever was commanded; zero full speed would crash the update loop; zero or negative
+        # timeout would never let a command through, and an infinite one would never stop the motors.
+        for item in fields(self):
+            value = getattr(self, item.name)
+            if not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0.0:
+                raise ValueError(f'{item.name} must be a finite number above zero, not {value!r}')
+
+
+def check_update_rate(rate_hz: float) -> float:
+    """Return the timer period in seconds, or raise if the rate is not a finite number above zero."""
+    if not isinstance(rate_hz, (int, float)) or not math.isfinite(rate_hz) or rate_hz <= 0.0:
+        raise ValueError(f'update_rate_hz must be a finite number above zero, not {rate_hz!r}')
+    return 1.0 / rate_hz
 
 
 def _clamp(value: float, limit: float) -> float:
@@ -88,8 +105,7 @@ class BaseController:
         self._linear = _approach(self._linear, self._target_linear, self._limits.max_linear_accel_m_s2 * elapsed)
         self._angular = _approach(self._angular, self._target_angular, self._limits.max_angular_accel_rad_s2 * elapsed)
         left, right = wheel_speeds(self._linear, self._angular, self._limits.track_width_m)
-        self._backend.drive(normalised(left, self._limits.full_speed_m_s),
-                            normalised(right, self._limits.full_speed_m_s))
+        self._backend.drive(*normalised_pair(left, right, self._limits.full_speed_m_s))
 
     def close(self) -> None:
         """Stop and release the hardware. Safe to call twice."""
