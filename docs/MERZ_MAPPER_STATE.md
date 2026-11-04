@@ -5,12 +5,13 @@
 > **TESTED** (measured result logged), **PLANNED** (in proposal), **PROPOSED**
 > (suggested, not agreed), **UNKNOWN**.
 
-**Last updated:** 2026-11-03 | **Phase:** Proposal + hardware procurement (pre-O1)
+**Last updated:** 2026-11-04 | **Phase:** Proposal + hardware procurement (pre-O1)
 
 ## Where things stand
 - Repo: memory docs, Claude Code config (PR #1 merged 2026-11-02). **All pre-hardware code written on branch `build/all-code` (2026-11-03), awaiting the student's review: not merged.**
 - Claude setup: 4 skills enabled on claude.ai (brain, navigation-estimation, perception-jetson, ros2-engineering-skills); Context7 + Consensus connected.
 - Code status: all packages, website and evaluation tools are **IMPLEMENTED; nothing is TESTED**. No `colcon build` has been run and nothing has run on hardware; only pure-Python unit tests, on Windows (`docs/BUILD_PROGRESS.md`). Poses, footprint, limits, covariances and motor interface are placeholders; no trained model exists. Next: `docs/BUILD_GUIDE.md`.
+- Config check (branch `build/config-check`, 2026-11-04): every Nav2, DWB, SLAM Toolbox, robot_localization and rf2o key and plugin name in `merz_bringup/config` checked against Humble source (RESEARCH_INDEX [C1-C7]). One real bug fixed: the custom no-motion BT was never applied (missing `default_nav_to_pose_bt_xml` key, so Nav2 used its stock tree with Spin/BackUp). Static checks only; still not run under ROS. Follow-up PROPOSED in decisions #18.
 - Hardware: parts list ordered by supervisor; delivery expected within days of 3 Nov, rover arriving with them; rover CAD to be shared. Gamepad, mast, mounts, checkerboard, QR posters not yet ordered.
 - Rover: university-built simple rover; spec unknown until received.
 - Confirmed 2026-11-02: QR + phone image-to-image navigation for demonstrator (decisions #12); Claude use allowed (#13).
