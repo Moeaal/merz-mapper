@@ -103,7 +103,7 @@ export default async function mission(ctx: PageContext) {
     card.replaceChildren(
       h('button', { class: 'icon-button card-close', type: 'button', 'aria-label': 'Close details', onclick: () => select(null, false) }, icon('close')),
       lm.photo ? h('img', { class: 'lm-photo', src: bundle.url(lm.photo.src), alt: `The sign camera's photo of ${lm.text || 'this sign'}`, width: lm.photo.w, height: lm.photo.h })
-        : h('div', { class: 'lm-photo placeholder', icon: 'camera' }),
+        : h('div', { class: 'lm-photo placeholder' }, h('span', { class: 'ph-icon', icon: 'camera' }), h('span', { class: 'mono small', text: 'No photo kept for this kind of landmark' })),
       h('p', { class: 'eyebrow', text: CLASS_NAMES[lm.class] ?? lm.class }),
       h('p', { class: 'lm-text display-s', text: lm.text || (lm.class === 'room_sign' ? 'Not read' : CLASS_NAMES[lm.class] ?? lm.class) }),
       lm.class === 'room_sign' ? h('p', { class: 'muted small', text: lm.text ? 'What the OCR read from the sign.' : 'The sign was seen, but its number could not be read.' }) : '',

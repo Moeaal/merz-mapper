@@ -39,7 +39,7 @@ export const floorFragment = /* glsl */ `
     if (uHasReveal > 0.5) {
       float k = floor(texture2D(tReveal, vUv).r * 255.0 + 0.5);
       known = step(0.5, k) * step(k, uRevealK + 0.001);
-      fresh = known * (1.0 - smoothstep(0.0, 4.0, uRevealK - k));
+      fresh = known * (1.0 - smoothstep(0.0, 1.5, uRevealK - k));
     }
     float occ = smoothstep(0.72, 0.92, s);
     float fre = smoothstep(0.22, 0.42, s) * (1.0 - occ);
@@ -55,11 +55,12 @@ export const floorFragment = /* glsl */ `
     float line = 1.0 - smoothstep(0.0, fwidth(vWorld.x) * 1.2, 0.5 - max(g.x, g.y));
     col = mix(col, uGrid, line * uGridAmount);
     col = mix(col, col * 0.62, ao * uAO);
-    col = mix(col, uAccent, fresh * 0.45);
+    col = mix(col, uAccent, fresh * 0.06);
     col = mix(col, uWall, occ);
     float alpha = known * max(fre, occ * uWallFlat) * uOpacity;
     if (alpha < 0.01) discard;
     gl_FragColor = vec4(col, alpha);
+    #include <colorspace_fragment>
   }
 `;
 
@@ -72,11 +73,13 @@ export const groundFragment = /* glsl */ `
   void main() {
     vec2 p = vWorld.xz / 2.0;
     vec2 f = abs(fract(p) - 0.5);
-    float dotMask = 1.0 - smoothstep(0.035, 0.035 + fwidth(p.x) * 1.5, length(vec2(0.5) - f));
+    float r = max(0.018, fwidth(p.x) * 0.9);
+    float dotMask = 1.0 - smoothstep(r, r + fwidth(p.x) * 1.2, length(vec2(0.5) - f));
     float fade = 1.0 - smoothstep(30.0, 120.0, distance(vWorld.xz, uCentre.xz));
-    float a = dotMask * fade * uOpacity;
+    float a = dotMask * fade * uOpacity * 0.55;
     if (a < 0.01) discard;
     gl_FragColor = vec4(uDot, a);
+    #include <colorspace_fragment>
   }
 `;
 
@@ -111,6 +114,7 @@ export const wallFragment = /* glsl */ `
     vec3 col = uSide * lambert * occl;
     col = mix(col, uCap, step(0.5, n.y));
     gl_FragColor = vec4(col, uOpacity);
+    #include <colorspace_fragment>
   }
 `;
 
@@ -161,6 +165,7 @@ export const ribbonFragment = /* glsl */ `
     }
     float edge = uGlow > 0.5 ? pow(1.0 - across, 2.2) * 0.55 : 1.0 - smoothstep(0.75, 1.0, across);
     gl_FragColor = vec4(col, a * edge * uOpacity);
+    #include <colorspace_fragment>
   }
 `;
 
@@ -194,5 +199,6 @@ export const cloudFragment = /* glsl */ `
     float soft = 1.0 - smoothstep(0.15, 0.5, r);
     vec3 col = mix(uColor, uAccent, vFresh);
     gl_FragColor = vec4(col, soft * uOpacity * (0.55 + 0.45 * vFresh));
+    #include <colorspace_fragment>
   }
 `;

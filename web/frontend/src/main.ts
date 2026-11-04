@@ -105,7 +105,7 @@ function shell(bundle: Bundle | null) {
     h('a', { class: 'brand', href: './', 'data-link': true, 'aria-label': 'Merz Mapper home' },
       h('span', { class: 'brand-mark', icon: 'logo' }), h('span', { class: 'brand-name', text: 'Merz Mapper' })),
     bundle?.manifest.sample ? h('span', { class: 'sample-badge', title: 'Made-up data until the rover surveys Merz Court' },
-      h('span', { class: 'dot', 'aria-hidden': 'true' }), 'Sample data') : null,
+      h('span', { class: 'dot', 'aria-hidden': 'true' }), 'Sample', h('span', { class: 'txt-long', text: ' data' })) : null,
     nav, h('div', { class: 'header-tools' }, themeToggle(), menu));
   document.body.insertBefore(header, app);
   return header;
@@ -171,7 +171,7 @@ async function render(userAction = false) {
 
 function boot() {
   bundlePromise = null;
-  render().catch((error) => serverDown(error));
+  render().catch((error) => { console.error(error); serverDown(error); });
 }
 
 boot();

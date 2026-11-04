@@ -1,5 +1,6 @@
 """Website tests on the sample database. No ROS needed."""
 import importlib.util
+import re
 from pathlib import Path
 import sys
 import time
@@ -134,9 +135,20 @@ def test_unknown_photo_gives_404(client):
     assert client.get('/photos/999').status_code == 404
 
 
-def test_page_is_served(client):
-    response = client.get('/')
-    assert response.status_code == 200 and '<title>Merz Mapper directions</title>' in response.text
+def test_site_pages_are_served(client):
+    """Every page of the single-page site returns the built index.html; unknown paths get it with a 404 status."""
+    if not (WEB / 'dist' / 'index.html').is_file():
+        pytest.skip('web/dist not built')
+    for path in ('/', '/find', '/mission', '/results', '/about', '/?entrance=north'):
+        response = client.get(path)
+        assert response.status_code == 200 and '<base href="/">' in response.text, path
+    missing = client.get('/no-such-page')
+    assert missing.status_code == 404 and 'Merz Mapper' in missing.text
+
+
+def test_api_routes_win_over_the_site(client):
+    assert client.get('/entrances').headers['content-type'].startswith('application/json')
+    assert client.get('/map').json()['available'] is True
 
 
 def test_every_room_query_is_under_one_second(client):
@@ -218,17 +230,23 @@ def test_no_map_file_is_reported_not_an_error(sample):
     assert client.get('/route', params={'entrance': 'north', 'room': 'S1.04'}).status_code == 200
 
 
-def test_about_page_and_static_files_are_served(client):
-    assert 'About Merz Mapper' in client.get('/about').text
-    for path in ('/static/app.js', '/static/app.css', '/static/icon.svg'):
-        assert client.get(path).status_code == 200, path
+def test_built_assets_and_data_bundle_are_served(client):
+    if not (WEB / 'dist' / 'index.html').is_file():
+        pytest.skip('web/dist not built')
+    html = client.get('/').text
+    for asset in re.findall(r'(?:src|href)="\./(assets/[^"]+)"', html):
+        assert client.get('/' + asset).status_code == 200, asset
+    assert client.get('/favicon.svg').status_code == 200
+    assert client.get('/data/index.json').status_code == 200
 
 
-def test_page_never_inserts_api_text_as_html():
-    """API text goes in with textContent; innerHTML-style insertion is only allowed for the fixed icon strings."""
-    script = (WEB / 'static' / 'app.js').read_text(encoding='utf-8')
-    assert 'innerHTML' not in script
-    assert script.count('insertAdjacentHTML') == 1 and "insertAdjacentHTML('afterbegin', ICONS[value])" in script
+def test_page_code_never_inserts_data_as_html():
+    """Bundle text goes in with textContent. Markup strings are only used for fixed icons and two fixed drawings."""
+    source = WEB / 'frontend' / 'src'
+    users = sorted(p.name for p in source.rglob('*.ts') if 'innerHTML' in p.read_text(encoding='utf-8'))
+    assert set(users) <= {'about.ts', 'notfound.ts', 'MapScene.ts'}, users
+    dom = (source / 'ui' / 'dom.ts').read_text(encoding='utf-8')
+    assert dom.count('insertAdjacentHTML') == 2 and dom.count('icons[') == 2
 
 
 # ---- QR posters

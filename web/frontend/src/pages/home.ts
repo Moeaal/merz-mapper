@@ -104,7 +104,7 @@ export default async function home(ctx: PageContext) {
   const isNarrow = window.innerWidth < 760;
   // Frame the building on the right on wide screens, so the headline has the left.
   const frame = (tilt: number, az: number, ms: number) => scene.fit(box, { tilt, az, duration: ms, padding: isNarrow ? 10 : 60,
-    offsetX: isNarrow ? 0 : -0.16, offsetY: isNarrow ? 0.1 : 0 });
+    pad: isNarrow ? { t: 64, b: window.innerHeight * 0.55 } : { l: window.innerWidth * 0.46, t: 64 } });
 
   if (reducedMotion() || !data) {
     finalState();
@@ -141,7 +141,7 @@ export default async function home(ctx: PageContext) {
       clearPins(); scene.setGraph(null); scene.setRoute(null); scene.setScan(null);
       scene.setCloudState(duration, 0.12); scene.setTrail(data?.mission.trajectory ?? null, 1e6, 0.9); scene.setTrailTime(duration);
       if (mid) { scene.setRobot({ x: mid[1], y: mid[2], yaw: mid[3] }); }
-      scene.fit(box, { tilt: 0.5, az: -0.2, duration: 1600, padding: isNarrow ? 10 : 80, offsetX: isNarrow ? 0 : 0.18 });
+      scene.fit(box, { tilt: 0.5, az: -0.2, duration: 1600, padding: isNarrow ? 10 : 80, pad: isNarrow ? { t: 64, b: window.innerHeight * 0.45 } : { l: 620, t: 64 } });
     },
     scan: () => {
       clearPins(); scene.setGraph(null); scene.setRoute(null);
@@ -164,7 +164,7 @@ export default async function home(ctx: PageContext) {
         pin.el.classList.add('pop');
         pins.push(pin);
       });
-      scene.fit(signs.map((s) => [s.x, s.y] as [number, number]), { tilt: 0.55, az: -0.35, duration: 1600, padding: isNarrow ? 30 : 100, offsetX: isNarrow ? 0 : 0.18 });
+      scene.fit(signs.map((s) => [s.x, s.y] as [number, number]), { tilt: 0.55, az: -0.35, duration: 1600, padding: isNarrow ? 30 : 100, pad: isNarrow ? { t: 64, b: window.innerHeight * 0.45 } : { l: 620, t: 64 } });
     },
     zones: () => {
       clearPins(); scene.setRoute(null);
@@ -174,7 +174,7 @@ export default async function home(ctx: PageContext) {
         .map(([a, b]) => [[byId.get(a)!.x, byId.get(a)!.y], [byId.get(b)!.x, byId.get(b)!.y]] as [number, number][]);
       scene.setGraph(edges);
       if (north) pins.push(overlay.add(youAreHere(north.name), north.x, north.y));
-      scene.fit(box, { tilt: 0.15, az: 0, duration: 1600, padding: isNarrow ? 10 : 80, offsetX: isNarrow ? 0 : 0.18 });
+      scene.fit(box, { tilt: 0.15, az: 0, duration: 1600, padding: isNarrow ? 10 : 80, pad: isNarrow ? { t: 64, b: window.innerHeight * 0.45 } : { l: 620, t: 64 } });
     },
     route: () => {
       clearPins(); scene.setGraph(null);
@@ -185,7 +185,7 @@ export default async function home(ctx: PageContext) {
       scene.setRoute(pts);
       scene.drawRoute(2200);
       pins.push(overlay.add(youAreHere(north.name), north.x, north.y), overlay.add(beacon(room), route.destination.x, route.destination.y));
-      scene.fit(pts, { tilt: 0.8, az: -0.4, duration: 1600, padding: isNarrow ? 40 : 120, offsetX: isNarrow ? 0 : 0.18 });
+      scene.fit(pts, { tilt: 0.8, az: -0.4, duration: 1600, padding: isNarrow ? 40 : 120, pad: isNarrow ? { t: 64, b: window.innerHeight * 0.45 } : { l: 620, t: 64 } });
     },
   };
   story.querySelectorAll<HTMLElement>('.beat').forEach((beat) => {

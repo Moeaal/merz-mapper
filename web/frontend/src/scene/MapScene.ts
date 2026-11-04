@@ -11,7 +11,7 @@ export interface Rig { x: number; y: number; dist: number; tilt: number; az: num
 export interface Eye { px: number; py: number; ph: number; tx: number; ty: number; th: number }
 type Theme = 'dark' | 'light';
 
-const WALL_HEIGHT = 2.4;
+const WALL_HEIGHT = 1.8;          // a cut-through model height: low enough to see corridors, above eye level
 const v3 = (x: number, y: number, h = 0) => new THREE.Vector3(x, h, -y);
 
 function css(name: string): THREE.Color {
@@ -40,7 +40,7 @@ export class MapScene {
   private ellipse: THREE.Mesh<THREE.RingGeometry, THREE.MeshBasicMaterial> | null = null;
   private graphLines: THREE.LineSegments<THREE.BufferGeometry, THREE.LineBasicMaterial> | null = null;
   private clock = new THREE.Clock();
-  private tweens: { update: (now: number) => boolean }[] = [];
+  private tweens: { update: (now: number) => boolean; channel: string }[] = [];
   private listeners = new Set<() => void>();
   private running = true;
   private continuous = 0;
@@ -149,7 +149,7 @@ export class MapScene {
     this.ground.material.uniforms.uDot.value.copy(css('--line-strong'));
     if (this.walls) {
       const u = this.walls.material.uniforms;
-      u.uSide.value.copy(theme === 'light' ? new THREE.Color('#e9e4d4') : new THREE.Color('#2a3a58'));
+      u.uSide.value.copy(theme === 'light' ? new THREE.Color('#e6e0cd') : new THREE.Color('#3b4f74'));
       u.uCap.value.copy(theme === 'light' ? css('--wall') : css('--wall'));
     }
     const accent = css('--accent-mark');
@@ -196,10 +196,13 @@ export class MapScene {
     this.camera.lookAt(target);
   }
 
-  tween(duration: number, step: (k: number) => void, done?: () => void) {
+  /** Animate something; tweens on the same channel replace each other (the camera has its own channel). */
+  tween(duration: number, step: (k: number) => void, done?: () => void, channel = 'misc') {
     if (this.reducedMotion || duration <= 0) { step(1); done?.(); this.dirty = true; return; }
     const start = performance.now();
+    if (channel !== 'misc') this.tweens = this.tweens.filter((t) => t.channel !== channel);
     this.tweens.push({
+      channel,
       update: (now) => {
         const t = Math.min(1, (now - start) / duration);
         step(easeInOut(t));
@@ -210,21 +213,20 @@ export class MapScene {
     this.dirty = true;
   }
 
-  stopTweens() { this.tweens = []; }
+  stopTweens(channel = 'camera') { this.tweens = this.tweens.filter((t) => t.channel !== channel); }
 
   flyTo(to: Partial<Rig>, duration = 1400, done?: () => void) {
     const from = { ...this.rig };
     const goal = { ...this.rig, ...to };
     let daz = goal.az - from.az;
     daz = Math.atan2(Math.sin(daz), Math.cos(daz));
-    this.stopTweens();
     this.tween(duration, (k) => {
       this.rig.x = from.x + (goal.x - from.x) * k;
       this.rig.y = from.y + (goal.y - from.y) * k;
       this.rig.dist = Math.exp(Math.log(from.dist) + (Math.log(goal.dist) - Math.log(from.dist)) * k);
       this.rig.tilt = from.tilt + (goal.tilt - from.tilt) * k;
       this.rig.az = from.az + daz * k;
-    }, done);
+    }, done, 'camera');
   }
 
   /** Distance needed to fit a box of map metres on screen, with padding in pixels. */
@@ -239,23 +241,37 @@ export class MapScene {
     return Math.max(byH, byW) * (1 + Math.sin(tilt) * 0.35);
   }
 
+  /**
+   * Frame a set of map points in the free part of the screen. pad gives the pixels covered by panels on each side,
+   * so a route is framed beside the directions panel rather than under it.
+   */
   fit(points: [number, number][], opts: { tilt?: number; az?: number; padding?: number; duration?: number;
-    offsetX?: number; offsetY?: number } = {}) {
+    pad?: { l?: number; r?: number; t?: number; b?: number } } = {}) {
     const xs = points.map((p) => p[0]);
     const ys = points.map((p) => p[1]);
     const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
     const az = opts.az ?? this.rig.az;
-    // Rotate the box into screen axes to size it properly when the map is rotated.
-    const c = Math.cos(az), s = Math.sin(az);
-    const corners = [[x0, y0], [x1, y0], [x0, y1], [x1, y1]].map(([x, y]) => [x * c - y * s, x * s + y * c]);
-    const w = Math.max(...corners.map((p) => p[0])) - Math.min(...corners.map((p) => p[0]));
-    const h = Math.max(...corners.map((p) => p[1])) - Math.min(...corners.map((p) => p[1]));
     const tilt = opts.tilt ?? this.rig.tilt;
-    const dist = Math.max(8, this.fitDistance(Math.max(w, 4), Math.max(h, 4), opts.padding ?? 90, tilt));
-    // Offsets shift the framed box away from panels (in metres, screen axes).
-    const ox = (opts.offsetX ?? 0) * dist, oy = (opts.offsetY ?? 0) * dist;
-    this.flyTo({ x: (x0 + x1) / 2 - (ox * c + oy * s), y: (y0 + y1) / 2 - (-ox * s + oy * c), dist, tilt, az },
-      opts.duration ?? 1400);
+    const c = Math.cos(az), s = Math.sin(az);
+    // Box size in screen axes: right = (c, s), up = (-s, c) in map coordinates.
+    const corners = [[x0, y0], [x1, y0], [x0, y1], [x1, y1]];
+    const along = corners.map(([x, y]) => x * c + y * s);
+    const across = corners.map(([x, y]) => -x * s + y * c);
+    const w = Math.max(4, Math.max(...along) - Math.min(...along));
+    const hgt = Math.max(4, (Math.max(...across) - Math.min(...across)) * Math.max(0.45, Math.cos(tilt)));
+    const el = this.renderer.domElement;
+    const W = el.clientWidth || window.innerWidth;
+    const H = el.clientHeight || window.innerHeight;
+    const m = opts.padding ?? 60;
+    const l = (opts.pad?.l ?? 0) + m, r = (opts.pad?.r ?? 0) + m, t = (opts.pad?.t ?? 0) + m, b = (opts.pad?.b ?? 0) + m;
+    const availW = Math.max(80, W - l - r), availH = Math.max(80, H - t - b);
+    const tanHalf = Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2);
+    const dist = Math.max(8, Math.max((w * W) / availW / (2 * tanHalf * this.camera.aspect), (hgt * H) / availH / (2 * tanHalf)));
+    const mpp = (2 * dist * tanHalf) / H;           // metres per pixel at the target
+    const sx = ((l - r) / 2) * mpp;                 // move the box right by this much
+    const sy = ((t - b) / 2) * mpp;                 // and down by this much
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    this.flyTo({ x: cx - sx * c - sy * s, y: cy - sx * s + sy * c, dist, tilt, az }, opts.duration ?? 1400);
   }
 
   overview(tilt = 0, duration = 1400, az = 0) {
@@ -325,7 +341,7 @@ export class MapScene {
       walls.material.uniforms.uHeight.value = Math.max(0.001, this.wallHeight);
       f.uAO.value = this.wallHeight;
       f.uWallFlat.value = 1 - this.wallHeight * 0.85;
-    }, () => { walls.visible = this.wallHeight > 0.01; });
+    }, () => { walls.visible = this.wallHeight > 0.01; }, 'walls');
   }
 
   // ------------------------------------------------------------------ ribbons: route and trail
@@ -347,7 +363,7 @@ export class MapScene {
       dir.normalize();
       const normal = new THREE.Vector2(-dir.y, dir.x).multiplyScalar(width / 2);
       for (const side of [-1, 1]) {
-        positions.push(p.x + normal.x * side, 0.04, -(p.y + normal.y * side));
+        positions.push(p.x + normal.x * side, 0.08, -(p.y + normal.y * side));
         dists.push(total);
         sides.push(side);
         ts.push(times ? times[i] : 0);
@@ -368,7 +384,7 @@ export class MapScene {
 
   private ribbonMaterial(glow: boolean, trail: boolean) {
     return new THREE.ShaderMaterial({
-      vertexShader: ribbonVertex, fragmentShader: ribbonFragment, transparent: true, depthWrite: false,
+      vertexShader: ribbonVertex, fragmentShader: ribbonFragment, transparent: true, depthWrite: false, side: THREE.DoubleSide,
       blending: glow && document.documentElement.dataset.theme !== 'light' ? THREE.AdditiveBlending : THREE.NormalBlending,
       uniforms: { uColor: { value: new THREE.Color() }, uDraw: { value: 0 }, uTime: { value: 0 }, uGlow: { value: glow ? 1 : 0 },
         uOpacity: { value: 1 }, uTrail: { value: trail ? 1 : 0 }, uT: { value: 0 }, uFade: { value: 120 },
@@ -398,12 +414,14 @@ export class MapScene {
     }
     if (!points || points.length < 2) { this.dirty = true; return 0; }
     const dense = this.densify(points);
-    const core = this.ribbonGeometry(dense, 0.32);
-    const glow = this.ribbonGeometry(dense, 2.4);
+    const core = this.ribbonGeometry(dense, 0.5);
+    const glow = this.ribbonGeometry(dense, 3.2);
     const coreMesh = new THREE.Mesh(core.geometry, this.ribbonMaterial(false, false));
     const glowMesh = new THREE.Mesh(glow.geometry, this.ribbonMaterial(true, false));
-    coreMesh.renderOrder = 5;
-    glowMesh.renderOrder = 4;
+    // The route is drawn over the walls, as navigation apps do: in 3D a corridor across the view is otherwise hidden.
+    for (const mesh of [coreMesh, glowMesh]) (mesh.material as THREE.ShaderMaterial).depthTest = false;
+    coreMesh.renderOrder = 11;
+    glowMesh.renderOrder = 10;
     this.route = { core: coreMesh, glow: glowMesh, length: core.total };
     this.scene.add(glowMesh, coreMesh);
     this.applyTheme();
@@ -417,7 +435,7 @@ export class MapScene {
       const d = from + (route.length - from) * k + 0.01;
       (route.core.material as THREE.ShaderMaterial).uniforms.uDraw.value = d;
       (route.glow.material as THREE.ShaderMaterial).uniforms.uDraw.value = d;
-    });
+    }, undefined, 'route');
   }
 
   routeLength() { return this.route?.length ?? 0; }
@@ -514,7 +532,7 @@ export class MapScene {
     if (!this.rays) {
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(n * 6), 3));
-      this.rays = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({ transparent: true, opacity: 0.16,
+      this.rays = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({ transparent: true, opacity: 0.07,
         blending: THREE.AdditiveBlending, depthWrite: false }));
       const hitGeometry = new THREE.BufferGeometry();
       hitGeometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(n * 3), 3));
@@ -566,7 +584,7 @@ export class MapScene {
     const material = new THREE.ShaderMaterial({
       vertexShader: cloudVertex, fragmentShader: cloudFragment, transparent: true, depthWrite: false,
       blending: THREE.AdditiveBlending,
-      uniforms: { uT: { value: 0 }, uSize: { value: 2.2 }, uPixelRatio: { value: this.renderer.getPixelRatio() },
+      uniforms: { uT: { value: 0 }, uSize: { value: 4.6 }, uPixelRatio: { value: this.renderer.getPixelRatio() },
         uColor: { value: new THREE.Color() }, uAccent: { value: new THREE.Color() }, uOpacity: { value: 1 } },
     });
     this.cloud = new THREE.Points(geometry, material);

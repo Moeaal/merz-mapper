@@ -119,7 +119,7 @@ class World:
         """Update hit/miss counts from a scan taken at a (slightly wrong) pose, like a SLAM map update."""
         a = yaw + self.angles
         finite = np.isfinite(ranges)
-        n = np.where(finite, (ranges / RESOLUTION).astype(np.int32), len(self.steps))
+        n = np.where(finite, (np.where(finite, ranges, 0.0) / RESOLUTION).astype(np.int32), len(self.steps))
         px = x + np.cos(a)[:, None] * self.steps[None, :]
         py = y + np.sin(a)[:, None] * self.steps[None, :]
         cols = ((px - self.ox) / RESOLUTION).astype(np.int32)

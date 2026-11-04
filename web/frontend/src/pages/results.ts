@@ -163,7 +163,7 @@ function gallery(ctx: PageContext) {
   const { bundle } = ctx;
   const all = [...bundle.landmarks].sort((a, b) => (a.class === 'room_sign' ? 0 : 1) - (b.class === 'room_sign' ? 0 : 1) || a.text.localeCompare(b.text, 'en', { numeric: true }));
   const filters = [['all', 'All'], ['room_sign', 'Room signs'], ['unread', 'Unread'], ['door', 'Doors'], ['lift', 'Lifts'], ['stairs', 'Stairs'], ['exit_sign', 'Exits']];
-  let active = 'all';
+  let active = 'room_sign';
   const grid = h('div', { class: 'masonry' });
   const count = h('p', { class: 'mono small muted', 'aria-live': 'polite' });
   const bar = h('div', { class: 'filters', role: 'toolbar', 'aria-label': 'Filter landmarks' }, ...filters.map(([k, label]) =>
@@ -176,6 +176,7 @@ function gallery(ctx: PageContext) {
         : h('div', { class: 'lm-glyph', icon: landmarkIcon(lm.class) }),
       h('div', { class: 'lm-body' },
         h('p', { class: 'lm-ocr mono', text: lm.text || (lm.class === 'room_sign' ? 'unread' : CLASS_NAMES[lm.class] ?? lm.class) }),
+        lm.class !== 'room_sign' ? h('p', { class: 'lm-pos mono', text: `at ${lm.x.toFixed(1)}, ${lm.y.toFixed(1)} m` }) : null,
         h('p', { class: 'lm-class eyebrow', text: `${CLASS_NAMES[lm.class] ?? lm.class} · ${lm.count} sightings` }),
         h('div', { class: 'meter-track thin', 'aria-hidden': 'true' }, h('span', { style: `width:${conf}%` })),
         h('span', { class: 'lm-fly' }, 'Show on map', icon('arrow'))));
@@ -221,9 +222,38 @@ function fusionCompare(bundle: PageContext['bundle']) {
   const next = h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Next landmark' }, icon('next'));
   const wrap = h('div', { class: 'fusion-view' }, canvas, handle,
     h('span', { class: 'fusion-tag left mono', text: 'One sighting' }), h('span', { class: 'fusion-tag right mono', text: 'Fused' }));
-  const img = new Image();
+  // The state image recoloured to the current theme (floor and walls), as on the main map.
+  let img: HTMLCanvasElement | null = null;
+  const source = new Image();
   const level = bundle.manifest.map.levels.find((l) => l.factor === 1)!;
-  img.src = bundle.url(level.file);
+  const recolour = () => {
+    const c = document.createElement('canvas');
+    c.width = source.width; c.height = source.height;
+    const g = c.getContext('2d')!;
+    g.drawImage(source, 0, 0);
+    const data = g.getImageData(0, 0, c.width, c.height);
+    const probe = (name: string) => {
+      const el = document.createElement('span');
+      el.style.color = getComputedStyle(document.documentElement).getPropertyValue(name);
+      document.body.append(el);
+      const rgb = getComputedStyle(el).color.match(/\d+/g)!.map(Number);
+      el.remove();
+      return rgb;
+    };
+    const floor = probe('--floor');
+    const wall = probe('--wall');
+    for (let i = 0; i < data.data.length; i += 4) {
+      const v = data.data[i];
+      const col = v > 190 ? wall : v > 60 ? floor : null;
+      if (col) { data.data[i] = col[0]; data.data[i + 1] = col[1]; data.data[i + 2] = col[2]; data.data[i + 3] = 255; }
+      else data.data[i + 3] = 0;
+    }
+    g.putImageData(data, 0, 0);
+    img = c;
+    draw();
+  };
+  source.onload = recolour;
+  source.src = bundle.url(level.file);
   const draw = () => {
     const { m, lm } = matches[index];
     const w = wrap.clientWidth || 520;
@@ -242,9 +272,9 @@ function fusionCompare(bundle: PageContext['bundle']) {
     const drawSide = (fused: boolean) => {
       g.fillStyle = col('--surface');
       g.fillRect(0, 0, w, hgt);
-      if (img.complete) {
+      if (img) {
         const [x0, y0] = toS(mapInfo.origin[0], mapInfo.origin[1] + mapInfo.height * mapInfo.resolution);
-        g.globalAlpha = 0.5;
+        g.globalAlpha = 0.85;
         g.imageSmoothingEnabled = false;
         g.drawImage(img, x0, y0, mapInfo.width * mapInfo.resolution * scale, mapInfo.height * mapInfo.resolution * scale);
         g.globalAlpha = 1;
@@ -279,7 +309,6 @@ function fusionCompare(bundle: PageContext['bundle']) {
     const fused = Math.hypot(lm!.x - cx, lm!.y - cy);
     caption.textContent = `${CLASS_NAMES[m.class] ?? m.class} ${m.text || ''} · ring = measured truth · one sighting ${(single * 100).toFixed(0)} cm · fused over ${lm!.observations.length} ${(fused * 100).toFixed(0)} cm`;
   };
-  img.onload = draw;
   const setSplit = (v: number) => { split = Math.max(0.05, Math.min(0.95, v)); draw(); };
   let dragging = false;
   wrap.addEventListener('pointerdown', (e) => { dragging = true; wrap.setPointerCapture(e.pointerId); setSplit((e.clientX - wrap.getBoundingClientRect().left) / wrap.clientWidth); });
@@ -292,7 +321,7 @@ function fusionCompare(bundle: PageContext['bundle']) {
   prev.addEventListener('click', () => { index = (index - 1 + matches.length) % matches.length; draw(); });
   next.addEventListener('click', () => { index = (index + 1) % matches.length; draw(); });
   new ResizeObserver(draw).observe(wrap);
-  window.addEventListener('merz-theme', draw);
+  window.addEventListener('merz-theme', () => { if (source.complete) recolour(); });
   return h('div', { class: 'fusion' },
     h('div', { class: 'fusion-head' }, h('p', { class: 'eyebrow', text: 'On the map · drag to compare' }),
       h('div', { class: 'fusion-nav' }, prev, next)),

@@ -7,7 +7,7 @@ export class FlatMap {
   private ctx = this.canvas.getContext('2d')!;
   private image: HTMLCanvasElement | null = null;
   private pinsLayer = document.createElement('div');
-  private pins: { el: HTMLElement; x: number; y: number }[] = [];
+  private pins: { el: HTMLElement; x: number; y: number }[] = [];   // el is the positioned wrapper
   private route: [number, number][] | null = null;
   private view = { x: 0, y: 0, s: 8 };          // centre (m) and pixels per metre
   private observer: ResizeObserver;
@@ -94,7 +94,14 @@ export class FlatMap {
 
   setRoute(points: [number, number][] | null) { this.route = points; this.draw(); }
 
-  addPin(el: HTMLElement, x: number, y: number) { el.classList.add('pin'); this.pinsLayer.append(el); this.pins.push({ el, x, y }); this.draw(); }
+  addPin(marker: HTMLElement, x: number, y: number) {
+    const el = document.createElement('div');
+    el.className = 'pin';
+    el.append(marker);
+    this.pinsLayer.append(el);
+    this.pins.push({ el, x, y });
+    this.draw();
+  }
 
   clearPins(keep = 0) { this.pins.splice(keep).forEach((p) => p.el.remove()); }
 

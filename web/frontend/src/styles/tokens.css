@@ -17,7 +17,7 @@
   --gutter: clamp(16px, 4vw, 48px);
   --header-h: 64px;
 
-  --size-hero: clamp(3.4rem, 9.6vw, 10.5rem);
+  --size-hero: clamp(3rem, 7.4vw, 7.6rem);
   --size-h1: clamp(2.5rem, 6vw, 5.5rem);
   --size-h2: clamp(1.75rem, 3.6vw, 3rem);
   --size-h3: clamp(1.2rem, 1.6vw, 1.5rem);
@@ -49,7 +49,7 @@
   --fail: #ff7fae;
   --fail-mark: #de4a86;
   --wall: #c9d6ea;
-  --floor: #0e1729;
+  --floor: #16233d;
   --unknown: #05080f;
   --cloud: #a9c3e6;
   --glass: rgb(10 16 28 / 62%);

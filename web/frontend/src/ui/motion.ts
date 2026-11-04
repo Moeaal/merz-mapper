@@ -32,7 +32,8 @@ export function countUp(el: HTMLElement, value: number | null, digits = 0, suffi
 /** Draw an SVG stroke from nothing. */
 export function drawLines(paths: SVGGeometryElement[], duration = 1.4, delay = 0) {
   for (const path of paths) {
-    const length = path.getTotalLength();
+    let length = 1200;
+    try { length = path.getTotalLength(); } catch { /* not in the page yet: a generous guess still animates */ }
     path.style.strokeDasharray = `${length}`;
     path.style.strokeDashoffset = reducedMotion() ? '0' : `${length}`;
   }

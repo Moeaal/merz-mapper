@@ -146,12 +146,8 @@ function mediaSlot(item: { file: string; alt: string; caption: string }) {
   const figure = h('figure', { class: 'media', 'data-reveal': true }, frame, h('figcaption', { class: 'small muted', text: item.caption }));
   // Real media is picked up automatically when the files are added to web/frontend/public/media/.
   if (item.file.endsWith('.mp4')) {
-    fetch(item.file, { method: 'HEAD' }).then((r) => {
-      if (!r.ok || !(r.headers.get('content-type') ?? '').startsWith('video')) return;
-      const video = h('video', { src: item.file, controls: true, muted: true, playsinline: true, preload: 'metadata', 'aria-label': item.alt });
-      frame.replaceChildren(video);
-      figure.classList.add('filled');
-    }).catch(() => undefined);
+    const video = h('video', { src: item.file, controls: true, muted: true, playsinline: true, preload: 'metadata', 'aria-label': item.alt });
+    video.addEventListener('loadedmetadata', () => { frame.replaceChildren(video); figure.classList.add('filled'); }, { once: true });
   } else {
     const img = new Image();
     img.onload = () => { img.alt = item.alt; frame.replaceChildren(img); figure.classList.add('filled'); };

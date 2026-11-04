@@ -85,8 +85,8 @@ export default async function find(ctx: PageContext) {
 
   const isNarrow = () => window.innerWidth < 900;
   const frameOpts = () => isNarrow()
-    ? { padding: 50, offsetY: 0.18 }
-    : { padding: 90, offsetX: 0.16 };
+    ? { padding: 28, pad: { t: 64, b: Math.round(window.innerHeight * 0.48) } }
+    : { padding: 70, pad: { l: 480, t: 64, r: 60 } };
   let threeD = false;
   if (scene) {
     scene.setCloudState(0, 0);

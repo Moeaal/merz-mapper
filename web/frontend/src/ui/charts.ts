@@ -98,20 +98,23 @@ export function dotStrip(samples: number[], target: number, unit: string, label:
   svg.append(s('line', { x1: L, x2: W - R, y1: mid + 30, y2: mid + 30, class: 'axis' }));
   const ticks = opts.log ? [1, 10, 100, 1000].filter((t) => t >= min && t <= max) : [0, max / 2, max].map((v) => +v.toPrecision(2));
   for (const t of ticks) svg.append(s('text', { x: sx(t), y: mid + 48, class: 'axis-label', 'text-anchor': 'middle' }, `${t}${unit}`));
-  // Simple beeswarm: stack dots that would overlap.
+  // Beeswarm for small samples; for large ones a bounded, evenly jittered strip so it never leaves the chart.
   const placed: { x: number; y: number }[] = [];
   const order = samples.map((v, i) => ({ v, i })).sort((a, b) => a.v - b.v);
+  const dense = samples.length > 60;
   for (const { v, i } of order) {
     const x = sx(v);
     let y = mid;
-    for (let k = 0; k < 40; k++) {
+    if (dense) y = mid + (((i * 37) % 23) / 22 - 0.5) * 48;
+    else for (let k = 0; k < 9; k++) {
       const off = (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 7;
       if (!placed.some((p) => Math.hypot(p.x - x, p.y - (mid + off)) < 7)) { y = mid + off; break; }
+      y = mid + off;
     }
     placed.push({ x, y });
-    const dot = s('circle', { cx: x, cy: y, r: 0, class: `dot ${v > target ? 'is-over' : ''}` });
+    const dot = s('circle', { cx: x, cy: y, r: 0, class: `dot ${v > target ? 'is-over' : ''}${dense ? ' is-dense' : ''}` });
     svg.append(dot);
-    gsap.to(dot, { attr: { r: 4 }, duration: 0.6, delay: 0.2 + placed.length * 0.012, ease: 'back.out(2)' });
+    gsap.to(dot, { attr: { r: dense ? 2.6 : 4 }, duration: 0.6, delay: 0.2 + placed.length * 0.012, ease: 'back.out(2)' });
     bindTip(dot, `${opts.names?.[i] ? opts.names[i] + ': ' : ''}${fmtv(v)}${unit}`);
   }
   const mean = samples.reduce((a, b) => a + b, 0) / Math.max(1, samples.length);

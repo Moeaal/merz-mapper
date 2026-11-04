@@ -28,6 +28,7 @@ export function getScene(bundle: Bundle): Promise<MapScene | null> {
     const reveal = bundle.manifest.files.mission ? await load(bundle.url('mission/reveal.png')).catch(() => undefined) : undefined;
     const host = document.getElementById('stage')!;
     current = new MapScene(host, bundle, { state, reveal });
+    (window as any).__merzScene = current;   // for debugging in the browser console
     document.documentElement.classList.add('has-webgl');
     return current;
   })().catch((error) => {
