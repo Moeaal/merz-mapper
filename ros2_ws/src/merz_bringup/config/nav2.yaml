@@ -7,7 +7,12 @@ bt_navigator:
     odom_topic: /odometry/filtered       # the EKF, not a wheel odometry topic
     bt_loop_duration: 10
     default_server_timeout: 20
-    # default_nav_to_pose_bt_xml is set in navigation.launch.py, as it needs the installed path.
+    # navigation.launch.py writes the installed path of behavior_trees/navigate_no_motion_recovery.xml here.
+    # The key must stay: Humble's RewrittenYaml only replaces keys that already exist, and without it Nav2
+    # silently uses its stock tree, which has Spin and BackUp. The placeholder is not a real file on purpose:
+    # without the launch file, bt_navigator fails to activate instead of moving with the stock recoveries.
+    # (Not empty: newer Nav2 releases load the stock tree when this is empty.)
+    default_nav_to_pose_bt_xml: SET_BY_NAVIGATION_LAUNCH
     plugin_lib_names:
       - nav2_compute_path_to_pose_action_bt_node
       - nav2_compute_path_through_poses_action_bt_node

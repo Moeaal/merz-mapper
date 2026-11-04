@@ -79,6 +79,12 @@ def test_moving_recoveries_are_absent():
     assert NAV2['behavior_server']['ros__parameters']['behavior_plugins'] == ['wait']
 
 
+def test_custom_tree_key_exists_for_the_launch_rewrite():
+    # Humble's RewrittenYaml only replaces keys already in the YAML. Without this key, navigation.launch.py's
+    # rewrite does nothing and Nav2 loads its stock tree, which has Spin and BackUp.
+    assert 'default_nav_to_pose_bt_xml' in NAV2['bt_navigator']['ros__parameters']
+
+
 def test_recovery_tree_only_uses_loaded_plugins():
     plugins = NAV2['bt_navigator']['ros__parameters']['plugin_lib_names']
     assert 'nav2_wait_action_bt_node' in plugins

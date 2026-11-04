@@ -63,7 +63,7 @@ Software stops are not proof the wheels stop. These checks have not yet been don
 - [ ] First run with the **wheels off the ground**: test that the deadman stops teleop, that holding it halts autonomy,
       and that stopping the publishers of `/cmd_vel_mux` stops the motors within `command_timeout_s`.
 - [ ] Kill `base_node` with `kill -9` while the wheels turn. The node's timeout cannot act once it is dead, so the
-      wheels stop only if the motor controller has its own watchdog (docs/REVIEW.md R1, decisions #18).
+      wheels stop only if the motor controller has its own watchdog (docs/REVIEW.md R1, decisions #19).
 - [ ] Switch the gamepad off while holding the deadman with a stick deflected: `/cmd_vel_teleop` must stop
       (docs/REVIEW.md R2).
 - [ ] Footprint and speed limits in `nav2.yaml` measured, not placeholders. First runs at reduced `max_vel_x`.
