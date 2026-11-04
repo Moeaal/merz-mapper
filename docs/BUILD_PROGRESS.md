@@ -141,9 +141,12 @@ python -m pytest ros2_ws/src tools web        # from the repo root, with the ove
   from a fresh `vcs import` of the edited file: same results as above.
 - What the pin gives up (upstream commits after `926033f`): the `explore/status` topic (not used by Merz), a fix that puts the frontier
   sphere markers at the centroid (visual only; `mission_node` only counts ADD markers), and upstream #51 "Do not blacklist for preempted
-  goal", **which changes exploration behaviour**. Recorded as decisions #18 (PROPOSED) for the student to accept, or to replace with a
+  goal", **which changes exploration behaviour**. Recorded as decisions #19 (PROPOSED) for the student to accept, or to replace with a
   Humble fork that back-ports #51.
 - No Merz source, configuration, parameter, launch file or test was changed.
+- Re-run after merging `main` (`ec7f5b0`, the config check that added `default_nav_to_pose_bt_xml` to `nav2.yaml` and one test):
+  `colcon build` 11 packages finished; `colcon test` **193 tests, 0 errors, 0 failures, 0 skipped** (`merz_bringup` now 51);
+  repo-root pytest **358 passed, 0 skipped**.
 
 ### Still not checked
 - Anything on the Jetson or Pi (apt binaries, Python 3.10, ARM64), or with `rosdep`.

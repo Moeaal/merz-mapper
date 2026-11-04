@@ -32,6 +32,20 @@ are in the proposal and not repeated here.
 | N9 | m-explore-ros2 README and `explore/config/params.yaml`, https://github.com/robo-friends/m-explore-ros2 | Package explore_lite, executable explore; topics explore/resume (Bool), explore/frontiers (markers); stock params incl. min_frontier_size 0.75, progress_timeout 30 | 2026-11-03 |
 | N10 | Ultralytics TensorRT page, https://docs.ultralytics.com/integrations/tensorrt/ | `format="engine"`; `YOLO("x.engine")` loads for inference; NVIDIA GPU needed; engines are hardware- and runtime-specific; current versions use `quantize=16/8` in place of deprecated `half`/`int8` | 2026-11-03 |
 
+## ROS 2 Humble config validation (`build/config-check`, 2026-11-04)
+Every parameter and plugin name in `merz_bringup/config` was checked against the source that declares it, at the
+commits below. docs.nav2.org and docs.ros.org were blocked by this session's network, so the docs were read from
+their GitHub sources instead.
+| Tag | Source | Key finding | Accessed |
+| --- | --- | --- | --- |
+| C1 | Nav2 `humble` branch, commit 3c3db59, https://github.com/ros-navigation/navigation2/tree/humble (`nav2_bringup/params/nav2_params.yaml`, `nav2_behavior_tree/CMakeLists.txt`, `*/plugins.xml`, each server's `declare_parameter` calls) | All Nav2, DWB, costmap, planner, smoother, behaviour, waypoint-follower, velocity-smoother and map_server keys and plugin classes in `nav2.yaml`/`keepout.yaml` exist in Humble. All 47 BT `plugin_lib_names` are Humble libraries. DWB in Humble never reads `FollowPath.stateful` (only the goal checker does); harmless, kept for parity with the stock file | 2026-11-04 |
+| C2 | Nav2 Humble `nav2_common/launch/rewritten_yaml.py` (same commit) | `param_rewrites` **only replaces keys already in the YAML**; it never adds one. `nav2_bt_navigator/src/navigators/navigate_to_pose.cpp` then falls back to the stock `navigate_to_pose_w_replanning_and_recovery.xml` (has Spin + BackUp) | 2026-11-04 |
+| C3 | Nav2 Humble `nav2_behavior_tree/include/nav2_behavior_tree/bt_action_server_impl.hpp` | An unreadable `default_nav_to_pose_bt_xml` makes bt_navigator fail `on_activate()`; Humble has no fallback for an empty value | 2026-11-04 |
+| C4 | Nav2 docs source, commit 74f751f, https://github.com/ros-navigation/docs.nav2.org (`configuring_bt_navigator.md`) | Current (post-Humble) docs: an **empty** `default_nav_to_pose_bt_xml` loads the stock tree, so a placeholder must be non-empty to fail safely on later distros | 2026-11-04 |
+| C5 | SLAM Toolbox `humble` branch, v2.6.10, commit dccc5d1, https://github.com/SteveMacenski/slam_toolbox/tree/humble (`config/mapper_params_online_async.yaml`, `solvers/ceres_solver.cpp`, `src/slam_toolbox_common.cpp`) | All 50 keys in `slam.yaml` are declared; `ceres_*` and `mode` live in the Ceres solver plugin. Stock keys we leave at defaults: `min_laser_range`, `min_pass_through`, `occupancy_threshold`, `restamp_tf` | 2026-11-04 |
+| C6 | robot_localization `humble-devel`, commit 7ebaee2, https://github.com/cra-ros-pkg/robot_localization/tree/humble-devel (`src/ros_filter.cpp`, `doc/state_estimation_nodes.rst`) | All keys in `ekf.yaml` and `ekf_wheel_odom.yaml` exist, including the per-sensor suffixes `_config`, `_queue_size`, `_differential`, `_relative`, `_remove_gravitational_acceleration` | 2026-11-04 |
+| C7 | rf2o_laser_odometry `ros2` branch, commit b38c68e, `src/CLaserOdometry2DNode.cpp` | Declares exactly the 7 keys in `scan_odometry.yaml`; `init_pose_from_topic: ''` skips the ground-truth subscription (source line 53). Launch node name `rf2o_laser_odometry` matches the YAML key. Confirms [N6] | 2026-11-04 |
+
 ## Related work (found via Consensus, 2026-11-02 - read before citing)
 | Tag | Source | Key finding |
 | --- | --- | --- |
