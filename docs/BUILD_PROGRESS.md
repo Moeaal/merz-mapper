@@ -48,7 +48,7 @@ Run on 2026-11-03, on Windows, in a clean venv installed from `requirements-dev.
 | `merz_base/test/test_base_core.py` | 31 |
 | `tools/test_extract_frames.py` | 7 |
 | `tools/eval/test_eval.py` | 22 |
-| `web/test_web.py` | 28 |
+| `web/test_web.py` | 38 (was 28; website redesign, branch `build/website-design`) |
 | `tools/test_static_refs.py` (cross-file consistency) | 102 |
 
 **The 4 skipped files need ROS 2. They are written but have never been run: a skip is not a pass. Run them on the Jetson or Pi:**

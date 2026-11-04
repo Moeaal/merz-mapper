@@ -5,6 +5,8 @@ data/*
 *.mcap
 *.bag
 *.pgm
+# The website's small sample map is kept; real maps stay out of git.
+!web/sample_data/merz_map.pgm
 *.posegraph
 *.data
 # ROS 2 build output

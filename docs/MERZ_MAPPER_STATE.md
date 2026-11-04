@@ -5,10 +5,11 @@
 > **TESTED** (measured result logged), **PLANNED** (in proposal), **PROPOSED**
 > (suggested, not agreed), **UNKNOWN**.
 
-**Last updated:** 2026-11-03 | **Phase:** Proposal + hardware procurement (pre-O1)
+**Last updated:** 2026-11-04 | **Phase:** Proposal + hardware procurement (pre-O1)
 
 ## Where things stand
 - Repo: memory docs, Claude Code config (PR #1 merged 2026-11-02). **All pre-hardware code written on branch `build/all-code` (2026-11-03), awaiting the student's review: not merged.**
+- Website (demonstrator) redesigned on branch `build/website-design` (PR into `build/all-code`, not merged, 2026-11-04): pan/zoom occupancy-grid map with route, swipeable photo steps synced to the map, searchable room picker with error states, About page, accessible light/dark design, matching QR poster PDF, richer sample data (11 junctions, 20 rooms, sample map). **IMPLEMENTED**; checked only in a headless browser and `pytest` (web 38 passed, Linux), not on real phones or with rover data. `ros2_ws/` untouched.
 - Claude setup: 4 skills enabled on claude.ai (brain, navigation-estimation, perception-jetson, ros2-engineering-skills); Context7 + Consensus connected.
 - Code status: all packages, website and evaluation tools are **IMPLEMENTED; nothing is TESTED**. No `colcon build` has been run and nothing has run on hardware; only pure-Python unit tests, on Windows (`docs/BUILD_PROGRESS.md`). Poses, footprint, limits, covariances and motor interface are placeholders; no trained model exists. Next: `docs/BUILD_GUIDE.md`.
 - Hardware: parts list ordered by supervisor; delivery expected within days of 3 Nov, rover arriving with them; rover CAD to be shared. Gamepad, mast, mounts, checkerboard, QR posters not yet ordered.
