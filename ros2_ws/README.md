@@ -4,7 +4,7 @@
 A cloud check on ROS 2 Humble (RoboStack, 2026-11-04) passed `colcon build` and `colcon test`; it has not yet been built on the
 Jetson or Pi (`docs/BUILD_PROGRESS.md`).
 
-**Target:** ROS 2 Humble, Ubuntu 22.04, JetPack 6.x (decisions #6, still PROPOSED). The full step-by-step
+**Target:** ROS 2 Humble, Ubuntu 22.04, JetPack 6.x (decisions #21, DECIDED). The full step-by-step
 procedure is in `docs/BUILD_GUIDE.md`.
 
 ## Packages

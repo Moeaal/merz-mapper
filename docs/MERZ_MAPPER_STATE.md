@@ -19,8 +19,8 @@
 - Hardware: parts list ordered by supervisor; delivery expected within days of 3 Nov, rover arriving with them; rover CAD to be shared. Gamepad, mast, mounts, checkerboard, QR posters not yet ordered.
 - Rover: university-built simple rover; spec unknown until received.
 - Confirmed 2026-11-02: QR + phone image-to-image navigation for demonstrator (decisions #12); Claude use allowed (#13).
-- Encoders: supervisor suggests none (decisions #10, PROPOSED) -> odometry from LIDAR scan matching + D455 IMU.
-- Practice: supervisor's YOLO webcam script in `tools/yolo_practice/` (not robot code); Raspberry Pi 5 with Ubuntu + ROS 2 installed for learning (distro to confirm). Laptop dual-boot abandoned (BitLocker).
+- Decided 2026-11-04 (student): ROS 2 Humble on JetPack 6.x (decisions #21); no wheel encoders, odometry = LIDAR scan matching + D455 IMU (decisions #22).
+- Practice: supervisor's YOLO webcam script in `tools/yolo_practice/` (not robot code); Raspberry Pi 5 with Ubuntu + ROS 2 installed for learning (check its distro; Humble matches the Jetson). Laptop dual-boot abandoned (BitLocker).
 
 ## Key dates
 | What | Date | Notes |
@@ -37,13 +37,12 @@
 2. ROS 2 tutorials on the Pi 5 (nodes, topics, launch). Review the `build/all-code` pull request; first real check is `colcon build` on the Pi, including rf2o (decisions #14); a cloud Humble build already passed, review decisions #19.
 3. 3D design of mast/sensor mounts once rover CAD arrives.
 4. Inspect parts and rover on arrival; fill HARDWARE_REGISTER.
-5. Next meeting: encoders (#10), distro, floor plan, test permission, unlisted parts (see minutes 2026-11-02 "Not covered").
+5. Next meeting: tell Dr Wright about decisions #21-22; floor plan, test permission, unlisted parts (see minutes 2026-11-02 "Not covered").
 6. Flash Jetson, install ROS 2, bring up each sensor one at a time, record bags.
 
 ## Active blockers
 - Rover spec unknown until received (OPEN_ISSUES #1).
-- ROS 2 distro / JetPack undecided (OPEN_ISSUES #2).
-- Encoder plan and proposal wording ("wheel odometry") unresolved until next meeting (OPEN_ISSUES #15).
+- Long plain corridors may defeat scan matching, with no encoders as backup (OPEN_ISSUES #17): test on a real corridor bag early.
 
 ## Memory files
 `docs/decisions.md` (engineering decisions) | `docs/HARDWARE_REGISTER.md` |

@@ -4,7 +4,7 @@
 need correcting, and fix this guide as you go. Log every test in `docs/logbook/`. Keep to the safety checklist in
 `ros2_ws/src/merz_bringup/README.md` before any motion.
 
-Assumes JetPack 6.x + Ubuntu 22.04 + ROS 2 Humble (decisions #6, still to be confirmed with Dr Wright).
+Assumes JetPack 6.x + Ubuntu 22.04 + ROS 2 Humble (decisions #21, DECIDED). No wheel encoders (decisions #22).
 
 ## 1. Parts and connections
 | Device | Connects to | Cable or link | Power | Notes |
@@ -202,7 +202,7 @@ python3 qr_posters.py --database ~/merz_data/merz.sqlite --base-url http://<reac
 | EKF gives nothing from the IMU | QoS or missing TF to the IMU frame | `ros2 topic info -v`; check `camera_imu_optical_frame` exists in TF |
 | Two publishers of `odom->base_link` | rf2o or a driver also publishing it | `publish_tf: false` in `scan_odometry.yaml`; only the EKF may do it |
 | Heading drifts when still | Gyro bias, no magnetometer (#15) | Measure the bias; try fusing scan vyaw |
-| Position stops in long corridors | Scan matching has nothing to lock on to (#15) | Slow down; open doors for features; check `/odom_scan`; consider encoders with Dr Wright |
+| Position stops in long corridors | Scan matching has nothing to lock on to (#15) | Slow down; open doors for features; check `/odom_scan`; fuse rf2o vyaw; last resort D455 visual odometry (no encoders, decisions #22) |
 | "Dropped implausible scan odometry" | rf2o jumped | Check the bag; raise the limit only with evidence |
 | Walls doubled or map skewed | Fast turns, wrong laser pose, or poor odometry | Slow the turns; check `sensor_poses.yaml`; re-run SLAM from the bag |
 | SLAM Toolbox complains about scan size | The driver's reading count varies | Keep `angle_compensate: true`; check the rate; see the slam_toolbox issues |

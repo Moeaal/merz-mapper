@@ -6,7 +6,7 @@ DRIVER RUNNING / CALIBRATED / ON ROVER.
 
 | Component | Confirmed specs | ROS 2 driver | Interface | Power | Integration status |
 | --- | --- | --- | --- | --- | --- |
-| Rover base | University-built simple rover; spec to inspect on receipt (motors, controller, encoders?, battery, mounting) | UNKNOWN | UNKNOWN | UNKNOWN battery | NOT RECEIVED |
+| Rover base | University-built simple rover; spec to inspect on receipt (motors, controller, battery, mounting). No encoders used (decisions #22) | UNKNOWN | UNKNOWN | UNKNOWN battery | NOT RECEIVED |
 | NVIDIA Jetson Orin Nano | JetPack 6.x = Ubuntu 22.04 [J1] | - | - | per rover/dev-kit supply | ORDERED by supervisor (Nov 2026; delivery date TBC) |
 | SLAMTEC RPLIDAR S2 | 0.05-30 m (90% reflect.), 0.05-10 m (10% reflect.); 10 Hz scan; 32 kHz sampling; ±30 mm accuracy [H1] | `sllidar_ros2` (SLAMTEC) | UART 1 Mbaud via USB adapter board [H1] | 5 V; startup current up to 1.5 A, ~0.5 A running [H1] | ORDERED by supervisor (Nov 2026; delivery date TBC) |
 | Intel RealSense D455 | Ideal depth range 0.6-6 m; min-Z ~0.52 m; <2% error at 4 m; depth FOV 87°x58°; BMI055 IMU [H2] | `realsense2_camera` (realsense-ros) | USB-C 3.1 Gen 1 | USB bus powered; use powered hub [H3] | ORDERED by supervisor (Nov 2026; delivery date TBC) |

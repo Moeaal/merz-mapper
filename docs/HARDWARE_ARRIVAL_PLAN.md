@@ -182,8 +182,8 @@ git add ros2_ws/src/merz_bringup/config/teleop.yaml && git commit -m "Gamepad ax
 - **Seeing the map from Windows:** RViz needs Linux. The easiest option on Windows is **Foxglove** with
   `foxglove_bridge` running on the Jetson (`sudo apt install ros-humble-foxglove-bridge`, then
   `ros2 launch foxglove_bridge foxglove_bridge_launch.xml`, and connect from the laptop to `ws://<jetson-ip>:8765`).
-  Otherwise plug a monitor into the Jetson for RViz on the bench. The Pi 5 can run RViz only if its ROS 2 distro matches
-  the Jetson's (to be confirmed).
+  Otherwise plug a monitor into the Jetson for RViz on the bench. The Pi 5 can run RViz only if it also runs Humble
+  (decisions #21).
 - **Set the same `ROS_DOMAIN_ID`** on every ROS machine (for example `export ROS_DOMAIN_ID=42` in `~/.bashrc`), so that
   you do not see other students' robots on university Wi-Fi. University Wi-Fi often blocks DDS discovery between devices.
   If it does, use Foxglove, or a small travel router on the rover.
@@ -240,7 +240,7 @@ thin `*_node.py` connects it to ROS.
 | `config/teleop.yaml` | Gamepad axes, deadman button, speeds. **Axis numbers are guesses: fix in Week 4** |
 | `config/twist_mux.yaml` | Priorities: teleop 100 over navigation 10, 0.5 s timeouts |
 | `config/scan_odometry.yaml` | rf2o settings, and the noise values (`vx_std` etc.) to measure in Week 5 |
-| `config/ekf.yaml`, `ekf_wheel_odom.yaml` | The EKF: scan odometry vx, vy plus IMU yaw rate. The wheel version is for if encoders are added |
+| `config/ekf.yaml`, `ekf_wheel_odom.yaml` | The EKF: scan odometry vx, vy plus IMU yaw rate. `ekf_wheel_odom.yaml` is unused: no encoders (decisions #22) |
 | `config/slam.yaml` | SLAM Toolbox settings (`max_laser_range` etc.) |
 | `config/nav2.yaml`, `keepout.yaml` | Nav2: 0.5 m/s cap, no reversing, footprint (placeholder), keep-out filter |
 | `behavior_trees/navigate_no_motion_recovery.xml` | Nav2 tree with no spinning or reversing when stuck (decisions #16) |
@@ -344,7 +344,7 @@ Find out and write down, with photos:
 - Motors: how many, which make and voltage. Skid-steer (4 wheels) or differential (2 wheels plus a caster)?
 - **Motor controller:** make and model, how it is controlled (USB serial, UART, RC/PWM, CAN?), and whether it has its own
   **command timeout or watchdog** (that answers decisions #19 / REVIEW R1). Find its manual.
-- **Encoders:** are there any (decisions #10)? Wires on the motors with 4-6 cores usually mean encoders.
+- Encoders are **not used** (decisions #22), even if the motors have them. Odometry comes from the LIDAR and the D455 IMU.
 - **Battery:** chemistry (LiPo, Li-ion, lead acid), voltage, capacity, charger, fuse, and **is there a power switch or
   emergency stop?**
 - Is there an existing computer or ROS driver on it? If so, ask whether to use it (`merz_base/README.md`).
@@ -352,7 +352,7 @@ Find out and write down, with photos:
 - *Done when:* the register's rover row has real values, and the questions for Dr Wright are listed.
 
 **Wed 11 Nov: proposal**
-- Finish the proposal. Use the rover facts from yesterday (for example the encoder wording, OPEN_ISSUES #15).
+- Finish the proposal. Use the rover facts from yesterday (the proposal must say scan matching + D455 IMU, not "wheel odometry": decisions #22).
 - Bench check that needs no set-up: power each USB device from a laptop and confirm that it is detected. On Windows,
   Intel's RealSense Viewer can show the D455 and update its firmware. SLAMTEC's Windows tool can show the LIDAR spinning.
 
@@ -364,13 +364,13 @@ Find out and write down, with photos:
 - Get the **Jetson's power supply** ready for the bench (the dev kit's own adapter).
 
 **Fri 13 Nov: submit D1 by 14:00**
-- Submit. Then the meeting agenda for Dr Wright: encoders (#10), ROS 2 distro (#2), floor plan (#14), permission to test
+- Submit. Then the meeting agenda for Dr Wright: tell him your decisions (Humble, no encoders: #21, #22), floor plan (#14), permission to test
   in Merz Court, the O2 and O8 pass rules (#21), the emergency stop and watchdog (decisions #19), and the unlisted parts.
 - Write the week's logbook and update `MERZ_MAPPER_STATE.md`.
 
 ### 5.2 Week 2 (16-20 Nov): Jetson, ROS 2 and the workspace
 **Mon 16 Nov: flash the Jetson**
-- Decide between JetPack 6.x and Humble (recommended, decisions #6) or something else, with Dr Wright's agreement.
+- Flash **JetPack 6.x** (the latest 6.x release) for **ROS 2 Humble** (decisions #21). Do not use JetPack 7: Humble needs Ubuntu 22.04.
 - Flash route (your laptop has no Linux, decisions #11):
   - **Developer kit:** the SD-card image route in NVIDIA's *Jetson Orin Nano Developer Kit Getting Started* guide. A kit
     from older stock may first need its firmware updated before JetPack 6 boots: follow NVIDIA's current instructions.
@@ -489,7 +489,8 @@ Bench work: the sensors sit on the desk, connected to the Jetson. Follow BUILD_G
 **Tue 8 Dec: scan odometry and a corridor test**
 - Drive a measured straight 5 m line by gamepad, 5 times. Compare `/odom_scan` with the laser meter, and set `vx_std`.
 - **Drive down a long, plain corridor** and record a bag. Does `/odom_scan` keep counting distance? If it stalls, that is
-  OPEN_ISSUES #17: tell Dr Wright now, because it may need encoders.
+  OPEN_ISSUES #17. There are no encoders (decisions #22), so try in order: drive slower, fuse rf2o `vyaw` in `ekf.yaml`,
+  open doors for features; last resort, add D455 visual odometry as a second velocity source (section 6, item 13).
 
 **Wed 9 Dec: EKF square test**
 - 2 m square, 3 times each way, `mapping.launch.py`. Compare `/odometry/filtered` at the start and end. Measure
@@ -598,7 +599,7 @@ facts you measured. Items 1-4 are safety-related and must be done before autonom
 | 10 | **Backup script:** copy `~/merz_data` to the laptop and OneDrive, and check sizes | Losing bags would cost weeks | Week 5 | Small |
 | 11 | **Battery monitoring** (if the controller or battery reports voltage): a node that warns, and stops autonomy below a threshold | Nothing in the software watches the battery (safety checklist) | Week 9 | Small |
 | 12 | **Store sign crops** (`landmarks.photo_id`) | The website shows real signs without photos until this is done (`web/README.md`) | Week 16 | Small (optional) |
-| 13 | **Encoders** in the EKF, using `ekf_wheel_odom.yaml`, only if the corridor test fails and Dr Wright agrees | OPEN_ISSUES #15, #17 | Only if needed | Medium |
+| 13 | **D455 visual odometry** as a second velocity source in the EKF (no encoders, decisions #22), only if the corridor test fails | OPEN_ISSUES #17 | Only if needed | Medium |
 | 14 | **Privacy step for photos** (skip or blur frames with people in them) | Junction photos are published on the website (section 7) | Before Week 16 | Small |
 
 ---
@@ -622,7 +623,7 @@ facts you measured. Items 1-4 are safety-related and must be done before autonom
 9. **Keep `main` working.** Only merge what has built and been tested on the Jetson. Tag milestones.
 10. **One thing at a time.** One new device, one new parameter or one new node per test.
 11. **Keep the website small.** It is a demonstrator. The marks are in the robot (decisions #5).
-12. **Questions to settle with Dr Wright early:** distro (#2), encoders (#10, #15, #17), floor plan (#14), O2 and O8 pass
+12. **Questions to settle with Dr Wright early:** floor plan (#14), long-corridor odometry result (#17), O2 and O8 pass
     rules (#21), independent stop (decisions #19), test permission, poster date (#11).
 
 ---

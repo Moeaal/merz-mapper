@@ -75,7 +75,7 @@ SQLite --> FastAPI --> website (phone, via an entrance QR code)
 `/mission_node/finish` (end the run), `/access_zone_node/compute` (both std_srvs/Trigger).
 
 ## Dependencies
-ROS 2 Humble (decisions #6, PROPOSED), slam_toolbox, nav2, robot_localization, twist_mux, joy, teleop_twist_joy, usb_cam, librealsense2 +
+ROS 2 Humble (decisions #21, DECIDED), slam_toolbox, nav2, robot_localization, twist_mux, joy, teleop_twist_joy, usb_cam, librealsense2 +
 realsense2_camera. Source builds via `ros2_ws/merz.repos`: sllidar_ros2, rf2o_laser_odometry (decisions #14, PROPOSED), m-explore-ros2
 (decisions #7, PROPOSED). Python: Ultralytics, TensorRT (JetPack), PaddleOCR or RapidOCR, FastAPI.
 
