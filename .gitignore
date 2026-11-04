@@ -24,3 +24,7 @@ __pycache__/
 # Personal Claude Code settings (shared settings are in .claude/settings.json)
 .claude/settings.local.json
 CLAUDE.local.md
+
+# Website build
+_site/
+web/frontend/node_modules/

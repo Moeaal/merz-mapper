@@ -17,6 +17,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import (COLOUR_PRIMARY, OCCUPIED, STATS_HEADERS, GridMap, describe, format_table, load_map, new_figure,  # noqa: E402
                     pass_fail, read_csv, save_figure, stats_row)
+from common import stats_dict, write_json  # noqa: E402,F401
 
 TARGET_M = 0.15
 
@@ -64,6 +65,7 @@ def main() -> None:
     parser.add_argument('--walls', required=True)
     parser.add_argument('--match-radius', type=float, default=0.5, help='Metres. Decide this before the run.')
     parser.add_argument('--plot', type=Path)
+    parser.add_argument('--json', type=Path, help='Also save the numbers as JSON, for tools/web_import.py.')
     args = parser.parse_args()
     segments = np.array([[float(r[k]) for k in ('x1', 'y1', 'x2', 'y2')] for r in read_csv(args.walls)])
     errors, excluded = wall_errors(load_map(args.map), segments, args.match_radius)
@@ -74,6 +76,13 @@ def main() -> None:
     print(f'Mean <= {TARGET_M} m: {pass_fail(stats.mean <= TARGET_M)}')
     if args.plot:
         plot(errors, args.plot)
+    if args.json:
+        write_json(args.json, 'O2', 'wall_error', stats.mean <= TARGET_M,
+                   {'stats': stats_dict(stats), 'excluded_percent': float(excluded),
+                    'within_target_percent': float(100.0 * np.mean(errors <= TARGET_M)), 'target_m': TARGET_M,
+                    'match_radius_m': args.match_radius,
+                    'histogram': np.histogram(errors, bins=20, range=(0.0, args.match_radius))[0].tolist()},
+                   {'map': args.map, 'walls': args.walls})
 
 
 if __name__ == '__main__':

@@ -80,3 +80,48 @@ def describe_steps(path: list[Junction], room: str, start_xy: tuple[float, float
         instructions.append({'straight': 'Continue straight on.', 'left': 'Turn left.', 'right': 'Turn right.',
                              'back': 'Turn around.'}[direction])
     return instructions
+
+
+FEATURE_WORDS = {'lift': 'the lift', 'stairs': 'the stairs', 'exit_sign': 'the exit sign'}
+
+
+def describe_steps_rich(path: list[Junction], room: str, start_xy: tuple[float, float],
+                        room_xy: tuple[float, float], features: Iterable[tuple[str, float, float]] = (),
+                        feature_radius_m: float = 4.0) -> list[dict]:
+    """Like describe_steps, but names a nearby landmark the robot saw ("Turn left at the lift") and says which side
+    the room is on at the end. Returns one dict per junction: turn ('straight', 'left', 'right', 'back', 'arrive')
+    and instruction. Only lifts, stairs and exit signs are used: they are easy to see and do not repeat every door."""
+    # Ignore landmarks right by the entrance: "past the exit sign" is no help to someone who has just come in.
+    features = [f for f in features if f[0] in FEATURE_WORDS and math.hypot(f[1] - start_xy[0], f[2] - start_xy[1]) > 4.0]
+    out = []
+    for index, junction in enumerate(path):
+        nearby = min(features, key=lambda f: math.hypot(f[1] - junction.x, f[2] - junction.y), default=None)
+        if nearby and math.hypot(nearby[1] - junction.x, nearby[2] - junction.y) > feature_radius_m:
+            nearby = None
+        before = (path[index - 1].x, path[index - 1].y) if index else start_xy
+        if index == len(path) - 1:
+            side = ''
+            if before != (junction.x, junction.y):
+                heading = math.atan2(junction.y - before[1], junction.x - before[0])
+                bearing = math.atan2(room_xy[1] - junction.y, room_xy[0] - junction.x) - heading
+                bearing = math.atan2(math.sin(bearing), math.cos(bearing))
+                if abs(bearing) < math.radians(30):
+                    side = ' straight ahead'
+                elif abs(bearing) > math.radians(150):
+                    side = ', back the way you came'
+                else:
+                    side = ' on your left' if bearing > 0 else ' on your right'
+            distance = math.hypot(room_xy[0] - junction.x, room_xy[1] - junction.y)
+            out.append({'turn': 'arrive', 'instruction': f'Room {room} is about {max(1, round(distance))} m away{side}.'})
+            continue
+        if before == (junction.x, junction.y):
+            out.append({'turn': 'straight', 'instruction': 'Head towards the next junction shown.'})
+            continue
+        turn = turn_direction(before, (junction.x, junction.y), (path[index + 1].x, path[index + 1].y))
+        place = FEATURE_WORDS[nearby[0]] if nearby else None
+        text = {'straight': 'Continue straight on', 'left': 'Turn left', 'right': 'Turn right',
+                'back': 'Turn around'}[turn]
+        if place:
+            text += f', past {place}' if turn == 'straight' else f' at {place}'
+        out.append({'turn': turn, 'instruction': text + '.'})
+    return out

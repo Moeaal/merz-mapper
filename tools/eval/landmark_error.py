@@ -17,6 +17,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import (COLOUR_PRIMARY, STATS_HEADERS, describe, format_table, new_figure, pass_fail, query_database,  # noqa: E402
                     read_csv, save_figure, stats_row)
+from common import stats_dict, write_json  # noqa: E402,F401
 
 TARGET_M = 0.5
 
@@ -73,6 +74,7 @@ def main() -> None:
     parser.add_argument('--database', required=True)
     parser.add_argument('--gate', type=float, default=2.0, help='Metres. Decide this before the run.')
     parser.add_argument('--plot', type=Path)
+    parser.add_argument('--json', type=Path, help='Also save the numbers as JSON, for tools/web_import.py.')
     args = parser.parse_args()
     matches, unmatched = match_landmarks(read_csv(args.truth), query_database(args.database, 'SELECT * FROM landmarks'),
                                          args.gate)
@@ -89,6 +91,14 @@ def main() -> None:
     print(f'Mean <= {TARGET_M} m: {pass_fail(stats.mean <= TARGET_M)}')
     if args.plot:
         plot(errors, args.plot)
+    if args.json:
+        write_json(args.json, 'O4', 'landmark_error', stats.mean <= TARGET_M,
+                   {'stats': stats_dict(stats), 'target_m': TARGET_M, 'gate_m': args.gate,
+                    'unmatched': len(unmatched),
+                    'matches': [{'class': m.truth['class'], 'text': m.truth.get('text', ''), 'landmark_id': m.landmark['id'],
+                                 'observations': m.landmark['observation_count'], 'error_m': m.error_m,
+                                 'truth_x': float(m.truth['x']), 'truth_y': float(m.truth['y'])} for m in matches]},
+                   {'truth': args.truth, 'database': args.database})
 
 
 if __name__ == '__main__':

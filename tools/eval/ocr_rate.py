@@ -15,6 +15,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import format_table, pass_fail, query_database, read_csv  # noqa: E402
+from common import stats_dict, write_json  # noqa: E402,F401
 
 TARGET_PERCENT = 85.0
 
@@ -48,6 +49,7 @@ def main() -> None:
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument('--database')
     source.add_argument('--results')
+    parser.add_argument('--json', type=Path, help='Also save the numbers as JSON, for tools/web_import.py.')
     args = parser.parse_args()
     truth = [row['text'] for row in read_csv(args.truth)]
     if args.database:
@@ -60,6 +62,12 @@ def main() -> None:
                          result.percent, pass_fail(result.percent >= TARGET_PERCENT)]]))
     print('Missed:', ', '.join(sorted(result.missed)) or 'none')
     print('False reads:', ', '.join(sorted(result.false_reads)) or 'none')
+    if args.json:
+        write_json(args.json, 'O3', 'ocr_rate', result.percent >= TARGET_PERCENT,
+                   {'signs': result.total_signs, 'correct': sorted(result.correct), 'missed': sorted(result.missed),
+                    'false_reads': sorted(result.false_reads), 'percent': result.percent,
+                    'target_percent': TARGET_PERCENT}, {'truth': args.truth, 'database': args.database,
+                                                        'results': args.results})
 
 
 if __name__ == '__main__':

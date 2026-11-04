@@ -1,17 +1,19 @@
-"""The demonstrator website: read-only API over the robot's SQLite database, plus one mobile page.
+"""The demonstrator website: a read-only API over the robot's SQLite database, and the built site in web/dist.
 
-Run with the sample data, from the web folder:
+Run from the web folder:
     python -m uvicorn app.main:app --reload
-Use real data by setting MERZ_DB, MERZ_PHOTOS and MERZ_MAP (the map_saver .yaml) first.
+By default the API reads the current data bundle (web/data/index.json, made by tools/web_import.py), falling back to
+web/sample_data. MERZ_DB, MERZ_PHOTOS and MERZ_MAP (the map_saver .yaml) override it.
 """
 from __future__ import annotations
 
+import json
 import math
 import os
 from pathlib import Path
 import sqlite3
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 
@@ -19,19 +21,42 @@ from app.grid_map import GridMap, load_grid_map
 from app.routing import Junction, describe_steps, nearest_junction, shortest_path
 
 WEB_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DB = WEB_ROOT / 'sample_data' / 'merz_sample.sqlite'
-DEFAULT_PHOTOS = WEB_ROOT / 'sample_data' / 'photos'
-DEFAULT_MAP = WEB_ROOT / 'sample_data' / 'merz_map.yaml'
-STATIC = WEB_ROOT / 'static'
+DATA = WEB_ROOT / 'data'
+DIST = WEB_ROOT / 'dist'
+SAMPLE_DB = WEB_ROOT / 'sample_data' / 'merz_sample.sqlite'
+SAMPLE_PHOTOS = WEB_ROOT / 'sample_data' / 'photos'
+SAMPLE_MAP = WEB_ROOT / 'sample_data' / 'merz_map.yaml'
+# Pages of the single-page site. Anything else that is not a file or an API route gets the site's 404 page.
+SITE_ROUTES = {'', 'find', 'mission', 'results', 'about'}
+
+
+def current_bundle() -> Path | None:
+    """The default run in web/data, if one has been imported."""
+    try:
+        default = json.loads((DATA / 'index.json').read_text())['default']
+    except (OSError, ValueError, KeyError):
+        return None
+    bundle = DATA / default
+    return bundle if (bundle / 'api' / 'merz.sqlite').is_file() else None
+
+
+BUNDLE = current_bundle()
+DEFAULT_DB = BUNDLE / 'api' / 'merz.sqlite' if BUNDLE else SAMPLE_DB
+DEFAULT_PHOTOS = SAMPLE_PHOTOS
+DEFAULT_MAP = BUNDLE / 'api' / 'map.yaml' if BUNDLE else SAMPLE_MAP
 
 
 def create_app(database: str | Path = DEFAULT_DB, photo_dir: str | Path = DEFAULT_PHOTOS,
-               map_yaml: str | Path | None = DEFAULT_MAP) -> FastAPI:
+               map_yaml: str | Path | None = DEFAULT_MAP, bundle: Path | None = BUNDLE,
+               site: Path | None = DIST) -> FastAPI:
     database = Path(database).expanduser()
     photo_dir = Path(photo_dir).expanduser()
     map_yaml = Path(map_yaml).expanduser() if map_yaml else None
     app = FastAPI(title='Merz Mapper demonstrator')
-    app.mount('/static', StaticFiles(directory=STATIC), name='static')
+    if DATA.is_dir():
+        app.mount('/data', StaticFiles(directory=DATA), name='data')
+    if site and (site / 'assets').is_dir():
+        app.mount('/assets', StaticFiles(directory=site / 'assets'), name='assets')
     grid_cache: dict[str, object] = {}
 
     def grid() -> GridMap | None:
@@ -57,14 +82,6 @@ def create_app(database: str | Path = DEFAULT_DB, photo_dir: str | Path = DEFAUL
         if not rows:
             raise HTTPException(status_code=404, detail=f"Unknown entrance '{entrance}'")
         return rows[0]
-
-    @app.get('/', include_in_schema=False)
-    def index() -> FileResponse:
-        return FileResponse(STATIC / 'index.html')
-
-    @app.get('/about', include_in_schema=False)
-    def about() -> FileResponse:
-        return FileResponse(STATIC / 'about.html')
 
     @app.get('/map')
     def map_info() -> dict:
@@ -151,9 +168,22 @@ def create_app(database: str | Path = DEFAULT_DB, photo_dir: str | Path = DEFAUL
             raise HTTPException(status_code=404, detail='Unknown photo')
         # Paths were stored on the robot, so only the file name is used. It also keeps requests inside photo_dir.
         path = photo_dir / Path(rows[0]['path'].replace('\\', '/')).name
+        if not path.is_file() and bundle is not None:
+            path = bundle / 'photos' / f'p{photo_id}.webp'      # the importer's compressed copy
         if not path.is_file():
             raise HTTPException(status_code=404, detail='Photo file is missing')
         return FileResponse(path)
+
+    @app.get('/{page:path}', include_in_schema=False)
+    def site_page(page: str, request: Request) -> Response:
+        """The built website. Its pages are handled in the browser, so they all return index.html."""
+        if site is None or not (site / 'index.html').is_file():
+            raise HTTPException(status_code=404, detail='The website has not been built: see web/README.md')
+        target = (site / page).resolve()
+        if page and target.is_file() and site.resolve() in target.parents:
+            return FileResponse(target)
+        status = 200 if page.strip('/') in SITE_ROUTES else 404
+        return FileResponse(site / 'index.html', status_code=status, headers={'Cache-Control': 'no-cache'})
 
     return app
 

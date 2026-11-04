@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<base href="/">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Merz Mapper · The building, as the robot saw it</title>
+<meta name="description" content="A final-year student rover maps Merz Court on its own, reads the door signs and photographs every junction. Find a room, replay the mission, see the results.">
+<meta name="theme-color" content="#05080f">
+<meta property="og:title" content="Merz Mapper · The building, as the robot saw it">
+<meta property="og:description" content="An autonomous rover maps a university building, then guides visitors to their room.">
+<meta property="og:image" content="og.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>
+  // Theme before first paint, so the page never flashes the wrong colours.
+  try {
+    const saved = localStorage.getItem('merz-theme');
+    const theme = saved || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    document.documentElement.dataset.theme = theme;
+  } catch (e) { /* storage blocked: keep the default */ }
+</script>
+  <script type="module" crossorigin src="./assets/index-CnpOjQDe.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/gsap-DjKJqAo0.js">
+  <link rel="stylesheet" crossorigin href="./assets/index-Bsr3Cb12.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div id="stage" aria-hidden="true"></div>
+<div id="overlay" aria-hidden="true"></div>
+<div id="app"></div>
+<p id="announcer" class="sr-only" aria-live="polite"></p>
+<noscript><p class="noscript">Merz Mapper needs JavaScript to draw the robot's map.</p></noscript>
+</body>
+</html>
