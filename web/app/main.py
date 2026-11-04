@@ -2,28 +2,46 @@
 
 Run with the sample data, from the web folder:
     python -m uvicorn app.main:app --reload
-Use real data by setting MERZ_DB and MERZ_PHOTOS first.
+Use real data by setting MERZ_DB, MERZ_PHOTOS and MERZ_MAP (the map_saver .yaml) first.
 """
 from __future__ import annotations
 
+import math
 import os
 from pathlib import Path
 import sqlite3
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
+from fastapi.staticfiles import StaticFiles
 
+from app.grid_map import GridMap, load_grid_map
 from app.routing import Junction, describe_steps, nearest_junction, shortest_path
 
 WEB_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DB = WEB_ROOT / 'sample_data' / 'merz_sample.sqlite'
 DEFAULT_PHOTOS = WEB_ROOT / 'sample_data' / 'photos'
+DEFAULT_MAP = WEB_ROOT / 'sample_data' / 'merz_map.yaml'
+STATIC = WEB_ROOT / 'static'
 
 
-def create_app(database: str | Path = DEFAULT_DB, photo_dir: str | Path = DEFAULT_PHOTOS) -> FastAPI:
+def create_app(database: str | Path = DEFAULT_DB, photo_dir: str | Path = DEFAULT_PHOTOS,
+               map_yaml: str | Path | None = DEFAULT_MAP) -> FastAPI:
     database = Path(database).expanduser()
     photo_dir = Path(photo_dir).expanduser()
+    map_yaml = Path(map_yaml).expanduser() if map_yaml else None
     app = FastAPI(title='Merz Mapper demonstrator')
+    app.mount('/static', StaticFiles(directory=STATIC), name='static')
+    grid_cache: dict[str, object] = {}
+
+    def grid() -> GridMap | None:
+        """The occupancy grid, loaded once and reloaded only when the file changes. None when there is no map."""
+        if map_yaml is None or not map_yaml.is_file():
+            return None
+        stamp = map_yaml.stat().st_mtime_ns
+        if grid_cache.get('stamp') != stamp:
+            grid_cache['stamp'], grid_cache['map'] = stamp, load_grid_map(map_yaml)
+        return grid_cache['map']
 
     def query(sql: str, parameters: tuple = ()) -> list[dict]:
         # Read-only by construction: the website can never alter what the robot recorded.
@@ -42,7 +60,27 @@ def create_app(database: str | Path = DEFAULT_DB, photo_dir: str | Path = DEFAUL
 
     @app.get('/', include_in_schema=False)
     def index() -> FileResponse:
-        return FileResponse(WEB_ROOT / 'static' / 'index.html')
+        return FileResponse(STATIC / 'index.html')
+
+    @app.get('/about', include_in_schema=False)
+    def about() -> FileResponse:
+        return FileResponse(STATIC / 'about.html')
+
+    @app.get('/map')
+    def map_info() -> dict:
+        """Where the occupancy-grid image sits in the map frame, so the page can draw routes on top of it."""
+        found = grid()
+        if found is None:
+            return {'available': False}
+        return {'available': True, 'image_url': '/map.png', 'resolution': found.resolution,
+                'origin': [found.origin_x, found.origin_y], 'width': found.width, 'height': found.height}
+
+    @app.get('/map.png', include_in_schema=False)
+    def map_image() -> Response:
+        found = grid()
+        if found is None:
+            raise HTTPException(status_code=404, detail='No map has been loaded')
+        return Response(found.png, media_type='image/png', headers={'Cache-Control': 'no-cache'})
 
     @app.get('/entrances')
     def entrances() -> dict:
@@ -84,15 +122,26 @@ def create_app(database: str | Path = DEFAULT_DB, photo_dir: str | Path = DEFAUL
         by_id = {j.id: j for j in junctions}
         photos = {r['id']: r['photo_id'] for r in rows}
         instructions = describe_steps([by_id[i] for i in ids], room, (start['x'], start['y']))
+        steps, previous = [], (start['x'], start['y'])
+        for i, text in zip(ids, instructions):
+            here = by_id[i]
+            steps.append({
+                'junction_id': i,
+                'instruction': text,
+                'photo_url': f'/photos/{photos[i]}' if photos[i] is not None else None,
+                'x': here.x,
+                'y': here.y,
+                # Straight-line distance from the previous point: a guide for the visitor, not a measured walk.
+                'distance_m': round(math.hypot(here.x - previous[0], here.y - previous[1]), 1),
+            })
+            previous = (here.x, here.y)
         return {
             'entrance': entrance,
             'room': room,
             'length_m': round(length, 1),
-            'steps': [{
-                'junction_id': i,
-                'instruction': text,
-                'photo_url': f'/photos/{photos[i]}' if photos[i] is not None else None,
-            } for i, text in zip(ids, instructions)],
+            'start': {'id': start['id'], 'name': start['name'], 'x': start['x'], 'y': start['y']},
+            'destination': {'room': room, 'x': targets[0]['x'], 'y': targets[0]['y']},
+            'steps': steps,
         }
 
     @app.get('/photos/{photo_id}', include_in_schema=False)
@@ -109,4 +158,5 @@ def create_app(database: str | Path = DEFAULT_DB, photo_dir: str | Path = DEFAUL
     return app
 
 
-app = create_app(os.environ.get('MERZ_DB', DEFAULT_DB), os.environ.get('MERZ_PHOTOS', DEFAULT_PHOTOS))
+app = create_app(os.environ.get('MERZ_DB', DEFAULT_DB), os.environ.get('MERZ_PHOTOS', DEFAULT_PHOTOS),
+                 os.environ.get('MERZ_MAP', DEFAULT_MAP))

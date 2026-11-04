@@ -2,167 +2,38 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Merz Mapper directions</title>
-<style>
-  :root { --ink: #1c2329; --muted: #5c6770; --line: #d8dde1; --surface: #ffffff; --page: #f3f4f2; --accent: #1f5f99; }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--page); color: var(--ink);
-         font: 17px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  header { background: var(--accent); color: #fff; padding: 16px 16px 18px; }
-  header p { margin: 0; font-size: 14px; opacity: .9; }
-  h1 { margin: 0 0 2px; font-size: 22px; font-weight: 650; }
-  main { max-width: 560px; margin: 0 auto; padding: 16px; }
-  h2 { font-size: 18px; margin: 4px 0 10px; }
-  .notice { background: #fff4d6; border: 1px solid #e0c36c; border-radius: 6px; padding: 9px 12px; margin-bottom: 14px;
-            font-size: 14px; }
-  .error { background: #fbe6e3; border-color: #dfa49b; }
-  input { width: 100%; padding: 13px 12px; margin-bottom: 10px; font: inherit; border: 1px solid var(--line);
-          border-radius: 6px; background: var(--surface); }
-  ul.choices { list-style: none; margin: 0; padding: 0; }
-  ul.choices button { width: 100%; min-height: 48px; margin-bottom: 8px; padding: 10px 14px; font: inherit; text-align: left;
-                      background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
-                      cursor: pointer; }
-  ul.choices button:hover, ul.choices button:focus-visible { border-color: var(--accent); outline: 2px solid var(--accent); }
-  ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: step; }
-  ol.steps li { counter-increment: step; background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
-                margin-bottom: 14px; overflow: hidden; }
-  ol.steps img { display: block; width: 100%; height: auto; background: var(--line); }
-  ol.steps p { margin: 0; padding: 11px 14px; }
-  ol.steps p::before { content: counter(step) ". "; font-weight: 650; }
-  .link { background: none; border: 0; padding: 8px 0; font: inherit; color: var(--accent); text-decoration: underline;
-          cursor: pointer; }
-  .muted { color: var(--muted); font-size: 15px; margin: 0 0 12px; }
-  footer { max-width: 560px; margin: 0 auto; padding: 0 16px 24px; color: var(--muted); font-size: 13px; }
-</style>
+<meta name="description" content="Step-by-step photo directions inside Merz Court, from a map built by a student-made robot.">
+<meta name="theme-color" content="#13233a">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
-<header>
-  <h1>Merz Mapper</h1>
-  <p id="where">Directions from a robot-built map</p>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <a class="brand" href="/" aria-label="Merz Mapper, start again">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#ffc629"/><path d="M8 24V14h8V8h8" fill="none" stroke="#13233a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="24" r="3" fill="#13233a"/></svg>
+    <span>Merz Mapper</span>
+  </a>
+  <nav aria-label="Site">
+    <a href="/" aria-current="page">Directions</a>
+    <a href="/about">About the project</a>
+  </nav>
 </header>
-<main>
-  <div id="sample" class="notice" hidden>Sample data: not a real building survey.</div>
-  <div id="error" class="notice error" role="alert" hidden></div>
-  <div id="view" aria-live="polite"></div>
+<div class="signal-band" aria-hidden="true"></div>
+<p id="sample" class="sample-ribbon" hidden><strong>Sample data.</strong> The rooms, map and photos are made up until the rover surveys Merz Court.</p>
+<main id="main" tabindex="-1">
+  <div id="view" class="view"><p class="loading" role="status">Loading directions…</p></div>
 </main>
-<footer>Student project demonstrator. Rooms listed are those the robot could reach from this entrance.</footer>
-
-<script>
-  // Everything from the API goes through textContent, so text from the database can never run as code.
-  const view = document.getElementById('view');
-  const where = document.getElementById('where');
-  const errorBox = document.getElementById('error');
-  let entrances = [];
-
-  function element(tag, text, className) {
-    const node = document.createElement(tag);
-    if (text !== undefined) node.textContent = text;
-    if (className) node.className = className;
-    return node;
-  }
-
-  function showError(message) {
-    errorBox.textContent = message;
-    errorBox.hidden = !message;
-  }
-
-  async function getJson(url) {
-    const response = await fetch(url);
-    const body = await response.json();
-    if (!response.ok) throw new Error(body.detail || 'Something went wrong. Please try again.');
-    return body;
-  }
-
-  function choiceList(items, label, onChoose) {
-    const list = element('ul', undefined, 'choices');
-    for (const item of items) {
-      const row = element('li');
-      const button = element('button', label(item));
-      button.type = 'button';
-      button.addEventListener('click', () => onChoose(item));
-      row.append(button);
-      list.append(row);
-    }
-    return list;
-  }
-
-  function showEntrances() {
-    where.textContent = 'Directions from a robot-built map';
-    view.replaceChildren(element('h2', 'Which entrance are you at?'),
-      choiceList(entrances, (e) => e.name, (e) => showRooms(e.id)));
-  }
-
-  async function showRooms(entranceId) {
-    showError('');
-    const entrance = entrances.find((e) => e.id === entranceId);
-    if (!entrance) {
-      showError('This QR code is not for a known entrance. Please choose one below.');
-      showEntrances();
-      return;
-    }
-    where.textContent = 'You are at: ' + entrance.name;
-    const { rooms } = await getJson('/rooms?entrance=' + encodeURIComponent(entranceId));
-    const search = element('input');
-    search.type = 'search';
-    search.placeholder = 'Search for a room number';
-    search.setAttribute('aria-label', 'Search for a room number');
-    const holder = element('div');
-    const draw = () => {
-      const term = search.value.trim().toUpperCase();
-      const matching = rooms.filter((room) => room.toUpperCase().includes(term));
-      holder.replaceChildren(matching.length
-        ? choiceList(matching, (room) => room, (room) => showRoute(entranceId, room))
-        : element('p', 'No matching room can be reached from this entrance.', 'muted'));
-    };
-    search.addEventListener('input', draw);
-    draw();
-    view.replaceChildren(element('h2', 'Where would you like to go?'), search, holder);
-  }
-
-  async function showRoute(entranceId, room) {
-    showError('');
-    try {
-      const route = await getJson('/route?entrance=' + encodeURIComponent(entranceId) +
-                                  '&room=' + encodeURIComponent(room));
-      const steps = element('ol', undefined, 'steps');
-      for (const step of route.steps) {
-        const item = element('li');
-        if (step.photo_url) {
-          const photo = element('img');
-          photo.src = step.photo_url;
-          photo.alt = 'View from this junction';
-          photo.loading = 'lazy';
-          item.append(photo);
-        }
-        item.append(element('p', step.instruction));
-        steps.append(item);
-      }
-      const back = element('button', 'Choose another room', 'link');
-      back.type = 'button';
-      back.addEventListener('click', () => showRooms(entranceId));
-      view.replaceChildren(element('h2', 'To room ' + route.room),
-        element('p', 'About ' + route.length_m + ' m. Match each photo to what you can see.', 'muted'), steps, back);
-      window.scrollTo(0, 0);
-    } catch (error) {
-      showError(error.message);
-    }
-  }
-
-  async function start() {
-    try {
-      const data = await getJson('/entrances');
-      entrances = data.entrances;
-      document.getElementById('sample').hidden = !data.sample_data;
-      const fromQr = new URLSearchParams(location.search).get('entrance');
-      if (fromQr) await showRooms(fromQr);
-      else showEntrances();
-    } catch (error) {
-      showError(error.message);
-    }
-  }
-
-  start();
-</script>
+<p id="announcer" class="visually-hidden" aria-live="polite"></p>
+<footer class="site-footer">
+  <p>A student project demonstrator. The map, room list and junction photos are recorded by the Merz Mapper rover.
+     <a href="/about">How it works</a></p>
+</footer>
+<script src="/static/app.js"></script>
 </body>
 </html>
