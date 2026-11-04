@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>About Merz Mapper</title>
+<meta name="description" content="How a small student-built robot maps Merz Court, reads the door signs and photographs each junction, so visitors can find their room.">
+<meta name="theme-color" content="#13233a">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <a class="brand" href="/" aria-label="Merz Mapper, directions">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#ffc629"/><path d="M8 24V14h8V8h8" fill="none" stroke="#13233a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="24" r="3" fill="#13233a"/></svg>
+    <span>Merz Mapper</span>
+  </a>
+  <nav aria-label="Site">
+    <a href="/">Directions</a>
+    <a href="/about" aria-current="page">About the project</a>
+  </nav>
+</header>
+<div class="signal-band" aria-hidden="true"></div>
+
+<main id="main" tabindex="-1">
+  <div class="about-hero">
+    <div class="inner">
+      <div>
+        <p class="eyebrow">About the project</p>
+        <h1>A robot that learns the building, so visitors do not get lost</h1>
+        <p>Merz Mapper is a final-year student engineering project. A rover drives the corridors of Merz Court on its own,
+           builds a map, reads the room numbers on the doors and takes a photo at every junction. This website turns
+           that into directions you can follow on your phone.</p>
+      </div>
+      <figure class="map-figure">
+        <div class="frame"><img id="about-map" src="/map.png" alt="The rover's map of the building: corridors and rooms seen from above, with walls drawn as lines." width="420" height="440"></div>
+        <figcaption id="about-map-caption">A map like the one the rover builds. White is open floor, lines are walls, and the dotted area is space it has not seen.</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <div class="about">
+    <section aria-labelledby="how-title">
+      <h2 id="how-title">What the rover does</h2>
+      <p>The rover is a small wheeled robot built at the university. It carries a small computer and three sensors, and
+         does four jobs on each trip through the building.</p>
+      <ol class="how">
+        <li><h3>Drives itself</h3><p>Starting at an entrance, it heads for the parts of the building it has not yet seen,
+            and stops at doors it cannot open.</p></li>
+        <li><h3>Builds a map</h3><p>A spinning laser scanner (LIDAR) measures the distance to the walls many times a
+            second. Joining these up gives a floor plan; the aim is for every wall to be within 15&nbsp;cm of where it really is.</p></li>
+        <li><h3>Reads the door signs</h3><p>A camera spots room signs and reads the numbers. A depth camera works out where
+            each sign is, so the room can be placed on the map.</p></li>
+        <li><h3>Photographs junctions</h3><p>Wherever corridors meet, it takes a photo. These are the pictures you
+            match against what you see, step by step.</p></li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="route-title">
+      <h2 id="route-title">From the map to your directions</h2>
+      <p>The QR poster at each entrance tells the website where you are. The website only offers rooms the rover could
+         actually reach from that entrance: if a locked door was in the way, those rooms are left out, so you are never
+         sent through a door you cannot open.</p>
+      <p>Your route is the shortest path along the corridors between junctions. The photo at each junction, with a turn
+         arrow, shows which way to go next. Everything shown comes from the rover's own records; the website cannot
+         change them.</p>
+    </section>
+
+    <section aria-labelledby="photos-title">
+      <h2 id="photos-title">The rover</h2>
+      <p>Photos of the real rover will be added here once it has been built and tested.</p>
+      <div class="photo-grid">
+        <figure class="slot" data-photo="/static/photos/rover.jpg" data-alt="The Merz Mapper rover">
+          <div class="frame"><div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 6l2-3h4l2 3"/></svg>Photo to follow</div></div>
+          <figcaption>The rover, with its sensor mast.</figcaption>
+        </figure>
+        <figure class="slot" data-photo="/static/photos/rover-sensors.jpg" data-alt="Close-up of the rover's sensors">
+          <div class="frame"><div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 6l2-3h4l2 3"/></svg>Photo to follow</div></div>
+          <figcaption>The laser scanner, depth camera and webcam.</figcaption>
+        </figure>
+        <figure class="slot" data-photo="/static/photos/rover-corridor.jpg" data-alt="The rover mapping a corridor in Merz Court">
+          <div class="frame"><div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 6l2-3h4l2 3"/></svg>Photo to follow</div></div>
+          <figcaption>Mapping a corridor in Merz Court.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section aria-labelledby="status-title">
+      <h2 id="status-title">Where the project is now</h2>
+      <p>This is work in progress. Until the rover's first survey, the website runs on made-up sample data, so the rooms,
+         map and photos above are not real.</p>
+      <ul class="status-list">
+        <li><span class="tag done">Written</span><span>Rover software, the room database and this website.</span></li>
+        <li><span class="tag next">Next</span><span>Build and test the rover, then map the building one entrance at a time.</span></li>
+        <li><span class="tag next">Then</span><span>Replace the sample data with the rover's map, signs and photos, and test the directions with visitors.</span></li>
+      </ul>
+      <div class="button-row"><a class="button" href="/">Find a room</a></div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p>A student project demonstrator. The website is read-only: it shows what the rover recorded and changes nothing.</p>
+</footer>
+<script>
+  // Real photos replace the placeholders as soon as they are added to web/static/photos/.
+  for (const slot of document.querySelectorAll('figure.slot[data-photo]')) {
+    const img = new Image();
+    img.onload = () => {
+      img.alt = slot.dataset.alt;
+      slot.querySelector('.frame').replaceChildren(img);
+      slot.classList.add('filled');
+    };
+    img.src = slot.dataset.photo;
+  }
+  const map = document.getElementById('about-map');
+  map.addEventListener('error', () => { map.closest('figure').hidden = true; });
+</script>
+</body>
+</html>
