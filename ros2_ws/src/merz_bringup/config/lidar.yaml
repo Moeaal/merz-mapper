@@ -1,0 +1,10 @@
+# RPLIDAR S2 (sllidar_ros2). Baud rate and scan mode are from the driver's own S2 launch file.
+/**:
+  ros__parameters:
+    channel_type: serial
+    serial_port: /dev/rplidar     # udev symlink from udev/99-merz-rplidar.rules
+    serial_baudrate: 1000000
+    frame_id: laser               # must match the URDF
+    inverted: false
+    angle_compensate: true
+    scan_mode: DenseBoost

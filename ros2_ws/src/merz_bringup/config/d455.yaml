@@ -1,0 +1,30 @@
+# RealSense D455 (realsense2_camera). The node runs as namespace=camera, name=camera.
+# Topic names depend on the driver version: 4.54+ gives /camera/camera/..., older gives /camera/...
+# Check with `ros2 topic list`. If they differ, search the workspace for "/camera/camera" and change each one.
+# Profile parameter names also differ between versions, hence both spellings below.
+/**:
+  ros__parameters:
+    camera_name: camera          # gives frames camera_link, camera_color_optical_frame, ...
+    publish_tf: true             # factory-calibrated internal frames; the URDF only provides camera_link
+    tf_publish_rate: 0.0         # 0 = static
+
+    enable_color: true
+    enable_depth: true
+    enable_infra1: false
+    enable_infra2: false
+
+    # Modest streams to save USB bandwidth and CPU. TODO: measure on rover (raise if the Jetson copes).
+    depth_module.profile: 848x480x15
+    depth_module.depth_profile: 848x480x15
+    rgb_camera.profile: 640x480x15
+    rgb_camera.color_profile: 640x480x15
+
+    align_depth.enable: true     # one bbox in the colour image must index the depth image directly
+    pointcloud.enable: true      # Nav2 costmap source near glass. Turn off for manual mapping if the CPU is short.
+
+    # The IMU: gyro and accel are separate streams, so unite them into one topic. 2 = linear interpolation.
+    enable_gyro: true
+    enable_accel: true
+    unite_imu_method: 2
+    gyro_fps: 200                # TODO: measure on rover (check supported rates with rs-enumerate-devices)
+    accel_fps: 63                # TODO: measure on rover (as above)

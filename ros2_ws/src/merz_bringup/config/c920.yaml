@@ -1,0 +1,12 @@
+# Logitech C920 (usb_cam). Reads door signs only: geometry comes from the D455, as autofocus changes the intrinsics.
+/**:
+  ros__parameters:
+    video_device: /dev/c920      # udev symlink from udev/99-merz-c920.rules
+    frame_id: sign_camera_optical_frame
+    camera_name: sign_camera     # must match camera_name in c920_camera_info.yaml
+    camera_info_url: package://merz_bringup/config/c920_camera_info.yaml
+    io_method: mmap
+    pixel_format: mjpeg2rgb      # the C920 only reaches full resolution in MJPEG over USB 2
+    image_width: 1920
+    image_height: 1080
+    framerate: 10.0              # OCR needs detail, not speed

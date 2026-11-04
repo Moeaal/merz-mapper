@@ -1,0 +1,13 @@
+landmark_node:
+  ros__parameters:
+    map_frame: map
+    database: ~/merz_data/merz.sqlite
+    photo_dir: ~/merz_data/photos
+    min_depth_m: 0.6        # D455 ideal range, [H2]
+    max_depth_m: 6.0        # D455 ideal range, [H2]
+    gate_m: 1.0             # TODO: measure on rover (door spacing sets the upper limit; doors nearer than this merge)
+    fusion_mode: fused      # fused or single_observation (O8). Raw observations are stored in both modes.
+    tf_timeout_s: 0.2
+    depth_scale_m: 0.001    # 16UC1 depth from the D455 is in millimetres
+    sync_queue_size: 30     # 2 s at 15 Hz; must exceed the detector's latency
+    sync_slop_s: 0.05       # s; under half of the 66 ms frame period at 15 Hz

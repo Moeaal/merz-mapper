@@ -1,0 +1,31 @@
+# Two detector instances: the D455 finds landmarks (it has depth, so positions come from it); the C920 only looks for
+# room signs to read, since it has the detail. There is no trained Merz model yet.
+# TODO: measure on rover. Train the model on Merz Court frames, then set "weights" below.
+# Switch engine to tensorrt and weights to the .engine file on the Jetson: tools/export_tensorrt.md.
+detector_d455:
+  ros__parameters:
+    engine: ultralytics
+    weights: /home/merz/merz_data/models/merz_yolo.pt    # TODO: measure on rover (real path on the Jetson)
+    confidence: 0.25                                     # TODO: tune from the validation set
+    image_size: 640
+    rate_hz: 3.0                                         # the robot moves slowly (<=0.5 m/s)
+    allowed_labels: ['door', 'lift', 'stairs', 'exit_sign', 'room_sign']
+
+detector_c920:
+  ros__parameters:
+    engine: ultralytics
+    weights: /home/merz/merz_data/models/merz_yolo.pt    # TODO: measure on rover
+    confidence: 0.25
+    image_size: 640
+    rate_hz: 2.0
+    allowed_labels: ['room_sign']
+
+sign_reader:
+  ros__parameters:
+    ocr_engine: auto
+    room_regex: '[A-Z]?\d{1,2}\.?\d{1,3}'                # TODO: measure on rover (match the real sign format)
+    min_sharpness: 100.0                                 # TODO: measure on rover (from real C920 crops)
+    sign_label: room_sign
+    min_agreement: 2
+    agreement_window_s: 10.0
+    sync_queue_size: 20                                  # 2 s at 10 Hz; must exceed the detector's latency

@@ -1,0 +1,4 @@
+# RPLIDAR S2 USB adapter (CP210x), appears as /dev/rplidar.
+# Check the IDs on the real adapter with: udevadm info -a -n /dev/ttyUSB0 | grep -E 'idVendor|idProduct'
+# Note that any other CP210x adapter on the robot would match too; add ATTRS{serial} if that happens.
+KERNEL=="ttyUSB*", SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE:="0666", SYMLINK+="rplidar"

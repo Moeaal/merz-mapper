@@ -1,0 +1,5 @@
+# Wireless gamepad, appears as /dev/input/merz_gamepad. The gamepad is not yet bought.
+# The rule is COMMENTED OUT until the IDs are known: TODO: measure on rover.
+# Find them with: lsusb   (then replace XXXX and YYYY and remove the leading #)
+# joy_node finds the pad by device index by default, so this rule is only needed for several input devices.
+#SUBSYSTEM=="input", KERNEL=="js*", ATTRS{idVendor}=="XXXX", ATTRS{idProduct}=="YYYY", MODE:="0666", SYMLINK+="input/merz_gamepad"

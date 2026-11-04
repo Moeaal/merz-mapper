@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<robot name="merz_rover" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Merz Mapper rover. All numbers come from config/sensor_poses.yaml so that measuring
+       the rover never means editing this file. Frames follow REP 103 and REP 105. -->
+
+  <xacro:arg name="sensor_poses_file" default="$(find merz_description)/config/sensor_poses.yaml"/>
+  <!-- The RealSense driver publishes the D455 internal frames from factory calibration, so they
+       must NOT also be published here. Set true only when the driver is not running (RViz check). -->
+  <xacro:arg name="include_d455_internal_frames" default="false"/>
+
+  <xacro:property name="poses" value="${xacro.load_yaml('$(arg sensor_poses_file)')}"/>
+  <xacro:property name="base" value="${poses['base']}"/>
+
+  <!-- One fixed sensor frame, posed from a named YAML entry. -->
+  <xacro:macro name="fixed_sensor" params="name parent:=base_link">
+    <xacro:property name="p" value="${poses[name]}"/>
+    <link name="${name}"/>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${name}"/>
+      <origin xyz="${p['x']} ${p['y']} ${p['z']}" rpy="${p['roll']} ${p['pitch']} ${p['yaw']}"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- An optical frame on the D455: z forward, x right, y down (REP 103). Nominal only. -->
+  <xacro:macro name="optical_frame" params="name">
+    <link name="${name}"/>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="camera_link"/>
+      <child link="${name}"/>
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    </joint>
+  </xacro:macro>
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 ${base['ground_clearance'] + base['height'] / 2}"/>
+      <geometry>
+        <box size="${base['length']} ${base['width']} ${base['height']}"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <xacro:fixed_sensor name="laser"/>
+  <xacro:fixed_sensor name="camera_link"/>
+  <xacro:fixed_sensor name="sign_camera"/>
+
+  <!-- The optical frame of the C920, needed to project landmarks into its image. usb_cam stamps images with it. -->
+  <link name="sign_camera_optical_frame"/>
+  <joint name="sign_camera_optical_joint" type="fixed">
+    <parent link="sign_camera"/>
+    <child link="sign_camera_optical_frame"/>
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+  </joint>
+
+  <xacro:if value="$(arg include_d455_internal_frames)">
+    <xacro:optical_frame name="camera_color_optical_frame"/>
+    <xacro:optical_frame name="camera_depth_optical_frame"/>
+    <xacro:optical_frame name="camera_imu_optical_frame"/>
+  </xacro:if>
+</robot>
