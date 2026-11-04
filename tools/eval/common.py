@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import csv
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
+import json
 import math
 from pathlib import Path
 import sqlite3
 import sys
-from typing import Iterable, Sequence
+from typing import Iterable, Optional, Sequence
 
 import numpy as np
 
@@ -48,6 +50,21 @@ def describe(values: Iterable[float]) -> Stats:
     t_value = _T_975.get(data.size - 1, 1.96)
     ci95 = t_value * sd / math.sqrt(data.size) if data.size > 1 else float('nan')
     return Stats(int(data.size), float(data.mean()), sd, float(data.max()), float(np.sqrt(np.mean(data ** 2))), ci95)
+
+
+def stats_dict(stats: Stats) -> dict:
+    """Stats as plain numbers for JSON. NaN (an undefined CI for one sample) becomes None."""
+    return {k: (None if isinstance(v, float) and math.isnan(v) else v) for k, v in asdict(stats).items()}
+
+
+def write_json(path: str | Path, objective: str, tool: str, passed: Optional[bool], result: dict,
+               inputs: dict) -> None:
+    """Save a result for tools/web_import.py, so the website shows exactly the numbers printed here."""
+    payload = {'objective': objective, 'tool': tool, 'passed': passed, 'result': result,
+               'inputs': {k: str(v) for k, v in inputs.items() if v is not None},
+               'written_at': datetime.now(timezone.utc).isoformat(timespec='seconds')}
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    Path(path).write_text(json.dumps(payload, indent=2))
 
 
 def format_table(headers: Sequence[str], rows: Iterable[Sequence]) -> str:

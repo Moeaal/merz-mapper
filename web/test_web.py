@@ -1,5 +1,6 @@
 """Website tests on the sample database. No ROS needed."""
 import importlib.util
+import re
 from pathlib import Path
 import sys
 import time
@@ -27,14 +28,14 @@ _spec.loader.exec_module(qr_posters)
 def sample(tmp_path_factory):
     """Build a fresh sample in a temporary folder, so the tests also prove the sample builder works."""
     root = tmp_path_factory.mktemp('sample')
-    make_sample_db.build(root / 'merz.sqlite', root / 'photos')
+    make_sample_db.build(root / 'merz.sqlite', root / 'photos', root / 'merz_map.yaml')
     return root
 
 
 @pytest.fixture(scope='module')
 def client(sample):
     from app.main import create_app
-    return fastapi_client.TestClient(create_app(sample / 'merz.sqlite', sample / 'photos'))
+    return fastapi_client.TestClient(create_app(sample / 'merz.sqlite', sample / 'photos', sample / 'merz_map.yaml'))
 
 
 # ---- routing
@@ -94,8 +95,9 @@ def test_entrances_are_listed_and_marked_as_sample(client):
 def test_rooms_depend_on_the_entrance(client):
     north = set(client.get('/rooms', params={'entrance': 'north'}).json()['rooms'])
     south = set(client.get('/rooms', params={'entrance': 'south'}).json()['rooms'])
-    assert north == {'S1.01', 'S1.02', 'S1.03', 'S1.04', 'S1.05'}
-    assert south == {'S2.01', 'S2.02', 'S2.03'}
+    assert north == {f'S1.{n:02d}' for n in range(1, 12)}
+    assert south == {f'S2.{n:02d}' for n in range(1, 10)}
+    assert not north & south     # the locked door splits the building in two
 
 
 def test_route_is_correct_in_the_sample(client):
@@ -133,9 +135,20 @@ def test_unknown_photo_gives_404(client):
     assert client.get('/photos/999').status_code == 404
 
 
-def test_page_is_served(client):
-    response = client.get('/')
-    assert response.status_code == 200 and '<title>Merz Mapper directions</title>' in response.text
+def test_site_pages_are_served(client):
+    """Every page of the single-page site returns the built index.html; unknown paths get it with a 404 status."""
+    if not (WEB / 'dist' / 'index.html').is_file():
+        pytest.skip('web/dist not built')
+    for path in ('/', '/find', '/mission', '/results', '/about', '/?entrance=north'):
+        response = client.get(path)
+        assert response.status_code == 200 and '<base href="/">' in response.text, path
+    missing = client.get('/no-such-page')
+    assert missing.status_code == 404 and 'Merz Mapper' in missing.text
+
+
+def test_api_routes_win_over_the_site(client):
+    assert client.get('/entrances').headers['content-type'].startswith('application/json')
+    assert client.get('/map').json()['available'] is True
 
 
 def test_every_room_query_is_under_one_second(client):
@@ -151,6 +164,89 @@ def test_sample_database_and_photos_are_in_the_repository():
     """The file in git must exist, so that the website opens straight after cloning."""
     assert (WEB / 'sample_data' / 'merz_sample.sqlite').is_file()
     assert (WEB / 'sample_data' / 'photos' / 'junction_1.png').is_file()
+    assert (WEB / 'sample_data' / 'merz_map.yaml').is_file() and (WEB / 'sample_data' / 'merz_map.pgm').is_file()
+
+
+def test_route_includes_map_positions(client):
+    body = client.get('/route', params={'entrance': 'north', 'room': 'S1.04'}).json()
+    assert body['start'] == {'id': 'north', 'name': 'North entrance', 'x': 2.0, 'y': 12.0}
+    assert body['destination'] == {'room': 'S1.04', 'x': -21.0, 'y': 13.5}
+    assert [(s['x'], s['y']) for s in body['steps']] == [(-2.0, 12.0), (-12.0, 12.0), (-24.0, 12.0)]
+    assert [s['distance_m'] for s in body['steps']] == [4.0, 10.0, 12.0]
+
+
+def test_route_up_the_north_wing_turns_right(client):
+    """Walking west, then north up the wing: north is on the right, so the turn must be 'right'."""
+    body = client.get('/route', params={'entrance': 'north', 'room': 'S1.07'}).json()
+    assert [s['junction_id'] for s in body['steps']] == [1, 2, 7]
+    assert body['steps'][1]['instruction'] == 'Turn right.'
+
+
+def test_south_wing_route_stays_in_the_south_zone(client):
+    body = client.get('/route', params={'entrance': 'south', 'room': 'S2.06'}).json()
+    assert [s['junction_id'] for s in body['steps']] == [4, 5, 9]
+    assert body['length_m'] == 20.0
+
+
+def test_map_metadata_matches_the_image(client):
+    info = client.get('/map').json()
+    assert info['available'] is True and info['image_url'] == '/map.png'
+    assert info['resolution'] == 0.1 and info['origin'] == [-38.0, -16.0]
+    response = client.get(info['image_url'])
+    assert response.status_code == 200 and response.headers['content-type'] == 'image/png'
+    from PIL import Image
+    import io
+    image = Image.open(io.BytesIO(response.content))
+    assert image.size == (info['width'], info['height']) and image.mode == 'RGBA'
+
+
+def test_every_junction_is_on_open_floor_in_the_map(client, sample):
+    """The sample map must agree with the junction graph, or routes would be drawn through walls."""
+    from PIL import Image
+    import io
+    info = client.get('/map').json()
+    image = Image.open(io.BytesIO(client.get('/map.png').content))
+    for x, y in make_sample_db.JUNCTIONS.values():
+        col = int((x - info['origin'][0]) / info['resolution'])
+        row = info['height'] - 1 - int((y - info['origin'][1]) / info['resolution'])
+        assert image.getpixel((col, row)) == (255, 255, 255, 255), (x, y)
+
+
+def test_map_classification_follows_map_server_rules():
+    from app.grid_map import FLOOR_RGBA, UNKNOWN_RGBA, WALL_RGBA, classify
+    info = {'mode': 'trinary', 'negate': 0, 'occupied_thresh': 0.65, 'free_thresh': 0.25}
+    assert classify(254, info) == FLOOR_RGBA
+    assert classify(0, info) == WALL_RGBA
+    assert classify(205, info) == UNKNOWN_RGBA        # map_saver's unknown marker, not free space
+    assert classify(128, info) == UNKNOWN_RGBA        # between the thresholds
+    assert classify(254, {**info, 'negate': 1}) == WALL_RGBA
+
+
+def test_no_map_file_is_reported_not_an_error(sample):
+    from app.main import create_app
+    client = fastapi_client.TestClient(create_app(sample / 'merz.sqlite', sample / 'photos', sample / 'missing.yaml'))
+    assert client.get('/map').json() == {'available': False}
+    assert client.get('/map.png').status_code == 404
+    assert client.get('/route', params={'entrance': 'north', 'room': 'S1.04'}).status_code == 200
+
+
+def test_built_assets_and_data_bundle_are_served(client):
+    if not (WEB / 'dist' / 'index.html').is_file():
+        pytest.skip('web/dist not built')
+    html = client.get('/').text
+    for asset in re.findall(r'(?:src|href)="\./(assets/[^"]+)"', html):
+        assert client.get('/' + asset).status_code == 200, asset
+    assert client.get('/favicon.svg').status_code == 200
+    assert client.get('/data/index.json').status_code == 200
+
+
+def test_page_code_never_inserts_data_as_html():
+    """Bundle text goes in with textContent. Markup strings are only used for fixed icons and two fixed drawings."""
+    source = WEB / 'frontend' / 'src'
+    users = sorted(p.name for p in source.rglob('*.ts') if 'innerHTML' in p.read_text(encoding='utf-8'))
+    assert set(users) <= {'about.ts', 'notfound.ts', 'MapScene.ts'}, users
+    dom = (source / 'ui' / 'dom.ts').read_text(encoding='utf-8')
+    assert dom.count('insertAdjacentHTML') == 2 and dom.count('icons[') == 2
 
 
 # ---- QR posters
@@ -164,3 +260,12 @@ def test_poster_qr_code_decodes_back_to_the_url(sample, tmp_path):
     assert {p.name for p in paths} == {'poster_north.png', 'poster_south.png'}
     decoded, _points, _code = cv2.QRCodeDetector().detectAndDecode(cv2.imread(str(tmp_path / 'poster_north.png')))
     assert decoded == 'http://localhost:8000/?entrance=north'
+
+
+def test_posters_are_combined_into_one_a4_pdf(sample, tmp_path):
+    paths = qr_posters.make_all(sample / 'merz.sqlite', 'http://localhost:8000', tmp_path)
+    pdf = qr_posters.make_pdf(paths, tmp_path / 'posters.pdf')
+    data = pdf.read_bytes()
+    assert data.startswith(b'%PDF') and b'/Count 2' in data      # one page per entrance
+    # 1240 x 1754 px at 150 dpi is A4: 595 x 842 points.
+    assert b'595.2' in data and b'841.92' in data

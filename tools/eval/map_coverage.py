@@ -15,6 +15,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import COLOUR_PRIMARY, FREE, GridMap, format_table, load_map, new_figure, pass_fail, read_csv, save_figure  # noqa: E402
+from common import stats_dict, write_json  # noqa: E402,F401
 
 TARGET_PERCENT = 90.0
 
@@ -77,6 +78,7 @@ def main() -> None:
     parser.add_argument('--map', required=True)
     parser.add_argument('--polygon', required=True)
     parser.add_argument('--plot', type=Path)
+    parser.add_argument('--json', type=Path, help='Also save the numbers as JSON, for tools/web_import.py.')
     args = parser.parse_args()
     grid = load_map(args.map)
     polygon = np.array([[float(r['x']), float(r['y'])] for r in read_csv(args.polygon)])
@@ -86,6 +88,10 @@ def main() -> None:
                          pass_fail(result.percent >= TARGET_PERCENT)]]))
     if args.plot:
         plot(grid, polygon, args.plot)
+    if args.json:
+        write_json(args.json, 'O2', 'map_coverage', result.percent >= TARGET_PERCENT,
+                   {'polygon_m2': result.polygon_area_m2, 'free_m2': result.free_area_m2, 'percent': result.percent,
+                    'target_percent': TARGET_PERCENT}, {'map': args.map, 'polygon': args.polygon})
 
 
 if __name__ == '__main__':

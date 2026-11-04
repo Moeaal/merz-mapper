@@ -19,6 +19,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import (COLOUR_PRIMARY, COLOUR_SECONDARY, STATS_HEADERS, describe, format_table, new_figure,  # noqa: E402
                     query_database, read_csv, save_figure, stats_row)
+from common import stats_dict, write_json  # noqa: E402,F401
 from landmark_error import match_landmarks  # noqa: E402
 
 
@@ -71,6 +72,7 @@ def main() -> None:
     parser.add_argument('--gate', type=float, default=2.0, help='Metres. Decide this before the run.')
     parser.add_argument('--min-observations', type=int, default=2)
     parser.add_argument('--plot', type=Path)
+    parser.add_argument('--json', type=Path, help='Also save the numbers as JSON, for tools/web_import.py.')
     args = parser.parse_args()
     pairs = paired_errors(read_csv(args.truth), query_database(args.database, 'SELECT * FROM landmarks'),
                           query_database(args.database, 'SELECT * FROM observations'), args.gate,
@@ -87,6 +89,15 @@ def main() -> None:
     print(f'Fused was better for {sum(1 for v in improvement if v > 0)} of {len(pairs)} landmarks')
     if args.plot:
         plot(pairs, args.plot)
+    if args.json:
+        lower = stats.mean - stats.ci95 if stats.count > 1 else None
+        write_json(args.json, 'O8', 'fusion_compare', (lower > 0) if lower is not None else None,
+                   {'improvement': stats_dict(stats), 'single': stats_dict(describe(p.single_m for p in pairs)),
+                    'fused': stats_dict(describe(p.fused_m for p in pairs)),
+                    'fused_better': sum(1 for v in improvement if v > 0),
+                    'pairs': [{'landmark_id': p.landmark_id, 'single_m': p.single_m, 'fused_m': p.fused_m}
+                              for p in pairs]},
+                   {'truth': args.truth, 'database': args.database, 'gate': args.gate})
 
 
 if __name__ == '__main__':

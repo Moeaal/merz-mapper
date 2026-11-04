@@ -13,6 +13,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import format_table, pass_fail, query_database, read_csv  # noqa: E402
+from common import stats_dict, write_json  # noqa: E402,F401
 
 
 @dataclass(frozen=True)
@@ -53,6 +54,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--survey', required=True)
     parser.add_argument('--database', required=True)
+    parser.add_argument('--json', type=Path, help='Also save the numbers as JSON, for tools/web_import.py.')
     args = parser.parse_args()
     rows = query_database(args.database, """SELECT z.entrance_id AS entrance, l.text AS room FROM access_zones z
                                             JOIN landmarks l ON l.id = z.landmark_id WHERE l.text <> ''""")
@@ -63,6 +65,11 @@ def main() -> None:
     for label, pairs in (('Only in map', result.extra), ('Only in survey', result.missing)):
         for entrance, room in pairs:
             print(f'{label}: {entrance} -> {room}')
+    if args.json:
+        write_json(args.json, 'O5', 'access_zone_compare', not result.extra and not result.missing,
+                   {'pairs': result.total, 'both_yes': result.both_yes, 'both_no': result.both_no,
+                    'only_in_map': [list(p) for p in result.extra], 'only_in_survey': [list(p) for p in result.missing],
+                    'agreement_percent': result.agreement_percent}, {'survey': args.survey, 'database': args.database})
 
 
 if __name__ == '__main__':
