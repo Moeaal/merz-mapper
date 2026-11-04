@@ -6,7 +6,7 @@ import rclpy
 from rclpy.node import Node
 
 from merz_base.backends import make_backend
-from merz_base.base_controller import BaseController, BaseLimits
+from merz_base.base_controller import BaseController, BaseLimits, check_update_rate
 
 _BACKEND_DEFAULTS = {
     'serial_port': '/dev/merz_motors',
@@ -39,12 +39,12 @@ class BaseNode(Node):
             full_speed_m_s=self.declare_parameter('full_speed_m_s', 1.0).value,
             command_timeout_s=self.declare_parameter('command_timeout_s', 0.5).value,
         )
-        rate_hz = self.declare_parameter('update_rate_hz', 20.0).value
+        period_s = check_update_rate(self.declare_parameter('update_rate_hz', 20.0).value)
         self._controller = BaseController(limits, make_backend(backend_name, config))
         if backend_name == 'mock':
             self.get_logger().warn('Mock backend: no motor will move. Set "backend" in config/base.yaml.')
         self.create_subscription(Twist, 'cmd_vel', self._on_command, 10)
-        self.create_timer(1.0 / rate_hz, self._on_timer)
+        self.create_timer(period_s, self._on_timer)
 
     # time.monotonic, not ROS time: a safety timeout must work even if the ROS clock stops or jumps.
     def _on_command(self, msg: Twist) -> None:

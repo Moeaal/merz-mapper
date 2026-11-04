@@ -55,7 +55,10 @@ class LandmarkNode(Node):
         self._bridge = CvBridge()
         self._sign_intrinsics: Intrinsics | None = None
         self._tf_buffer = Buffer()
-        self._tf_listener = TransformListener(self._tf_buffer, self)
+        # spin_thread: _lookup waits up to tf_timeout_s inside a callback. Without its own thread, the listener's TF
+        # subscriptions share this node's single-threaded executor, so no new transform can arrive during that wait:
+        # every lookup at an image time newer than the last TF message would block for the full timeout and fail.
+        self._tf_listener = TransformListener(self._tf_buffer, self, spin_thread=True)
         self._publisher = self.create_publisher(LandmarkArray, 'landmarks', 10)
 
         self.create_subscription(CameraInfo, 'sign_camera_info', self._on_sign_camera_info, qos_profile_sensor_data)
