@@ -1,7 +1,8 @@
 # Merz Mapper ROS 2 workspace
 
-**Status: IMPLEMENTED - not yet built or tested on hardware.** No `colcon build` has been run: this code
-was written on a Windows laptop with no ROS 2. Only the pure-Python unit tests have been run.
+**Status: IMPLEMENTED - not yet built or tested on hardware.** This code was written on a Windows laptop with no ROS 2.
+A cloud check on ROS 2 Humble (RoboStack, 2026-11-04) passed `colcon build` and `colcon test`; it has not yet been built on the
+Jetson or Pi (`docs/BUILD_PROGRESS.md`).
 
 **Target:** ROS 2 Humble, Ubuntu 22.04, JetPack 6.x (decisions #6, still PROPOSED). The full step-by-step
 procedure is in `docs/BUILD_GUIDE.md`.
