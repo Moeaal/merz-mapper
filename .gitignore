@@ -1,6 +1,14 @@
 # Large data lives on the SSD + OneDrive, not in git
 data/*
 !data/.gitkeep
+!data/README.md
+
+# ROS 2 / colcon build output (in ros2_ws/ or wherever colcon was run)
+build/
+install/
+log/
+
+# Rosbags and SLAM outputs
 *.db3
 *.mcap
 *.bag
@@ -9,18 +17,39 @@ data/*
 !web/sample_data/merz_map.pgm
 *.posegraph
 *.data
-# ROS 2 build output
-ros2_ws/build/
-ros2_ws/install/
-ros2_ws/log/
-# Models and Python clutter
+
+# Model weights and exported engines
 *.pt
+*.pth
 *.engine
 *.onnx
+*.tflite
+runs/
+
+# Datasets (photos stay out of git: privacy and repository size)
+datasets/
+perception/labelled/
+
+# Python caches and virtual environments
 __pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .venv/
+venv/
+env/
+
+# Editors and OS junk
 .vscode/
 .idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
 # Personal Claude Code settings (shared settings are in .claude/settings.json)
 .claude/settings.local.json
 CLAUDE.local.md
