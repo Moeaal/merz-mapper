@@ -1,0 +1,6 @@
+# PROPOSED prototype outputs: regenerate, do not commit
+samples/synthetic/
+results*.json
+score*.json
+runs/
+*.ts
