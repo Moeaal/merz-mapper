@@ -17,6 +17,7 @@ procedure is in `docs/runbooks/build-guide.md`.
 | `merz_semantic_map` | Landmark localisation and the SQLite database | ament_python |
 | `merz_exploration` | Frontier exploration, access zones, junction photos, mission end | ament_python |
 | `merz_base` | `/cmd_vel` to motors, with a command timeout | ament_python |
+| `merz_sim` | Gazebo simulation of the rover and a made-up floor, for SLAM, Nav2 and exploration (never launched yet) | ament_python |
 
 ## Design rule
 Every package keeps its logic in plain Python modules with no `rclpy` import, and wraps them in a thin
