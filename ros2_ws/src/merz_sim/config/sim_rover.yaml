@@ -1,0 +1,78 @@
+# Simulated rover: every dimension, mass, sensor pose and sensor setting in ONE file (PROPOSED).
+# The real rover is unknown (OPEN_ISSUES #1), so all of these are PLACEHOLDERS. TODO: measure on rover.
+# Read by urdf/merz_sim_rover.urdf.xacro (model) and launch/sim.launch.py (base limits).
+# Units: metres, kilograms, radians, hertz. REP 103: x forward, y left, z up. base_link is on the floor at the
+# centre of rotation, as on the real rover (merz_description/config/sensor_poses.yaml).
+#
+# Keep the sensor poses equal to merz_description/config/sensor_poses.yaml; test/test_sim_config.py checks this.
+
+chassis:
+  length: 0.50            # same as sensor_poses.yaml base
+  width: 0.40
+  height: 0.20
+  ground_clearance: 0.05
+  mass: 8.0               # placeholder, a light aluminium rover with a battery
+
+wheels:                   # two driven wheels on the axle through base_link (differential drive)
+  radius: 0.08
+  width: 0.04
+  separation: 0.44        # centre to centre. The outer edges stay inside the Nav2 footprint (0.50 m wide)
+  mass: 0.5
+  friction: 1.0
+
+casters:                  # frictionless spheres front and rear, so the model stays level
+  radius: 0.025
+  x_offset: 0.20          # +/- from base_link
+  mass: 0.1
+
+mast:                     # carries the sign camera
+  radius: 0.015
+  x: 0.0
+  y: 0.0
+  mass: 0.5
+
+limits:                   # applied by sim_base_node, which uses merz_base's own BaseController (same clamp, ramp, timeout)
+  max_linear_m_s: 0.5     # project spec
+  max_angular_rad_s: 1.0  # same as merz_base/config/base.yaml and nav2.yaml
+  max_linear_accel_m_s2: 0.5
+  max_angular_accel_rad_s2: 1.0
+  command_timeout_s: 0.5
+
+lidar:                    # RPLIDAR S2-like (RESEARCH_INDEX [H1]): 10 Hz, 30 m. Frame "laser", topic /scan
+  x: 0.10
+  y: 0.0
+  z: 0.30
+  yaw: 0.0
+  update_rate: 10.0
+  samples: 1600           # the S2 gives about 3000 per turn at 10 Hz (0.12 deg); halved to keep software rendering fast
+  min_angle: -3.14159
+  max_angle: 3.14159
+  range_min: 0.12         # above the 0.10 m to the mast, which would otherwise be a permanent return. Real S2: 0.05 m
+  range_max: 30.0
+  noise_stddev: 0.01      # placeholder; the S2 datasheet gives accuracy, not a noise model
+
+d455:                     # depth camera + IMU, RealSense D455-like (RESEARCH_INDEX [H2]). Frame camera_link
+  x: 0.20
+  y: 0.0
+  z: 0.35
+  pitch: 0.0
+  update_rate: 15.0       # same as config/d455.yaml profiles
+  width: 424              # smaller than the real 640x480 colour / 848x480 depth, for software rendering speed
+  height: 240
+  horizontal_fov: 1.5184  # 87 deg, the D455 depth FOV [H2]
+  near_clip: 0.52         # D455 min-Z [H2]
+  far_clip: 10.0
+  imu_rate: 200.0         # same as gyro_fps in config/d455.yaml
+  gyro_noise_stddev: 0.003      # rad/s. TODO: measure on rover (stationary test); placeholder, not from a datasheet
+  gyro_bias_stddev: 0.0005      # rad/s
+  accel_noise_stddev: 0.02      # m/s^2 (not fused by the EKF)
+
+sign_camera:              # Logitech C920-like on the mast. Frame sign_camera, topic /sign_cam/image_raw
+  x: 0.0
+  y: 0.0
+  z: 1.50
+  pitch: 0.0              # positive tilts downwards
+  update_rate: 10.0       # same as config/c920.yaml
+  width: 640              # the real C920 runs at 1920x1080; reduced for software rendering
+  height: 480
+  horizontal_fov: 1.22    # about 70 deg
