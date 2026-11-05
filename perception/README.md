@@ -2,7 +2,7 @@
 
 **Status: PROPOSED prototype, not robot code, no ROS.** It has run only on SYNTHETIC images in a cloud container
 (CPU, RapidOCR). It has not run on Merz Court photos, a webcam, PaddleOCR's own models or the Jetson. Plan, datasets
-and results: `docs/research/perception_plan.md`. Photo walk: `PHOTO_CHECKLIST.md`.
+and results: `docs/research/perception-plan.md`. Photo walk: `PHOTO_CHECKLIST.md`.
 
 Pipeline: image or webcam frame -> detector (none / YOLOE zero-shot / fine-tuned YOLO) -> crop each sign (+10%) ->
 OCR (PaddleOCR, or RapidOCR with the same PP-OCR models) -> re-read rows split by the text detector -> regex room

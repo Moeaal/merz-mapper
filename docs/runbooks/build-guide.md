@@ -181,10 +181,10 @@ Record door states at every run (O5).
 YOLO model. Hold one corridor back for testing. Export using `tools/export_tensorrt.md`, then set `weights` and `engine` in
 `merz_perception/config/perception.yaml`, and the `room_regex` to the real sign format.
 
-**Database:** written to `~/merz_data/merz.sqlite`. See `docs/DATABASE_SCHEMA.md`. To recompute zones offline:
+**Database:** written to `~/merz_data/merz.sqlite`. See `docs/software/database-schema.md`. To recompute zones offline:
 `python -m merz_exploration.compute_access_zones --map <map.yaml> --database merz.sqlite --entrance east --start 0 0`
 
-**Evaluation:** `docs/EXPERIMENTS.md`, using `tools/eval/`.
+**Evaluation:** `docs/planning/experiments.md`, using `tools/eval/`.
 
 **Website:**
 ```bash
@@ -209,7 +209,7 @@ python3 qr_posters.py --database ~/merz_data/merz.sqlite --base-url http://<reac
 | Robot aims at glass, or the map is noisy near it (#4) | LIDAR sees through or reflects off glass | Keep-out mask (`merz_bringup/maps/README.md`); lower `max_laser_range`; mark glass in evaluation |
 | Exploration stops too early | `min_frontier_size`, or mission timeout | Check `/explore/frontiers` in RViz; check the mission log's end reason |
 | Mission never ends, or ends at once | The marker assumption in `mission_node` is wrong | Echo `/explore/frontiers`; correct the `_on_frontiers` count |
-| Access zone too large | A door was open, or a stale map (`docs/DATABASE_SCHEMA.md`) | Check logged door states; run the entrance in a fresh map and compare |
+| Access zone too large | A door was open, or a stale map (`docs/software/database-schema.md`) | Check logged door states; run the entrance in a fresh map and compare |
 | Access zone empty | Start pose wrong, or map YAML path | Check `start_x/y` against the map; re-run `compute_access_zones` |
 | OCR rejects everything | Blur threshold or regex | Look at the `sharpness` CSV column; set `min_sharpness` and `room_regex` from real data |
 | PaddleOCR will not install on the Jetson | aarch64 + GPU | `ocr_engine: rapid` with `rapidocr-onnxruntime`, or CPU |

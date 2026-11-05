@@ -15,5 +15,5 @@ repositories:
     url: https://github.com/robo-friends/m-explore-ros2.git
     # Pinned: main from 96d1888 (2026-01-13) includes tf2_ros/*.hpp headers that Humble does not have,
     # so explore_lite fails to compile. 926033f (2025-07-24) is the last Humble-compatible commit.
-    # See docs/BUILD_PROGRESS.md (ROS 2 Humble check) and docs/decisions.md.
+    # See docs/archive/build-progress.md (ROS 2 Humble check) and docs/decisions.md.
     version: 926033fdef55af37ec0455660c0e4d00aa47e82f

@@ -1,6 +1,6 @@
 # Build progress
 
-Tracks `docs/BUILD_ALL_PROMPT.md`. To resume: `Continue docs/BUILD_ALL_PROMPT.md from docs/BUILD_PROGRESS.md.`
+Tracks `docs/archive/build-all-prompt.md`. To resume: `Continue docs/archive/build-all-prompt.md from docs/archive/build-progress.md.`
 
 **Branch:** `build/all-code` (never merged by Claude; the student reviews the pull request).
 **Status words:** code here is IMPLEMENTED at most. Nothing has run on hardware. A cloud `colcon build` + `colcon test` on

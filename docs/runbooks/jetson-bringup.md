@@ -4,17 +4,17 @@
 names to need correcting. When a step is done, write the result in `docs/logbook/` (date, exact versions, command, output,
 pass/fail). Only then may anything be called TESTED.
 
-**Assumes the PROPOSED platform** in `docs/research/distro_decision.md`: JetPack 6.2.x (newest 6.2.3 / L4T 36.5.2) + Ubuntu
+**Assumes the PROPOSED platform** in `docs/research/distro-decision.md`: JetPack 6.2.x (newest 6.2.3 / L4T 36.5.2) + Ubuntu
 22.04 + ROS 2 Humble. It is not yet confirmed with Dr Wright (OPEN_ISSUES #2). Where option B (JetPack 7.2.1 + Jazzy) differs,
 a note says so.
 
 **Markers**
 - **[ROVER]**: depends on the rover, which is still UNKNOWN (OPEN_ISSUES #1). Do not guess: inspect the rover first.
-- **[SKU]**: depends on which Jetson arrived (Developer Kit or third-party carrier; 4 GB or 8 GB). See distro_decision section 6.
+- **[SKU]**: depends on which Jetson arrived (Developer Kit or third-party carrier; 4 GB or 8 GB). See distro-decision.md section 6.
 - **[MISSING]**: the part is not on the parts list (gamepad, mast, mounts, checkerboard: OPEN_ISSUES #10).
 - **Gate**: a step that must pass before you go on. If a gate fails, stop and log it; do not debug several things at once.
 
-Source tags such as [S16] refer to the source table in `docs/research/distro_decision.md`. Tags such as [H1] refer to
+Source tags such as [S16] refer to the source table in `docs/research/distro-decision.md`. Tags such as [H1] refer to
 `docs/RESEARCH_INDEX.md`.
 
 Order of work: 1 inventory -> 2 flash -> 3 system set-up -> 4 ROS 2 + workspace -> 5 udev -> 6 one sensor at a time ->
@@ -51,7 +51,7 @@ Order of work: 1 inventory -> 2 flash -> 3 system set-up -> 4 ROS 2 + workspace 
 
 ## 2. Flashing to the NVMe SSD
 
-Boot **and** data both go on the NVMe: bags are large (BUILD_GUIDE; perception skill). Fit the NVMe SSD in the carrier's M.2
+Boot **and** data both go on the NVMe: bags are large (build-guide.md; perception skill). Fit the NVMe SSD in the carrier's M.2
 slot **before** flashing. Pick **one** route. The student's laptop runs Windows and has no Linux install (decisions #11), so
 route 2.2 is the expected one unless the department has a PC for route 2.1.
 
@@ -112,14 +112,14 @@ Record the values in the section 1 table.
    ```
    Record the mode with every FPS or rate figure.
 2. **Power from the rover battery [ROVER].** For now use the Developer Kit's own supply on the bench. Do not wire the Jetson to the
-   rover battery until the DC-DC converter rating has been checked against the Jetson's input requirement and the battery (BUILD_GUIDE §1).
+   rover battery until the DC-DC converter rating has been checked against the Jetson's input requirement and the battery (build-guide.md §1).
 3. **Disable USB autosuspend.** It is a common cause of RealSense drop-outs; one reporter tried it [S21]. Treat it as cheap insurance, not a known fix:
    ```bash
    cat /sys/module/usbcore/parameters/autosuspend      # 2 by default on most kernels; -1 = off
    # make it permanent: add usbcore.autosuspend=-1 to the APPEND line in /boot/extlinux/extlinux.conf, then reboot
    ```
    Keep a copy of `extlinux.conf` before editing: a mistake there can stop the Jetson booting.
-4. **SSH and hostname** so that it can run headless on the rover (`HARDWARE_ARRIVAL_PLAN.md` §3.4): `sudo hostnamectl set-hostname merz-jetson`,
+4. **SSH and hostname** so that it can run headless on the rover (`docs/planning/hardware-arrival-plan.md` §3.4): `sudo hostnamectl set-hostname merz-jetson`,
    check `sudo systemctl status ssh`.
 5. **Clock.** Bags and TF need a correct clock: check `timedatectl` shows "System clock synchronized: yes" on the university network.
 6. **Monitoring.** `tegrastats` is built in. `jtop` (pip `jetson-stats`) is optional; one report says it shows the JetPack
@@ -200,15 +200,15 @@ colcon test && colcon test-result --verbose
 ```
 **Extra check (do not change `merz.repos` yet):** in a scratch workspace, test whether `m-explore-ros2` **`main`** now builds on apt Humble.
 Humble's geometry2 has had the `tf2_ros/*.hpp` headers since 0.25.16 (July 2025), and the current release is 0.25.24
-(distro_decision §3.3) [S29]. If it builds, propose replacing the pin in decisions #19, which would bring back upstream #51.
+(distro-decision.md §3.3) [S29]. If it builds, propose replacing the pin in decisions #19, which would bring back upstream #51.
 ```bash
 mkdir -p ~/scratch_ws/src && cd ~/scratch_ws/src && git clone https://github.com/robo-friends/m-explore-ros2.git
 cd ~/scratch_ws && colcon build --packages-select explore_lite && git -C src/m-explore-ros2 rev-parse HEAD
 ```
 
 ### 4.5 Python packages (only what bring-up needs)
-`pip3 install --user pyserial` (for `merz_base`). Leave YOLO/TensorRT and OCR until after G1 (`HARDWARE_ARRIVAL_PLAN.md` week 7).
-Notes for later, from distro_decision §3: JetPack 6 Python is 3.10; use the Jetson PyTorch wheel, not the pip default [S30];
+`pip3 install --user pyserial` (for `merz_base`). Leave YOLO/TensorRT and OCR until after G1 (`docs/planning/hardware-arrival-plan.md` week 7).
+Notes for later, from distro-decision.md §3: JetPack 6 Python is 3.10; use the Jetson PyTorch wheel, not the pip default [S30];
 `paddlepaddle` has aarch64 wheels on PyPI only up to **3.2.2** [S35]; the fallback is RapidOCR on ONNX Runtime.
 
 ---
@@ -256,7 +256,7 @@ check the cable, the adapter's power and the baud rate (1000000 for S2 [N8]). If
 `ros-humble-rplidar-ros` with `rplidar_s2_launch.py` [S28].
 
 ### 6.2 D455 depth and colour
-Start on a **direct Jetson USB 3 port** with a short, good USB-C cable (BUILD_GUIDE §1). Move it to the hub only after this passes.
+Start on a **direct Jetson USB 3 port** with a short, good USB-C cable (build-guide.md §1). Move it to the hub only after this passes.
 ```bash
 ros2 launch merz_bringup d455.launch.py
 ros2 topic list | grep camera                                       # 4.54+ gives /camera/camera/... (d455.yaml note)
@@ -265,11 +265,11 @@ ros2 topic hz /camera/camera/aligned_depth_to_color/image_raw       # expect abo
 ros2 topic hz /camera/camera/depth/color/points                     # point cloud is on (pointcloud.enable: true)
 ```
 **Pass:** rates hold for 10 minutes; `tegrastats` CPU is not saturated. A flat wall at 2.00 m (laser meter) reads about 2.0 m in the
-depth image centre. Write down the reading; the full 1-4 m wall test is in BUILD_GUIDE §5. If CPU is short, set `pointcloud.enable: false`
+depth image centre. Write down the reading; the full 1-4 m wall test is in build-guide.md §5. If CPU is short, set `pointcloud.enable: false`
 for manual mapping (it is in `d455.yaml` as a comment).
 
 ### 6.3 D455 IMU: GO / NO-GO gate (the biggest O1 risk)
-The D455 IMU often fails on JetPack 6 (distro_decision §3.1) [S20-S24], and the no-encoder plan relies on it for heading (decisions #2, #10).
+The D455 IMU often fails on JetPack 6 (distro-decision.md §3.1) [S20-S24], and the no-encoder plan relies on it for heading (decisions #2, #10).
 **Time-box: one working day.**
 ```bash
 rs-enumerate-devices | grep -i -E "gyro|accel|motion"      # the Motion Module must be listed
@@ -280,14 +280,14 @@ ros2 topic echo /camera/camera/imu --field angular_velocity   # rotate the camer
 ```
 **Pass:** a steady IMU rate for 10 minutes with no `control_transfer returned error` lines and no "No HID info provided, IMU is disabled".
 Turning the camera changes the angular velocity on the expected axis; still, it reads near zero.
-**If it fails, in this order (distro_decision §5):**
+**If it fails, in this order (distro-decision.md §5):**
 1. Check the firmware: `rs-fw-update -l` lists the camera, its serial and firmware. Log that version first, so it can be put back.
    Download the signed 5.13.0.50 image from RealSense's firmware page, close every other RealSense program, then run
    `rs-fw-update -s <serial> -f <image>.bin` (usage from librealsense `tools/fw-update/readme.md`). D455 only, and **never lower than
    5.13.0.50** [S20, S23].
 2. Rebuild librealsense once (clean `build/`) and retest. Then stop.
 3. Go on with section 6.4 onwards and with mapping **without the IMU** (scan odometry only), log the deviation, and raise the IMU fallback
-   with Dr Wright (distro_decision §6 question 5).
+   with Dr Wright (distro-decision.md §6 question 5).
 **Known wrapper quirk:** `unite_imu_method: 2` acts like 1 (copy) in realsense-ros 4.59.1 [S32]. It still publishes `/camera/camera/imu`; just
 note it in the logbook. Check the timestamps are increasing: `ros2 topic echo /camera/camera/imu --field header.stamp`.
 
@@ -310,7 +310,7 @@ ros2 launch merz_bringup teleop.launch.py
 ros2 topic echo /joy                      # find the deadman button and axes; fix teleop.yaml
 ros2 topic echo /cmd_vel_mux              # moves only while the deadman (enable_button) is held
 ```
-**Pass:** no `/cmd_vel_mux` message moves the robot unless the deadman is held. Then test **link loss** (docs/REVIEW.md: untested
+**Pass:** no `/cmd_vel_mux` message moves the robot unless the deadman is held. Then test **link loss** (docs/software/safety-review.md: untested
 wireless-gamepad link loss is a High finding): switch the pad off while holding the stick; output must go to zero.
 
 ### 6.6 URDF and TF [ROVER]
@@ -319,7 +319,7 @@ ros2 launch merz_description description.launch.py rviz:=true include_d455_inter
 ros2 run tf2_tools view_frames            # one tree: base_link -> laser, camera_link, sign_camera ...
 ```
 **[ROVER]** `sensor_poses.yaml` holds placeholders until the mast and mounts exist **[MISSING]**. On the bench, a check that the tree is
-connected is enough. Real poses come in BUILD_GUIDE §2 once the rover CAD and mounts are known.
+connected is enough. Real poses come in build-guide.md §2 once the rover CAD and mounts are known.
 
 ### 6.7 Everything together: 20 minutes
 Move the D455 to the powered hub only if 6.2 passed on the direct port. Then:
@@ -353,7 +353,7 @@ ros2 bag play ~/merz_data/bags/<time>_bench_sensors                           # 
 ## 8. Powered USB hub notes
 - **Power source [ROVER]:** on the rover the hub must run from the rover battery through a DC-DC converter, not mains
   (HARDWARE_REGISTER notes). Check the hub's input voltage and current on its label before choosing the converter.
-- **What goes where (BUILD_GUIDE §1):** D455 on a direct Jetson USB 3 port; RPLIDAR adapter, C920 and gamepad dongle on the hub.
+- **What goes where (build-guide.md §1):** D455 on a direct Jetson USB 3 port; RPLIDAR adapter, C920 and gamepad dongle on the hub.
 - **Budget:** the RPLIDAR S2 can draw up to 1.5 A at start-up and about 0.5 A running [H1]. Start the LIDAR first, or alone, if the hub
   cuts out at power-on, and measure the real current with a USB meter. The D455 and C920 currents are not in the register yet: measure them
   (O1 power budget).
@@ -378,7 +378,7 @@ ros2 bag play ~/merz_data/bags/<time>_bench_sensors                           # 
 | Version clash, or a camera that worked yesterday no longer opens | Two librealsense installs (source + apt) | Remove one; choose only one install option | [S19] |
 | `unite_imu_method: 2` gives copied accel values | Wrapper bug in 4.x up to 4.59.1 | Note in the logbook; little effect on a gyro-yaw EKF | [S32] (verified in source) |
 | Jazzy arm64 `ros-jazzy-realsense2-camera` returns 404 (option B only) | Missing arm64 debs (seen June 2025) | Build realsense-ros from source (this runbook does anyway) | [S25] (anecdotal) |
-| D455 drops out under load | USB bandwidth or power | Lower streams in `d455.yaml`; turn off the point cloud; direct port | BUILD_GUIDE §7 |
+| D455 drops out under load | USB bandwidth or power | Lower streams in `d455.yaml`; turn off the point cloud; direct port | build-guide.md §7 |
 | Topic names differ (`/camera/...` vs `/camera/camera/...`) | Wrapper version | `ros2 topic list`; the repo expects `/camera/camera/...` | `d455.yaml` comment |
 | Builds killed with no error | Out of memory on a 4 GB module | Swap file; `--parallel-workers 2`; `make -j2` | step 3.7 |
 
@@ -389,7 +389,7 @@ ros2 bag play ~/merz_data/bags/<time>_bench_sensors                           # 
 | --- | --- | --- |
 | 3.2, 8 Power from the battery | Battery voltage and capacity, spare outputs, the DC-DC converters | Bench supplies only; fill HARDWARE_REGISTER when the rover is inspected |
 | 5 udev | Whether the motor controller is a second CP210x or other USB serial device | Add `ATTRS{serial}` to the LIDAR rule if it clashes |
-| 6.6 URDF / TF | Sensor poses, `base_link` position, footprint | Bench check only; measure on the rover (BUILD_GUIDE §2) |
+| 6.6 URDF / TF | Sensor poses, `base_link` position, footprint | Bench check only; measure on the rover (build-guide.md §2) |
 | Mounting (all sensors) | Mast, mounts and where the LIDAR can see 360° clear **[MISSING]** | Rover CAD from the supervisor; 3D-print mounts |
 | Motors (`merz_base`) | Controller interface, encoders, stop path (decisions #19 R1, OPEN_ISSUES #19) | Not part of sensor bring-up. Wheels off the ground, physical power cut within reach, before any motion |
-| First manual map | Whether the rover can be driven by G1 | `mapping.launch.py base:=false` lets the sensor rig be **pushed by hand** to make the first map (see `o1_checklist.md`) |
+| First manual map | Whether the rover can be driven by G1 | `mapping.launch.py base:=false` lets the sensor rig be **pushed by hand** to make the first map (see `o1-checklist.md`) |

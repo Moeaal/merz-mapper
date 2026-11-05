@@ -4,7 +4,7 @@
 source was checked"); none of the papers below has been read in full for this file. Read the paper before quoting
 a result from it in the report.
 
-Objectives referred to (from `docs/EXPERIMENTS.md`):
+Objectives referred to (from `docs/planning/experiments.md`):
 **O1** sensors + first manual map | **O2** autonomous exploration: coverage and wall accuracy | **O3** door-sign
 reading | **O4** landmark position error | **O5** entrance access zones | **O6** query time | **O7** route
 correctness | **O8** fused against single-sensor comparison.
@@ -314,7 +314,7 @@ analysis," in *Proc. IEEE/CVF Int. Conf. Comput. Vis. (ICCV)*, Seoul, South Kore
 DOI: [10.1109/ICCV.2019.00481](https://doi.org/10.1109/ICCV.2019.00481)
 - *Summary:* Shows that text-recognition papers used inconsistent training and test data, and compares modules
   (transformation, features, sequence, prediction) under one setup for accuracy, speed and memory.
-- *Relevance:* Supports the O3 method: fix the test set first and keep training signs out of it (EXPERIMENTS O3
+- *Relevance:* Supports the O3 method: fix the test set first and keep training signs out of it (experiments.md O3
   threats).
 - *Supports:* O3.
 
@@ -621,7 +621,7 @@ pp. 387–407, 2009. DOI: [10.1007/s10514-009-9155-6](https://doi.org/10.1007/s1
 - *Summary:* Proposes measuring SLAM error from relative relations between poses, so no global ground-truth frame is
   needed, and publishes relation sets for common datasets.
 - *Relevance:* Justifies measuring wall error locally after aligning the plan, and warns that global alignment can
-  hide or inflate error (EXPERIMENTS O2 threats).
+  hide or inflate error (experiments.md O2 threats).
 - *Supports:* O2, O8.
 
 **LB-9.2** J. Sturm, N. Engelhard, F. Endres, W. Burgard, and D. Cremers, "A benchmark for the evaluation of RGB-D SLAM
@@ -663,7 +663,7 @@ robotics and in science," *Auton. Robots*, vol. 27, pp. 313–325, 2009. Issue: 
 DOI: [10.1007/s10514-009-9137-8](https://doi.org/10.1007/s10514-009-9137-8)
 - *Summary:* Compares how experiments are done in mobile robotics with experimental practice in the sciences, and
   argues that robotics experimentation has not yet reached comparable maturity.
-- *Relevance:* Supports the EXPERIMENTS rules: fix pass rules before the runs, repeat runs, publish bags and
+- *Relevance:* Supports the experiments.md rules: fix pass rules before the runs, repeat runs, publish bags and
   parameters.
 - *Supports:* O2–O8.
 

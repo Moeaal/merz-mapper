@@ -3,13 +3,13 @@
 **Written 2026-11-04. Status: PLAN.** None of these steps has been run, so nothing here is TESTED. All the code in the
 repository is IMPLEMENTED: it is written, and the unit tests and a cloud ROS 2 Humble build pass. None of it has run on the
 Jetson or the rover. Expect to fix commands, topic names and parameters as you go. Each time you do, change this file and
-`docs/BUILD_GUIDE.md`.
+`docs/runbooks/build-guide.md`.
 
 How this file relates to the others:
-- `docs/BUILD_GUIDE.md`: the **commands** for each hardware step. This file says **when** to run them, **why**, and what
+- `docs/runbooks/build-guide.md`: the **commands** for each hardware step. This file says **when** to run them, **why**, and what
   must be finished before the next step starts.
-- `docs/EXPERIMENTS.md`: how each objective (O1-O8) is measured, with its pass rule.
-- `docs/REVIEW.md`: safety findings that must be closed before the rover moves on its own.
+- `docs/planning/experiments.md`: how each objective (O1-O8) is measured, with its pass rule.
+- `docs/software/safety-review.md`: safety findings that must be closed before the rover moves on its own.
 - `ros2_ws/src/merz_bringup/README.md`: the **safety checklist**. Read it before any motion.
 
 Contents
@@ -95,7 +95,7 @@ git push -u origin hw/sensor-poses          # then open a PR on GitHub
 
 ### 2.3 Good habits
 - **Commit small and often**, with a message that says *what* changed and *why*. The report will need the history.
-- **Record the commit in every experiment.** `git rev-parse --short HEAD` gives the commit, and EXPERIMENTS requires it.
+- **Record the commit in every experiment.** `git rev-parse --short HEAD` gives the commit, and experiments.md requires it.
 - **Tag milestones** so you can always go back to them, for example:
   ```bash
   git tag -a g1-first-map -m "Code used for the first manual map (G1)" && git push origin g1-first-map
@@ -142,7 +142,7 @@ git push -u origin hw/sensor-poses          # then open a PR on GitHub
    ```bash
    mkdir -p ~/merz_data/{bags,maps,photos,models,eval}
    ```
-4. **Build** using `docs/BUILD_GUIDE.md` section 3 ("Workspace").
+4. **Build** using `docs/runbooks/build-guide.md` section 3 ("Workspace").
 5. **Source the workspace in every terminal:** add both lines to `~/.bashrc`:
    ```bash
    source /opt/ros/humble/setup.bash
@@ -273,7 +273,7 @@ thin `*_node.py` connects it to ROS.
 | `landmark_node.py` | Joins D455 detections, depth and TF, and writes landmarks to SQLite |
 | `localiser.py` | Box -> median depth -> 3D point -> map frame -> match to an existing landmark -> running mean |
 | `geometry.py` | Camera maths (deprojection, projection) |
-| `database.py` | The SQLite database (`docs/DATABASE_SCHEMA.md`): rooms, landmarks, observations, junctions, zones |
+| `database.py` | The SQLite database (`docs/software/database-schema.md`): rooms, landmarks, observations, junctions, zones |
 | `config/semantic_map.yaml` | `gate_m` (merge distance), `fusion_mode` (`fused` or `single_observation`, for O8) |
 
 #### `merz_exploration`: exploring, access zones and junction photos (O2, O5, O7)
@@ -343,7 +343,7 @@ The proposal (D1, Fri 13 Nov 14:00) comes first this week. Give the hardware abo
 Find out and write down, with photos:
 - Motors: how many, which make and voltage. Skid-steer (4 wheels) or differential (2 wheels plus a caster)?
 - **Motor controller:** make and model, how it is controlled (USB serial, UART, RC/PWM, CAN?), and whether it has its own
-  **command timeout or watchdog** (that answers decisions #19 / REVIEW R1). Find its manual.
+  **command timeout or watchdog** (that answers decisions #19 / safety-review.md R1). Find its manual.
 - **Encoders:** are there any (decisions #10)? Wires on the motors with 4-6 cores usually mean encoders.
 - **Battery:** chemistry (LiPo, Li-ion, lead acid), voltage, capacity, charger, fuse, and **is there a power switch or
   emergency stop?**
@@ -358,7 +358,7 @@ Find out and write down, with photos:
 
 **Thu 12 Nov: proposal and ordering**
 - Final checks on the proposal: third person, IEEE references, UK English.
-- Order the missing parts (OPEN_ISSUES #10): **wired** or disconnect-safe gamepad (REVIEW R2), a checkerboard (or print
+- Order the missing parts (OPEN_ISSUES #10): **wired** or disconnect-safe gamepad (safety-review.md R2), a checkerboard (or print
   one on A3 and glue it to a rigid board), mast material, a **physical emergency stop switch** if the rover has none,
   DC-DC converters once the battery voltage is known, cable ties, Velcro and short USB 3 cables.
 - Get the **Jetson's power supply** ready for the bench (the dev kit's own adapter).
@@ -382,13 +382,13 @@ Find out and write down, with photos:
 - *Done when:* the Jetson boots from NVMe, and you can SSH in from the laptop.
 
 **Tue 17 Nov: ROS 2 Humble and tools**
-- Install ROS 2 (BUILD_GUIDE section 3), then the apt drivers from `merz_bringup/README.md`.
+- Install ROS 2 (build-guide.md section 3), then the apt drivers from `merz_bringup/README.md`.
 - Set the power mode (`sudo nvpmodel -q`), install `tmux`, `htop`, `git`, `jtop` (`sudo pip3 install jetson-stats`).
 - Quick test: `ros2 run demo_nodes_cpp talker` in one terminal and `ros2 run demo_nodes_py listener` in another.
 - *Done when:* the talker and listener talk.
 
 **Wed 18 Nov: librealsense (allow the whole day, OPEN_ISSUES #3)**
-- RSUSB source build, as in BUILD_GUIDE section 3. Plug the D455 **directly** into a Jetson USB 3 port.
+- RSUSB source build, as in build-guide.md section 3. Plug the D455 **directly** into a Jetson USB 3 port.
 - *Done when:* `rs-enumerate-devices` lists the D455 on **USB 3.x**, and `realsense-viewer` shows depth (if a monitor is attached).
   Log the librealsense version and the camera firmware.
 
@@ -400,13 +400,13 @@ Find out and write down, with photos:
   (`vcs export src --exact`) in the logbook, as `merz.repos` uses branch names.
 
 **Fri 20 Nov: udev, safety parts and catch-up**
-- Install the udev rules (BUILD_GUIDE section 3). Check `/dev/rplidar` and `/dev/c920` appear. You may need to change the
+- Install the udev rules (build-guide.md section 3). Check `/dev/rplidar` and `/dev/c920` appear. You may need to change the
   vendor or product IDs in the rules: get the real ones from `udevadm info -a -n /dev/ttyUSB0` and `lsusb`.
 - Catch up on anything from Mon-Thu that failed.
 - Update the register and STATE. Commit.
 
 ### 5.3 Week 3 (23-27 Nov): sensors one at a time, and mounts
-Bench work: the sensors sit on the desk, connected to the Jetson. Follow BUILD_GUIDE section 4, one device per day.
+Bench work: the sensors sit on the desk, connected to the Jetson. Follow build-guide.md section 4, one device per day.
 
 **Mon 23 Nov: LIDAR**
 - `ros2 launch merz_bringup lidar.launch.py`; `ros2 topic hz /scan` (about 10 Hz).
@@ -418,7 +418,7 @@ Bench work: the sensors sit on the desk, connected to the Jetson. Follow BUILD_G
 - `ros2 launch merz_bringup d455.launch.py`. Check colour, aligned depth (about 15 Hz) and `/camera/camera/imu`.
 - Rotate the camera by hand around its vertical axis, and check which IMU axis changes. Note it: the EKF uses yaw rate.
 - Point it at a flat wall at 1, 2 and 3 m, measured by the laser meter, and compare with the depth.
-- If the topic names differ (older drivers use `/camera/...`), see BUILD_GUIDE section 7.
+- If the topic names differ (older drivers use `/camera/...`), see build-guide.md section 7.
 - *Done when:* all streams run for 10 minutes without dropping out.
 
 **Wed 25 Nov: C920 and the URDF**
@@ -438,7 +438,7 @@ Bench work: the sensors sit on the desk, connected to the Jetson. Follow BUILD_G
 - Using the rover CAD: design the LIDAR mount (level, above everything else, with a clear 360° view), the D455 mount
   (forward and level) and the mast (C920 at about 1.5 m, stiff). Send them for 3D printing.
 - Plan the wiring and power: battery -> emergency stop -> fuse -> DC-DC converters -> Jetson and hub. Check the
-  converter ratings against the loads (BUILD_GUIDE section 1). Ask a technician to check it before you connect it.
+  converter ratings against the loads (build-guide.md section 1). Ask a technician to check it before you connect it.
 
 ### 5.4 Week 4 (30 Nov-4 Dec): motors, gamepad, safety and assembly
 **Every motor test this week is done with the wheels off the ground, with the emergency stop in reach.**
@@ -459,12 +459,12 @@ Bench work: the sensors sit on the desk, connected to the Jetson. Follow BUILD_G
 - Gamepad: `ros2 topic echo /joy`, press each button and stick, and fix `teleop.yaml` (axes, deadman, signs).
 - *Done when:* `ros2 launch merz_bringup teleop.launch.py` + base drives the wheels only while the deadman is held.
 
-**Wed 2 Dec: safety tests (REVIEW.md, merz_bringup safety checklist)**
+**Wed 2 Dec: safety tests (safety-review.md, merz_bringup safety checklist)**
 - Physical emergency stop while the wheels turn: they must stop.
-- `kill -9` the base node while the wheels turn (REVIEW R1). If they **keep turning**, the rover must not run autonomously
+- `kill -9` the base node while the wheels turn (safety-review.md R1). If they **keep turning**, the rover must not run autonomously
   until a watchdog exists (decisions #19; section 6, item 2).
-- Turn the gamepad off while holding the deadman with a stick pushed (REVIEW R2). `/cmd_vel_teleop` must stop.
-- Unplug the controller's USB while driving (REVIEW R3): what happens?
+- Turn the gamepad off while holding the deadman with a stick pushed (safety-review.md R2). `/cmd_vel_teleop` must stop.
+- Unplug the controller's USB while driving (safety-review.md R3): what happens?
 - Write every result in the logbook, including failures. These are good material for the report.
 
 **Thu 3 Dec: assembly**
@@ -473,7 +473,7 @@ Bench work: the sensors sit on the desk, connected to the Jetson. Follow BUILD_G
 - Measure the real speed limits: drive at full output and time it over 2 m, which gives `full_speed_m_s`.
 
 **Fri 4 Dec: measure the sensor poses and footprint**
-- Measure every pose (BUILD_GUIDE section 2) and fill in `merz_description/config/sensor_poses.yaml`, with the
+- Measure every pose (build-guide.md section 2) and fill in `merz_description/config/sensor_poses.yaml`, with the
   uncertainty of each measurement in the logbook.
 - Measure the outer size of the rover, and set `footprint` in `nav2.yaml` (both costmaps) and the box in `sensor_poses.yaml`.
 - Check in RViz/Foxglove: the scan lines up with the walls, and the rover faces the right way.
@@ -482,7 +482,7 @@ Bench work: the sensors sit on the desk, connected to the Jetson. Follow BUILD_G
 
 ### 5.5 Week 5 (7-11 Dec): calibration and the first map
 **Mon 7 Dec: IMU and C920 calibration**
-- IMU noise: 60 s still, motors off (BUILD_GUIDE section 5). Work out the gyro bias and SD (section 6, item 7: a small
+- IMU noise: 60 s still, motors off (build-guide.md section 5). Work out the gyro bias and SD (section 6, item 7: a small
   script). Compare with the covariance in the IMU messages.
 - C920 intrinsics with the checkerboard, autofocus off. Save `c920_camera_info.yaml`.
 
@@ -499,7 +499,7 @@ Bench work: the sensors sit on the desk, connected to the Jetson. Follow BUILD_G
 **Thu 10 Dec: first manual map (O1)**
 - Permission to test, people nearby told, emergency stop in reach.
 - `mapping.launch.py` in one terminal, `record_bag.launch.py name:=first_map` in another. Drive slowly, turn gently,
-  close a loop if possible. Save the map with `map_saver_cli` (BUILD_GUIDE section 6).
+  close a loop if possible. Save the map with `map_saver_cli` (build-guide.md section 6).
 - *Done when:* a map is saved, and the bag plays back. **This meets the O1 target date.**
 
 **Fri 11 Dec: back up and review**
@@ -512,7 +512,7 @@ Bench work: the sensors sit on the desk, connected to the Jetson. Follow BUILD_G
 
 **Tue 15 Dec: data for the model.** Drive the corridors you will use, with `images:=true`, at the speed the robot will
 explore at. Include doors, lifts, stairs, exit signs and room signs, in different lighting. **Keep one corridor apart as a
-test set** (EXPERIMENTS, O3). Several short bags are easier to handle than one long one.
+test set** (experiments.md, O3). Several short bags are easier to handle than one long one.
 
 **Wed 16 Dec: ground truth while you are in the building.** Photograph or list every door sign in the test area (O3
 `signs.csv`). Ask estates or Dr Wright for the floor plan (OPEN_ISSUES #14). Note glass walls and doors for the keep-out mask.
@@ -559,7 +559,7 @@ extract frames from the December bags (`tools/extract_frames.py`) and start labe
 - **Fri:** record door states and conditions. Fix the problems found. Tag the commit `first-exploration`.
 
 ### 5.12 Weeks 11-19 (8 Mar-7 May): experiments, website, report
-Follow `docs/EXPERIMENTS.md` for each objective. **Agree the pass rules with Dr Wright and write the ground truth before
+Follow `docs/planning/experiments.md` for each objective. **Agree the pass rules with Dr Wright and write the ground truth before
 each run.** Three runs per experiment. Each week below is Mon-Fri: one day of preparation and ground truth, two to three
 days of runs, and one day of analysis and writing it up the same week.
 
@@ -587,14 +587,14 @@ facts you measured. Items 1-4 are safety-related and must be done before autonom
 | # | What | Why | When | Size |
 | --- | --- | --- | --- | --- |
 | 1 | **Real motor interface** in `merz_base`: fill in `base.yaml`; if the controller uses binary packets (Sabertooth packetised serial, RoboClaw, etc.) or RC PWM, a new backend class in `backends.py` with tests; a udev rule for `/dev/merz_motors` | The serial backend only sends text commands; the rover's controller is unknown | Week 4 | Small-medium |
-| 2 | **Independent stop** (decisions #19): either use the controller's own serial watchdog, or a small microcontroller (an Arduino, say) that cuts the motor enable unless it gets a heartbeat from the Jetson, plus a heartbeat publisher in `merz_base` | If the Jetson or `base_node` dies, nothing stops the motors (REVIEW R1) | Week 4, before autonomy | Medium |
-| 3 | **Nav2 safety fixes:** `velocity_smoother.velocity_timeout` to 0.5 s (R4); `navigate_through_poses` no-motion tree (decisions #18); error handling in `base_node` (R3); lock fix in `mission_node` (R10) | Open findings in `docs/REVIEW.md` | Week 9 | Small |
+| 2 | **Independent stop** (decisions #19): either use the controller's own serial watchdog, or a small microcontroller (an Arduino, say) that cuts the motor enable unless it gets a heartbeat from the Jetson, plus a heartbeat publisher in `merz_base` | If the Jetson or `base_node` dies, nothing stops the motors (safety-review.md R1) | Week 4, before autonomy | Medium |
+| 3 | **Nav2 safety fixes:** `velocity_smoother.velocity_timeout` to 0.5 s (R4); `navigate_through_poses` no-motion tree (decisions #18); error handling in `base_node` (R3); lock fix in `mission_node` (R10) | Open findings in `docs/software/safety-review.md` | Week 9 | Small |
 | 4 | **`nav2_collision_monitor` and a latched e-stop lock** in twist_mux on a gamepad button (decisions #20) | Short-range stop at sensor rate; autonomy stays stopped after the deadman is released (R5, R6) | Week 9 | Medium |
 | 5 | **YOLO training set-up:** `tools/train/merz.yaml` (dataset file with the 5 classes), a training script with a fixed seed, and a split that keeps one corridor out | Nothing trains the model yet; `tools/export_tensorrt.md` assumes `merz_yolo.pt` exists | Week 7 | Small |
 | 6 | **RViz/Foxglove layouts** for mapping and navigation (map, scan, TF, costmaps, frontiers, keep-out mask) | Only `description.rviz` exists | Week 3-5 | Small |
-| 7 | **Calibration analysis scripts:** IMU bias and noise from a bag; straight-line and square-test errors from `/odom_scan` and `/odometry/filtered`; D455 wall-distance check | BUILD_GUIDE asks for these numbers, but no tool computes them | Week 5 | Small |
+| 7 | **Calibration analysis scripts:** IMU bias and noise from a bag; straight-line and square-test errors from `/odom_scan` and `/odometry/filtered`; D455 wall-distance check | build-guide.md asks for these numbers, but no tool computes them | Week 5 | Small |
 | 8 | **Plan-to-map alignment tool:** rigid transform from named corners measured in the plan and picked in the map, then transforms `walls.csv`, the corridor polygon and `truth.csv` into the map frame | The O2, O4 and O8 scripts need truth in the map frame | Week 10 | Small |
-| 9 | **Run scripts:** one `tmux` script (or systemd service) that starts a run, records a bag, and writes a `run_info.txt` (commit, parameters, time, power mode, battery) | EXPERIMENTS asks for these details for every run; easier than remembering | Week 5 | Small |
+| 9 | **Run scripts:** one `tmux` script (or systemd service) that starts a run, records a bag, and writes a `run_info.txt` (commit, parameters, time, power mode, battery) | experiments.md asks for these details for every run; easier than remembering | Week 5 | Small |
 | 10 | **Backup script:** copy `~/merz_data` to the laptop and OneDrive, and check sizes | Losing bags would cost weeks | Week 5 | Small |
 | 11 | **Battery monitoring** (if the controller or battery reports voltage): a node that warns, and stops autonomy below a threshold | Nothing in the software watches the battery (safety checklist) | Week 9 | Small |
 | 12 | **Store sign crops** (`landmarks.photo_id`) | The website shows real signs without photos until this is done (`web/README.md`) | Week 16 | Small (optional) |
@@ -617,7 +617,7 @@ facts you measured. Items 1-4 are safety-related and must be done before autonom
 5. **Glass** (OPEN_ISSUES #4). Mark every glass wall and door on a keep-out mask before autonomous runs.
 6. **Record everything.** Every run gets a logbook entry: date and time, lighting, people, door states, commit, parameter
    files, bag name, power mode, battery. Without these, a result cannot be used in the report.
-7. **Decide pass rules before the runs.** A pass rule chosen after seeing the results is not a valid test (EXPERIMENTS).
+7. **Decide pass rules before the runs.** A pass rule chosen after seeing the results is not a valid test (experiments.md).
 8. **Back up weekly**, and always before the leave.
 9. **Keep `main` working.** Only merge what has built and been tested on the Jetson. Tag milestones.
 10. **One thing at a time.** One new device, one new parameter or one new node per test.
@@ -665,5 +665,5 @@ Go through the safety checklist in `ros2_ws/src/merz_bringup/README.md`.
 | `dmesg -w`, `lsusb -t` | USB errors and USB speeds |
 | `ros2 bag info <bag>` | What is in a bag |
 
-When something breaks, look in `docs/BUILD_GUIDE.md` section 7 (troubleshooting) first, then paste the full error into a
+When something breaks, look in `docs/runbooks/build-guide.md` section 7 (troubleshooting) first, then paste the full error into a
 Claude Code session.

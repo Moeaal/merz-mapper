@@ -32,7 +32,7 @@ This keeps decisions #6, but adds three conditions that the evidence makes neces
 
 **Main reason:** the code is already written for Humble. Every Nav2, SLAM Toolbox, robot_localization and rf2o key has been
 checked against Humble source (RESEARCH_INDEX [C1-C7]), and a cloud Humble `colcon build` + `colcon test` has passed
-(BUILD_PROGRESS). With six working weeks to G1 (18 Dec 2026) and a zero buffer before leave (OPEN_ISSUES #5), moving
+(build-progress.md). With six working weeks to G1 (18 Dec 2026) and a zero buffer before leave (OPEN_ISSUES #5), moving
 everything to new versions carries more risk than any gain JetPack 7.2 + Jazzy offers. Jazzy's one clear practical advantage,
 a host-free NVMe install, is handled for JetPack 6 in runbook section 2.
 
@@ -100,7 +100,7 @@ version numbers are the released package versions in `ros/rosdistro` master on 2
 | Navigation | `navigation2` | apt 1.1.20 [S3] | apt 1.3.14 [S3] | Repo `nav2.yaml` checked against Humble (RESEARCH_INDEX [C1]). Jazzy would need the check again. `enable_stamped_cmd_vel` exists from Jazzy, default `false` [S36] |
 | EKF | `robot_localization` | apt 3.5.5 [S3] | apt 3.8.4 [S3] | Repo `ekf.yaml` checked against `humble-devel` ([C6]) |
 | Frontier exploration | `m-explore-ros2` (`explore_lite`) | src. Repo pins `926033f`. **New finding:** see 3.3 | src. Upstream CI builds humble, jazzy and kilted [S31] | Alternative `roadmap_explorer`: apt 1.0.0 on Humble only; Jazzy entry is source-only [S3] |
-| Scan-matching odometry | `rf2o_laser_odometry` (`ros2` branch) | src. Last commit `b38c68e`, 2023-04-28 [S33]. **Builds on Humble** (cloud check, BUILD_PROGRESS) | src. Jazzy runtime report: "Waiting for laser_scans..." with `ros2 run`; works when started by its launch file (Mar 2026, anecdotal) [S34] | Not in rosdistro for any distro. Repo launches it from `merz_bringup` |
+| Scan-matching odometry | `rf2o_laser_odometry` (`ros2` branch) | src. Last commit `b38c68e`, 2023-04-28 [S33]. **Builds on Humble** (cloud check, build-progress.md) | src. Jazzy runtime report: "Waiting for laser_scans..." with `ros2 run`; works when started by its launch file (Mar 2026, anecdotal) [S34] | Not in rosdistro for any distro. Repo launches it from `merz_bringup` |
 | Teleop | `joy` (joystick_drivers), `teleop_twist_joy`, `twist_mux` | apt 3.3.0 / 2.4.8 / 4.3.0 [S3] | apt 3.3.0 / 2.6.5 / 4.5.0 [S3] | |
 | Bags | `rosbag2` + `rosbag2_storage_mcap` | apt 0.15.17 [S3] | apt 0.26.11 [S3] | |
 | Calibration | `camera_calibration` (image_pipeline) | apt 3.0.9 [S3] | apt 5.0.13 [S3] | |
@@ -134,7 +134,7 @@ IMU needs is **UNKNOWN**. Do not count it as a fix.
 
 ### 3.3 Frontier exploration: the Humble pin may no longer be needed
 The repo pins `m-explore-ros2` to `926033f` because `main` (from `96d1888`, 2026-01-13) includes `tf2_ros/buffer.hpp`, which
-failed on the cloud RoboStack Humble build (BUILD_PROGRESS). However, Humble's `geometry2` gained the `.hpp` headers in commit
+failed on the cloud RoboStack Humble build (build-progress.md). However, Humble's `geometry2` gained the `.hpp` headers in commit
 `0b54e91` (2025-07-24, "Change tf2_ros C to C++ headers (backport #807)"), first in tag 0.25.16 (2025-07-25). The current Humble
 release is **0.25.24** [S3, S29]. Upstream `m-explore-ros2` CI also builds Humble [S31]. So `main` (now `326cf8a`, 2026-06-02,
 which includes upstream #51) **probably builds on apt Humble on the Jetson**; the RoboStack build most likely had an older
@@ -233,4 +233,4 @@ Confirm with Dr Wright: JetPack 6.2.x + Humble (PROPOSED), the Jetson SKU/carrie
 | S37 | PaddleOCR issue #17327 (Dec 2025-May 2026), https://github.com/PaddlePaddle/PaddleOCR/issues/17327 (anecdotal) | No official JetPack 6 GPU wheel |
 | S38 | Paddle issues #75117 and #74126 (2025), https://github.com/PaddlePaddle/Paddle/issues/75117 (anecdotal) | Requests for JetPack 6 GPU wheels; no official link |
 | S39 | Community build, https://github.com/SidaWang12/paddle3.0-jetson-jetpack6-build (unverified) | Paddle Inference GPU wheel built for JetPack 6.2 |
-| S40 | Merz repo: `docs/BUILD_PROGRESS.md`, RESEARCH_INDEX [C1-C7], `ros2_ws/merz.repos`, `merz_bringup/config/d455.yaml` | What the project has already checked against Humble |
+| S40 | Merz repo: `docs/archive/build-progress.md`, RESEARCH_INDEX [C1-C7], `ros2_ws/merz.repos`, `merz_bringup/config/d455.yaml` | What the project has already checked against Humble |

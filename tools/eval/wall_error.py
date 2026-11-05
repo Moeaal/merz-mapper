@@ -4,7 +4,7 @@
 
 The walls CSV has columns x1,y1,x2,y2 (metres, map frame). Align the floor plan to the map first, and report how.
 Cells beyond --match-radius are probably not walls (furniture, people) so they are excluded, and the share excluded is
-always reported, as a large share would mean the mean is flattering the map. Target: 0.15 m (rule: docs/EXPERIMENTS.md).
+always reported, as a large share would mean the mean is flattering the map. Target: 0.15 m (rule: docs/planning/experiments.md).
 """
 from __future__ import annotations
 

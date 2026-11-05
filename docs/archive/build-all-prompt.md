@@ -1,7 +1,7 @@
 # Build-all instructions for Claude Code
 
-**Student command:** `Read docs/BUILD_ALL_PROMPT.md and carry it out.`
-**To resume after a break or a full context:** `Continue docs/BUILD_ALL_PROMPT.md from docs/BUILD_PROGRESS.md.`
+**Student command:** `Read docs/archive/build-all-prompt.md and carry it out.`
+**To resume after a break or a full context:** `Continue docs/archive/build-all-prompt.md from docs/archive/build-progress.md.`
 
 You are writing ALL Merz Mapper software that can be written before the hardware arrives,
 working on the student's **Windows laptop** (no ROS 2 installed here). The student will
@@ -12,7 +12,7 @@ read and learn the code later; your job now is complete, clean, well-commented, 
    `docs/decisions.md`, `docs/CLAUDE_CODE_ROADMAP.md`. Use the `merz-mapper-engineering-brain` skill and
    the specialist skills it routes to (`ros2-engineering-skills` for ROS 2 mechanics).
 2. `git pull` on main, then create branch `build/all-code`.
-3. Create `docs/BUILD_PROGRESS.md` with a checklist of the phases below. Tick each phase when its commit
+3. Create `docs/archive/build-progress.md` with a checklist of the phases below. Tick each phase when its commit
    is pushed, so any later session can resume from it.
 4. Check Python 3.12 is available (`py -3.12 --version`). If missing, tell the student how to install it,
    then continue writing code anyway.
@@ -46,16 +46,16 @@ plus the extras listed here.
 | 3 | 3 Sensor bringup + teleop | udev rules in `merz_bringup/udev/`, one `.rules` file per device |
 | 4 | 4 Odometry, EKF, SLAM | Pick the scan-matching package after checking it supports Humble; record the choice in `docs/decisions.md` as PROPOSED |
 | 5 | 5 Perception | Engine abstraction: `ultralytics` (now) and TensorRT `.engine` (on Jetson), chosen by param; `tools/export_tensorrt.md` with the export steps |
-| 6 | 6 Semantic map + SQLite | `docs/DATABASE_SCHEMA.md` |
+| 6 | 6 Semantic map + SQLite | `docs/software/database-schema.md` |
 | 7 | 7 Exploration + access zones | |
 | 8 | 8 Nav2 + full autonomy launch | |
-| 9 | 9 Evaluation tools | `docs/EXPERIMENTS.md` with the procedure per objective |
+| 9 | 9 Evaluation tools | `docs/planning/experiments.md` with the procedure per objective |
 | 10 | 10 Website + QR posters | Must run on Windows with a sample database (`web/sample_data/`) so the student can open it in a browser now |
 | 11 | 11 Rover base driver | Rover not yet known: write `merz_base` with a backend interface and two backends: (a) **serial** motor controller with a configurable command format, (b) **Jetson GPIO PWM** for an H-bridge using `Jetson.GPIO`, pins in `config/base.yaml` (placeholders; note that PWM pins must be enabled with `jetson-io` and checked against NVIDIA's Orin Nano pinout before use). Include a cmd_vel timeout that stops the motors, speed/acceleration limits, and a mock backend for unit tests |
 | 12 | Build guide | See section 3 |
 | 13 | Final check | See section 4 |
 
-## 3. `docs/BUILD_GUIDE.md` (phase 12)
+## 3. `docs/runbooks/build-guide.md` (phase 12)
 A step-by-step guide the student follows when the hardware arrives. Mark it "not yet verified on hardware".
 1. **Parts and connections:** table of every device, port and cable. Jetson USB 3 port -> D455 (direct, not
    through the hub); powered hub -> RPLIDAR adapter, C920, gamepad dongle; NVMe in the M.2 slot. Power: Jetson
@@ -73,7 +73,7 @@ A step-by-step guide the student follows when the hardware arrives. Mark it "not
 7. **Troubleshooting:** the known risks from `docs/OPEN_ISSUES.md`.
 
 ## 4. Final check (phase 13)
-- Run all Windows-runnable tests; paste the summary into `docs/BUILD_PROGRESS.md`.
+- Run all Windows-runnable tests; paste the summary into `docs/archive/build-progress.md`.
 - Check every launch file references packages, files and params that exist (static check by reading).
 - Update `docs/SOFTWARE_ARCHITECTURE.md` (real package/node/topic names, status IMPLEMENTED),
   `docs/MERZ_MAPPER_STATE.md` (a few lines), and tick `docs/CLAUDE_CODE_ROADMAP.md` stages 1-11 as

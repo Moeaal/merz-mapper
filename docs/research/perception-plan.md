@@ -3,7 +3,7 @@
 **Status: PROPOSED** (2026-11-05, branch `perception-prototype`). Nothing here is agreed with the supervisor.
 Nothing has run on Merz Court photos, the C920, the D455 or the Jetson. The prototype is in `perception/`.
 
-O3 target (proposal, `docs/EXPERIMENTS.md`): **at least 85% of the door signs in the test area read correctly.**
+O3 target (proposal, `docs/planning/experiments.md`): **at least 85% of the door signs in the test area read correctly.**
 
 ## 1. Summary
 1. No pretrained model covers all five classes. Doors and stairs exist in Open Images V7 [1], [2]. Lifts, exit signs
@@ -87,7 +87,7 @@ sharper and higher-resolution than robot frames, so expect a drop when moving to
   (`perception/train/split_dataset.py`; name files `<area>_<sign>_<nn>.jpg`).
 - **train** about 80%, **val** about 20% (one or two whole areas held out).
 - **O3 test corridor**: photographed and driven **only for testing**, never labelled for training
-  (`docs/EXPERIMENTS.md` O3 threats: "hold back one corridor").
+  (`docs/planning/experiments.md` O3 threats: "hold back one corridor").
 
 ### 4.4 Fine-tuning
 - `python perception/train/train_yolo.py --data perception/train/merz_landmarks.yaml`. This starts from COCO

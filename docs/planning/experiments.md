@@ -13,7 +13,7 @@ arrives (HARDWARE_REGISTER has none yet).
 
 ## O1: sensors and first manual map (G1, by 18 Dec 2026)
 - **Measure:** each sensor at its expected rate; TF tree complete; one map of a corridor by manual driving.
-- **Procedure:** `docs/BUILD_GUIDE.md` sections 4-6, recording a bag.
+- **Procedure:** `docs/runbooks/build-guide.md` sections 4-6, recording a bag.
 - **Pass:** all sensors publishing at the same time; a map saved; the bag replays. Aim for ~11 Dec (OPEN_ISSUES #5).
 - **Threats:** battery and USB power under full load; IMU frame wrong (check by rotating by hand).
 

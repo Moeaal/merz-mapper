@@ -17,8 +17,8 @@ Student: Mohammed Abdulaal | Supervisor: Dr Nick Wright
 | `docs/SOFTWARE_ARCHITECTURE.md` | Packages, nodes, topics, TF, data flow | O1-O6 |
 | `docs/OPEN_ISSUES.md` | Problems, severity, proposed fixes | all |
 | `docs/RESEARCH_INDEX.md` | Verified sources and key findings | O8, D4 |
-| `docs/BUILD_GUIDE.md` | Step-by-step procedure for when the hardware arrives | all |
-| `docs/EXPERIMENTS.md` | Procedure and pass rule for each objective | O1-O8 |
+| `docs/runbooks/build-guide.md` | Step-by-step procedure for when the hardware arrives | all |
+| `docs/planning/experiments.md` | Procedure and pass rule for each objective | O1-O8 |
 | `ros2_ws/` | ROS 2 workspace; start with `ros2_ws/README.md` | O1-O6 |
 | `tools/` | `eval/` = objective evaluation scripts; `extract_frames.py`; `yolo_practice/` = supervisor practice script | O3, O8 |
 | `data/` | Rosbags, maps, photos - NOT committed (see .gitignore) | - |
@@ -36,4 +36,4 @@ Student: Mohammed Abdulaal | Supervisor: Dr Nick Wright
 - `merz_base` - rover base driver - O1
 
 ## Bring-up
-Not yet run. Follow `docs/BUILD_GUIDE.md`. Unit tests on Windows: `python -m pytest` (see `docs/BUILD_PROGRESS.md`).
+Not yet run. Follow `docs/runbooks/build-guide.md`. Unit tests on Windows: `python -m pytest` (see `docs/archive/build-progress.md`).

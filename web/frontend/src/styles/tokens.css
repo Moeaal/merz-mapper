@@ -1,4 +1,4 @@
-/* Design tokens: docs/WEBSITE_DESIGN.md. One accent (signal amber); status colours only for objectives.
+/* Design tokens: docs/website/design-brief.md. One accent (signal amber); status colours only for objectives.
    Text tokens are checked for >= 4.5:1; mark tokens with the dataviz validator. */
 :root {
   --font-display: 'Archivo Variable', 'Archivo', system-ui, sans-serif;

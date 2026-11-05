@@ -6,7 +6,7 @@ built and tested before the rover has run. Nothing here is a measurement.
 
 The output folder looks like the rover's ~/merz_data after two entrance runs:
 
-    merz.sqlite                   docs/DATABASE_SCHEMA.md (written with merz_semantic_map.database)
+    merz.sqlite                   docs/software/database-schema.md (written with merz_semantic_map.database)
     maps/run_north.yaml + .pgm    map_saver / slam_toolbox save_map format
     maps/run_south.yaml + .pgm
     photos/junction_<sec>_<nsec>.jpg, photos/sign_<id>_<sec>.jpg
@@ -314,7 +314,7 @@ def run_evaluation(out: Path, truth: Path, final_map: Path) -> None:
             extra += ['--plot', eval_dir / f'{stem}.png']
         subprocess.run([sys.executable, tools / job[0], *map(str, job[1:]), *map(str, extra)], check=True,
                        stdout=subprocess.DEVNULL)
-    # O6/O7 need the website running, as in docs/EXPERIMENTS.md. Here it runs on this machine, over localhost.
+    # O6/O7 need the website running, as in docs/planning/experiments.md. Here it runs on this machine, over localhost.
     port = free_port()
     env = {**__import__('os').environ, 'MERZ_DB': str(db), 'MERZ_PHOTOS': str(out / 'photos'), 'MERZ_MAP': str(final_map)}
     server = subprocess.Popen([sys.executable, '-m', 'uvicorn', 'app.main:app', '--port', str(port), '--log-level',

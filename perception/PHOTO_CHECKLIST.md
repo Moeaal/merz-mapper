@@ -1,7 +1,7 @@
 # Merz Court photo checklist (phone) - PROPOSED
 
 Purpose: training photos for the landmark model and a ground-truth list of door signs for O3. Plan:
-`docs/research/perception_plan.md`. Round 1 takes about 2 hours, for 400-600 photos.
+`docs/research/perception-plan.md`. Round 1 takes about 2 hours, for 400-600 photos.
 
 ## Before going
 - [ ] Permission: tell the supervisor, or ask building management, that you are photographing corridors and signs.

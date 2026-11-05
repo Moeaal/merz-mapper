@@ -3,7 +3,7 @@
     python tools/web_import.py PATH_TO_RUN                 # e.g. a copy of the rover's ~/merz_data
     python tools/web_import.py PATH_TO_RUN --run-id merz-court-2027-03 --name "Merz Court, first survey"
 
-PATH_TO_RUN is laid out as the rover writes it (docs/DATABASE_SCHEMA.md, merz_bringup record_bag.launch.py):
+PATH_TO_RUN is laid out as the rover writes it (docs/software/database-schema.md, merz_bringup record_bag.launch.py):
 
     merz.sqlite          the database                       (required)
     maps/*.yaml + .pgm   saved maps; the most complete is used (required)

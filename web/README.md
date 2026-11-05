@@ -5,7 +5,7 @@ run. Until the rover has run, the bundle comes from a **synthetic run** (an inve
 rover's real file formats), and the site says so on every page. The website is a demonstrator and is the first thing to
 cut if time runs short (decisions #5); the robot is the project.
 
-Design brief: `docs/WEBSITE_DESIGN.md`. Pages: landing and story (`/`), wayfinding from a QR code (`/?entrance=X`, `/find`),
+Design brief: `docs/website/design-brief.md`. Pages: landing and story (`/`), wayfinding from a QR code (`/?entrance=X`, `/find`),
 mission replay (`/mission`), results for objectives O2-O8 (`/results`), about (`/about`).
 
 ## Run it on Windows (3 commands)
@@ -38,7 +38,7 @@ Nothing is invented: if a part is missing, that part of the site says so. Real r
 "Sample" badge disappears. Note: the rover code does not yet store sign crops (`landmarks.photo_id` stays empty), so
 real signs show without photos until that is added (PROPOSED).
 
-Score a run before importing it (procedures and pass rules: `docs/EXPERIMENTS.md`), for example:
+Score a run before importing it (procedures and pass rules: `docs/planning/experiments.md`), for example:
 ```powershell
 .venv\Scripts\python tools\eval\map_coverage.py --map run\maps\run_south.yaml --polygon corridor.csv --json run\eval\map_coverage.json --plot run\eval\map_coverage.png
 ```

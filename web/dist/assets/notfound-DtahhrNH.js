@@ -1,4 +1,4 @@
-import{h as a,r}from"./index-9NhEqVB4.js";import"./gsap-DjKJqAo0.js";function c(s){const o=s.bundle.graph.entrances[0],e=a("div",{class:"lost-visual","aria-hidden":"true"});return e.innerHTML=`<svg viewBox="0 0 400 260">
+import{h as a,r}from"./index-BVIaeF4C.js";import"./gsap-DjKJqAo0.js";function c(s){const o=s.bundle.graph.entrances[0],e=a("div",{class:"lost-visual","aria-hidden":"true"});return e.innerHTML=`<svg viewBox="0 0 400 260">
       <defs><radialGradient id="lostScan" cx="0" cy="0.5" r="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".45"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></radialGradient></defs>
       <g class="lost-dots">${Array.from({length:13*8},(t,l)=>`<circle cx="${20+l%13*30}" cy="${20+Math.floor(l/13)*30}" r="1.6"/>`).join("")}</g>
       <path class="lost-wall" d="M20 200 H150 V120 H40"/>

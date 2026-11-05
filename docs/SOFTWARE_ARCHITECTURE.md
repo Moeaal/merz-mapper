@@ -2,7 +2,7 @@
 
 Status rule: **IMPLEMENTED** means the code is in the repo. It becomes **TESTED** only when a logbook entry records a result on
 hardware. As of 2026-11-03, all the code below is IMPLEMENTED: nothing has been built with colcon or run on hardware.
-Unit tests of the pure-Python logic pass on Windows (`docs/BUILD_PROGRESS.md`). Names of third-party topics are from driver docs
+Unit tests of the pure-Python logic pass on Windows (`docs/archive/build-progress.md`). Names of third-party topics are from driver docs
 and source, and must be confirmed when the drivers run.
 
 Design rule: each package keeps its logic in plain Python modules with no `rclpy` import, wrapped by a thin `*_node.py`.
@@ -79,4 +79,4 @@ ROS 2 Humble (decisions #6, PROPOSED), slam_toolbox, nav2, robot_localization, t
 realsense2_camera. Source builds via `ros2_ws/merz.repos`: sllidar_ros2, rf2o_laser_odometry (decisions #14, PROPOSED), m-explore-ros2
 (decisions #7, PROPOSED). Python: Ultralytics, TensorRT (JetPack), PaddleOCR or RapidOCR, FastAPI.
 
-Database: `docs/DATABASE_SCHEMA.md`. Procedure: `docs/BUILD_GUIDE.md`. Experiments: `docs/EXPERIMENTS.md`.
+Database: `docs/software/database-schema.md`. Procedure: `docs/runbooks/build-guide.md`. Experiments: `docs/planning/experiments.md`.

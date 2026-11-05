@@ -1,4 +1,4 @@
-"""The Merz Mapper SQLite database. Standard library only. Schema documented in docs/DATABASE_SCHEMA.md.
+"""The Merz Mapper SQLite database. Standard library only. Schema documented in docs/software/database-schema.md.
 
 The robot writes this file during a run, and the website reads it afterwards.
 """

@@ -2,10 +2,10 @@
 
 **Status: IMPLEMENTED - not yet built or tested on hardware.** This code was written on a Windows laptop with no ROS 2.
 A cloud check on ROS 2 Humble (RoboStack, 2026-11-04) passed `colcon build` and `colcon test`; it has not yet been built on the
-Jetson or Pi (`docs/BUILD_PROGRESS.md`).
+Jetson or Pi (`docs/archive/build-progress.md`).
 
 **Target:** ROS 2 Humble, Ubuntu 22.04, JetPack 6.x (decisions #6, still PROPOSED). The full step-by-step
-procedure is in `docs/BUILD_GUIDE.md`.
+procedure is in `docs/runbooks/build-guide.md`.
 
 ## Packages
 | Package | Purpose | Type |

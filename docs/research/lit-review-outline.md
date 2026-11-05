@@ -1,6 +1,6 @@
 # Literature review outline (EEE3094 technical report)
 
-**Status:** PROPOSED structure, 2026-11-05. Sources are the `LB-x.y` entries in `docs/research/literature_base.md`;
+**Status:** PROPOSED structure, 2026-11-05. Sources are the `LB-x.y` entries in `docs/research/literature-base.md`;
 check every UNVERIFIED field there before citing. Write the final text in the third person with IEEE numbered
 references.
 

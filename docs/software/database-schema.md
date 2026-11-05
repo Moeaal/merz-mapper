@@ -30,7 +30,7 @@ without repeating it in another mode, and the spread of each landmark's sighting
 ## One map frame
 Routes and landmarks only make sense across entrances if all runs share a map frame. A new SLAM run normally starts
 its own frame at wherever the robot is. So the first entrance creates the map, and each later entrance continues from
-its posegraph (`posegraph:=...`, with the start pose in that frame). See `docs/BUILD_GUIDE.md` section 6.
+its posegraph (`posegraph:=...`, with the start pose in that frame). See `docs/runbooks/build-guide.md` section 6.
 
 Threat to validity: a door open in an earlier run leaves free space in the continued map. Flood fill then treats it as
 open unless the later run sees the door closed. Record door states for every run (O5).
