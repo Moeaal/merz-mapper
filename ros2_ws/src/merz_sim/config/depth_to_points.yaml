@@ -1,0 +1,7 @@
+# depth_image_proc point_cloud_xyz_node: the simulated D455 depth image -> /camera/camera/depth/color/points, the
+# point cloud Nav2's local costmap reads (merz_bringup/config/nav2.yaml, voxel_layer "depth").
+# It is computed from the depth image and its camera_info in camera_color_optical_frame, so it is correct whatever
+# axis convention Gazebo's own point cloud uses (which is not bridged).
+point_cloud_xyz_node:
+  ros__parameters:
+    queue_size: 5

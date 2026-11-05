@@ -1,0 +1,15 @@
+# Odometry mode (a), simulation only (PROPOSED): simulated wheel odometry + IMU -> EKF.
+# Loaded AFTER merz_bringup/config/ekf.yaml, so it keeps every setting there (frames, rate, IMU yaw rate, process noise)
+# and only replaces the odom0 input: /wheel/odometry instead of /odom_scan. rf2o does not run in this mode.
+#
+# Fused: vx (how fast the wheels say the rover moves) and vy (always 0 for a differential drive: the "no sideways
+# motion" constraint). Yaw rate still comes from the IMU only, as in mode (b) and in merz_bringup/config/ekf_wheel_odom.yaml,
+# because a real skid-steer rover's wheels slip in turns. So the two modes differ ONLY in where linear motion comes from.
+ekf_filter_node:
+  ros__parameters:
+    odom0: /wheel/odometry
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true,  true,  false,
+                   false, false, false,
+                   false, false, false]

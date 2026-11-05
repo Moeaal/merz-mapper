@@ -1,0 +1,10 @@
+# Odometry mode (a), simulation only. Gazebo's DiffDrive odometry has no covariance, like rf2o, so the same relay
+# (merz_bringup scan_odom_relay_node, run under this name) adds one: /sim/wheel_odometry_raw -> /wheel/odometry.
+# The DiffDrive plugin integrates wheel joint angles, so it drifts with wheel slip, like real encoders.
+wheel_odom_relay:
+  ros__parameters:
+    vx_std: 0.02       # m/s. Placeholder for encoders; real values depend on the encoders (decisions #10)
+    vy_std: 0.01       # m/s. Holds vy near 0 (no sideways motion)
+    vyaw_std: 0.1      # rad/s. Not fused (see ekf_wheel_mode.yaml)
+    max_speed: 1.5     # m/s
+    max_yaw_rate: 3.0  # rad/s

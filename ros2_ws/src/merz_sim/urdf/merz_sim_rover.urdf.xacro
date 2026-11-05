@@ -1,0 +1,361 @@
+<?xml version="1.0"?>
+<robot name="merz_rover" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- SIMULATION ONLY (PROPOSED). A parametric differential-drive stand-in for the unknown rover (OPEN_ISSUES #1).
+       Every number comes from config/sim_rover.yaml. The frame names are the ones the real stack uses
+       (merz_description + the RealSense driver), so merz_bringup's EKF, SLAM and Nav2 files work unchanged.
+
+       Frames: base_link (floor, centre of rotation) -> chassis, wheels, casters, mast
+               base_link -> laser
+               base_link -> camera_link -> camera_color_optical_frame, camera_depth_optical_frame,
+                                           camera_imu_optical_frame      (on the real rover the D455 driver owns these)
+               base_link -> sign_camera -> sign_camera_optical_frame
+
+       Gazebo-version-specific names (plugin file names, the frame id tag) are chosen by the gz_version argument and
+       nowhere else in this file. -->
+
+  <xacro:arg name="rover_file" default="$(find merz_sim)/config/sim_rover.yaml"/>
+  <xacro:arg name="gz_version" default="fortress"/>   <!-- fortress | harmonic -->
+  <xacro:arg name="cameras" default="true"/>           <!-- false: LIDAR + IMU only, much faster in software rendering -->
+
+  <xacro:property name="r" value="${xacro.load_yaml('$(arg rover_file)')}"/>
+  <xacro:property name="c" value="${r['chassis']}"/>
+  <xacro:property name="w" value="${r['wheels']}"/>
+  <xacro:property name="k" value="${r['casters']}"/>
+  <xacro:property name="m" value="${r['mast']}"/>
+  <xacro:property name="ld" value="${r['lidar']}"/>
+  <xacro:property name="d" value="${r['d455']}"/>
+  <xacro:property name="s" value="${r['sign_camera']}"/>
+
+  <!-- Gazebo version table. Fortress = Ignition Gazebo 6 (the binary pairing for Humble); Harmonic = Gazebo 8. -->
+  <xacro:property name="gz" value="$(arg gz_version)"/>
+  <!-- Fails the expansion (ValueError) for any other value. -->
+  <xacro:if value="${['fortress', 'harmonic'].index(gz) >= 0}"/>
+  <xacro:property name="gz_prefix" value="${'ignition-gazebo' if gz == 'fortress' else 'gz-sim'}"/>
+  <xacro:property name="gz_ns" value="${'ignition::gazebo' if gz == 'fortress' else 'gz::sim'}"/>
+  <xacro:property name="frame_tag" value="${'ignition_frame_id' if gz == 'fortress' else 'gz_frame_id'}"/>
+
+  <xacro:property name="mast_bottom" value="${c['ground_clearance'] + c['height']}"/>
+
+  <!-- Solid-body inertias (box, cylinder about its axis = z, sphere). -->
+  <xacro:macro name="box_inertia" params="mass x y z">
+    <inertia ixx="${mass * (y*y + z*z) / 12}" ixy="0" ixz="0" iyy="${mass * (x*x + z*z) / 12}" iyz="0"
+             izz="${mass * (x*x + y*y) / 12}"/>
+  </xacro:macro>
+  <xacro:macro name="cylinder_inertia" params="mass radius length">
+    <inertia ixx="${mass * (3*radius*radius + length*length) / 12}" ixy="0" ixz="0"
+             iyy="${mass * (3*radius*radius + length*length) / 12}" iyz="0" izz="${mass * radius * radius / 2}"/>
+  </xacro:macro>
+
+  <!-- A frame id element whose tag depends on the Gazebo version. -->
+  <xacro:macro name="frame_id" params="frame">
+    <xacro:element xacro:name="${frame_tag}">${frame}</xacro:element>
+  </xacro:macro>
+
+  <!-- IMU noise on one axis. -->
+  <xacro:macro name="gyro_axis" params="axis">
+    <xacro:element xacro:name="${axis}">
+      <noise type="gaussian">
+        <mean>0.0</mean>
+        <stddev>${d['gyro_noise_stddev']}</stddev>
+        <bias_mean>0.0</bias_mean>
+        <bias_stddev>${d['gyro_bias_stddev']}</bias_stddev>
+      </noise>
+    </xacro:element>
+  </xacro:macro>
+  <xacro:macro name="accel_axis" params="axis">
+    <xacro:element xacro:name="${axis}">
+      <noise type="gaussian">
+        <mean>0.0</mean>
+        <stddev>${d['accel_noise_stddev']}</stddev>
+      </noise>
+    </xacro:element>
+  </xacro:macro>
+
+  <material name="body_grey"><color rgba="0.55 0.57 0.6 1"/></material>
+  <material name="tyre_black"><color rgba="0.08 0.08 0.08 1"/></material>
+  <material name="sensor_blue"><color rgba="0.15 0.3 0.7 1"/></material>
+
+  <!-- base_link: on the floor at the centre of rotation, with no mass (KDL warns about an inertial root link). -->
+  <link name="base_link"/>
+
+  <link name="chassis">
+    <visual>
+      <geometry><box size="${c['length']} ${c['width']} ${c['height']}"/></geometry>
+      <material name="body_grey"/>
+    </visual>
+    <collision>
+      <geometry><box size="${c['length']} ${c['width']} ${c['height']}"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="${c['mass']}"/>
+      <xacro:box_inertia mass="${c['mass']}" x="${c['length']}" y="${c['width']}" z="${c['height']}"/>
+    </inertial>
+  </link>
+  <joint name="chassis_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis"/>
+    <origin xyz="0 0 ${c['ground_clearance'] + c['height'] / 2}"/>
+  </joint>
+
+  <!-- Driven wheels: the joint axis is the wheel axle (y). The cylinder is rotated so its axis lies along y. -->
+  <xacro:macro name="wheel" params="side sign">
+    <link name="${side}_wheel">
+      <visual>
+        <origin rpy="${pi/2} 0 0"/>
+        <geometry><cylinder radius="${w['radius']}" length="${w['width']}"/></geometry>
+        <material name="tyre_black"/>
+      </visual>
+      <collision>
+        <origin rpy="${pi/2} 0 0"/>
+        <geometry><cylinder radius="${w['radius']}" length="${w['width']}"/></geometry>
+      </collision>
+      <inertial>
+        <origin rpy="${pi/2} 0 0"/>
+        <mass value="${w['mass']}"/>
+        <xacro:cylinder_inertia mass="${w['mass']}" radius="${w['radius']}" length="${w['width']}"/>
+      </inertial>
+    </link>
+    <joint name="${side}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${side}_wheel"/>
+      <origin xyz="0 ${sign * w['separation'] / 2} ${w['radius']}"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+    <gazebo reference="${side}_wheel">
+      <mu1>${w['friction']}</mu1>
+      <mu2>${w['friction']}</mu2>
+    </gazebo>
+  </xacro:macro>
+  <xacro:wheel side="left" sign="1"/>
+  <xacro:wheel side="right" sign="-1"/>
+
+  <!-- Casters: spheres on fixed joints with no friction, so they slide. -->
+  <xacro:macro name="caster" params="name x">
+    <link name="${name}_caster">
+      <visual><geometry><sphere radius="${k['radius']}"/></geometry><material name="tyre_black"/></visual>
+      <collision><geometry><sphere radius="${k['radius']}"/></geometry></collision>
+      <inertial>
+        <mass value="${k['mass']}"/>
+        <inertia ixx="${0.4 * k['mass'] * k['radius']**2}" ixy="0" ixz="0" iyy="${0.4 * k['mass'] * k['radius']**2}"
+                 iyz="0" izz="${0.4 * k['mass'] * k['radius']**2}"/>
+      </inertial>
+    </link>
+    <joint name="${name}_caster_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${name}_caster"/>
+      <origin xyz="${x} 0 ${k['radius']}"/>
+    </joint>
+    <gazebo reference="${name}_caster">
+      <mu1>0.0</mu1>
+      <mu2>0.0</mu2>
+    </gazebo>
+  </xacro:macro>
+  <xacro:caster name="front" x="${k['x_offset']}"/>
+  <xacro:caster name="rear" x="${-k['x_offset']}"/>
+
+  <!-- Mast up to the sign camera. Visual only: a collision would add nothing indoors and slows physics. -->
+  <link name="mast">
+    <visual>
+      <geometry><cylinder radius="${m['radius']}" length="${s['z'] - mast_bottom}"/></geometry>
+      <material name="body_grey"/>
+    </visual>
+    <inertial>
+      <mass value="${m['mass']}"/>
+      <xacro:cylinder_inertia mass="${m['mass']}" radius="${m['radius']}" length="${s['z'] - mast_bottom}"/>
+    </inertial>
+  </link>
+  <joint name="mast_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="mast"/>
+    <origin xyz="${m['x']} ${m['y']} ${(s['z'] + mast_bottom) / 2}"/>
+  </joint>
+
+  <!-- ===== Sensors ===== -->
+  <!-- LIDAR. The housing is drawn below the scan plane so that the sensor does not see its own body. -->
+  <link name="laser">
+    <visual>
+      <origin xyz="0 0 -0.03"/>
+      <geometry><cylinder radius="0.04" length="0.04"/></geometry>
+      <material name="tyre_black"/>
+    </visual>
+  </link>
+  <joint name="laser_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser"/>
+    <origin xyz="${ld['x']} ${ld['y']} ${ld['z']}" rpy="0 0 ${ld['yaw']}"/>
+  </joint>
+  <gazebo reference="laser">
+    <sensor name="rplidar_s2" type="gpu_lidar">
+      <topic>/scan</topic>
+      <xacro:frame_id frame="laser"/>
+      <update_rate>${ld['update_rate']}</update_rate>
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>${ld['samples']}</samples>
+            <resolution>1</resolution>
+            <min_angle>${ld['min_angle']}</min_angle>
+            <max_angle>${ld['max_angle']}</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>0</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>${ld['range_min']}</min>
+          <max>${ld['range_max']}</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>${ld['noise_stddev']}</stddev>
+        </noise>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <!-- D455: camera_link faces forward (x). Gazebo cameras look along their link's x axis, so the camera sensors are
+       attached to camera_link, and their messages are stamped with the optical frame (z forward), as the real driver does. -->
+  <link name="camera_link">
+    <visual>
+      <geometry><box size="0.026 0.124 0.029"/></geometry>
+      <material name="sensor_blue"/>
+    </visual>
+  </link>
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="${d['x']} ${d['y']} ${d['z']}" rpy="0 ${d['pitch']} 0"/>
+  </joint>
+  <xacro:macro name="optical_frame" params="name parent">
+    <link name="${name}"/>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${name}"/>
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    </joint>
+  </xacro:macro>
+  <xacro:optical_frame name="camera_color_optical_frame" parent="camera_link"/>
+  <xacro:optical_frame name="camera_depth_optical_frame" parent="camera_link"/>
+  <xacro:optical_frame name="camera_imu_optical_frame" parent="camera_link"/>
+
+  <!-- The IMU sits in the optical-axes frame, like the D455's, so the EKF has to rotate it through TF exactly as on
+       the real rover. -->
+  <gazebo reference="camera_imu_optical_frame">
+    <sensor name="d455_imu" type="imu">
+      <topic>/camera/camera/imu</topic>
+      <xacro:frame_id frame="camera_imu_optical_frame"/>
+      <update_rate>${d['imu_rate']}</update_rate>
+      <always_on>true</always_on>
+      <imu>
+        <angular_velocity>
+          <xacro:gyro_axis axis="x"/>
+          <xacro:gyro_axis axis="y"/>
+          <xacro:gyro_axis axis="z"/>
+        </angular_velocity>
+        <linear_acceleration>
+          <xacro:accel_axis axis="x"/>
+          <xacro:accel_axis axis="y"/>
+          <xacro:accel_axis axis="z"/>
+        </linear_acceleration>
+      </imu>
+    </sensor>
+  </gazebo>
+
+  <xacro:if value="$(arg cameras)">
+    <!-- One RGB-D sensor gives colour and depth from the same viewpoint, i.e. already "aligned depth to colour". -->
+    <gazebo reference="camera_link">
+      <sensor name="d455_rgbd" type="rgbd_camera">
+        <topic>/camera/sim_rgbd</topic>
+        <xacro:frame_id frame="camera_color_optical_frame"/>
+        <update_rate>${d['update_rate']}</update_rate>
+        <always_on>true</always_on>
+        <camera>
+          <horizontal_fov>${d['horizontal_fov']}</horizontal_fov>
+          <image>
+            <width>${d['width']}</width>
+            <height>${d['height']}</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.05</near>
+            <far>${d['far_clip']}</far>
+          </clip>
+          <depth_camera>
+            <clip>
+              <near>${d['near_clip']}</near>
+              <far>${d['far_clip']}</far>
+            </clip>
+          </depth_camera>
+        </camera>
+      </sensor>
+    </gazebo>
+  </xacro:if>
+
+  <!-- Sign camera on top of the mast. -->
+  <link name="sign_camera">
+    <visual>
+      <origin xyz="-0.03 0 0"/>
+      <geometry><box size="0.03 0.09 0.03"/></geometry>
+      <material name="tyre_black"/>
+    </visual>
+  </link>
+  <joint name="sign_camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="sign_camera"/>
+    <origin xyz="${s['x']} ${s['y']} ${s['z']}" rpy="0 ${s['pitch']} 0"/>
+  </joint>
+  <xacro:optical_frame name="sign_camera_optical_frame" parent="sign_camera"/>
+  <xacro:if value="$(arg cameras)">
+    <gazebo reference="sign_camera">
+      <sensor name="sign_cam" type="camera">
+        <!-- Gazebo derives the info topic from this one: /sign_cam/camera_info. -->
+        <topic>/sign_cam/image_raw</topic>
+        <xacro:frame_id frame="sign_camera_optical_frame"/>
+        <update_rate>${s['update_rate']}</update_rate>
+        <always_on>true</always_on>
+        <camera>
+          <horizontal_fov>${s['horizontal_fov']}</horizontal_fov>
+          <image>
+            <width>${s['width']}</width>
+            <height>${s['height']}</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.05</near>
+            <far>30.0</far>
+          </clip>
+        </camera>
+      </sensor>
+    </gazebo>
+  </xacro:if>
+
+  <!-- ===== Model plugins ===== -->
+  <gazebo>
+    <!-- Differential drive. It reads /sim/cmd_vel (from sim_base_node, never from Nav2 directly) and publishes wheel
+         odometry on /sim/wheel_odom and a TF on /sim/wheel_tf. Neither is bridged unless odom_mode:=wheel asks
+         for the odometry; the TF is never bridged, as the EKF alone owns odom->base_link. -->
+    <plugin filename="${gz_prefix}-diff-drive-system" name="${gz_ns}::systems::DiffDrive">
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+      <wheel_separation>${w['separation']}</wheel_separation>
+      <wheel_radius>${w['radius']}</wheel_radius>
+      <topic>/sim/cmd_vel</topic>
+      <odom_topic>/sim/wheel_odom</odom_topic>
+      <tf_topic>/sim/wheel_tf</tf_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_link</child_frame_id>
+      <odom_publish_frequency>30</odom_publish_frequency>
+    </plugin>
+    <plugin filename="${gz_prefix}-joint-state-publisher-system" name="${gz_ns}::systems::JointStatePublisher">
+      <joint_name>left_wheel_joint</joint_name>
+      <joint_name>right_wheel_joint</joint_name>
+    </plugin>
+  </gazebo>
+</robot>

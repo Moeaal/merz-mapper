@@ -1,0 +1,87 @@
+# A made-up university floor, loosely like a teaching building (PROPOSED). NOT a plan of Merz Court:
+# replace it once a floor plan is available (OPEN_ISSUES #14).
+# merz_sim/world_gen.py turns this into SDF at launch time; `ros2 run merz_sim make_world` writes it to a file.
+#
+# Layout, metres (x east, y north):
+#
+#            y=7  +--R1--+--R2--+  ||  +--R4---+--R5---+
+#                 |      |      |  ||  |       |       |
+#    +-atrium-+   |  d   |  X   |  ||  |   d   |   d   |       d = open door, X = closed door
+#  W |  o  o  |===+------+------+  ++  +-------+-------+=== E  W, E, S = entrances, each with a closed porch
+#    |        |   main corridor (2 m)  junction              |
+#    +--------+===+------d------+  ++  +----X----------+===
+#                 |  R3 (lab)   |  ||  |    R6         |
+#            y=-7 +-------------+  ||  +---------------+
+#                                  S
+wall:
+  thickness: 0.15
+  height: 2.4
+
+# Each wall goes from `from` to `to`. A door is a gap `width` wide whose centre is `at` metres along the wall from `from`.
+# A closed door is drawn as a thin panel in the gap: the LIDAR sees it as a wall, as it would a real closed door.
+walls:
+  # Atrium (open area), 10 m x 10 m, with the west entrance
+  - {from: [-10, -5], to: [-10, 5], doors: [{at: 5.0, width: 2.0}]}
+  - {from: [-10, 5], to: [0, 5]}
+  - {from: [-10, -5], to: [0, -5]}
+  - {from: [0, 1], to: [0, 5]}
+  - {from: [0, -5], to: [0, -1]}
+  # West porch (outside the entrance doors): closed, so the explored area stays bounded
+  - {from: [-13, 2], to: [-10, 2]}
+  - {from: [-13, -2], to: [-10, -2]}
+  - {from: [-13, -2], to: [-13, 2]}
+
+  # Main corridor, west half (x 0 to 14) and east half (x 16 to 30)
+  - {from: [0, 1], to: [14, 1], doors: [{at: 5.0, width: 1.0}, {at: 11.0, width: 1.0, closed: true}]}
+  - {from: [0, -1], to: [14, -1], doors: [{at: 8.0, width: 1.2}]}
+  - {from: [16, 1], to: [30, 1], doors: [{at: 3.5, width: 1.0}, {at: 10.5, width: 1.0}]}
+  - {from: [16, -1], to: [30, -1], doors: [{at: 6.0, width: 1.0, closed: true}]}
+  # East entrance and porch
+  - {from: [30, -1], to: [30, 1], doors: [{at: 1.0, width: 1.4}]}
+  - {from: [30, 2], to: [33, 2]}
+  - {from: [30, -2], to: [33, -2]}
+  - {from: [33, -2], to: [33, 2]}
+  - {from: [30, 1], to: [30, 2]}
+  - {from: [30, -2], to: [30, -1]}
+
+  # Rooms north of the corridor
+  - {from: [2, 7], to: [14, 7]}
+  - {from: [16, 7], to: [30, 7]}
+  - {from: [2, 1], to: [2, 7]}
+  - {from: [8, 1], to: [8, 7]}
+  - {from: [23, 1], to: [23, 7]}
+  - {from: [30, 2], to: [30, 7]}
+  # Rooms south of the corridor
+  - {from: [2, -7], to: [14, -7]}
+  - {from: [16, -7], to: [30, -7]}
+  - {from: [2, -7], to: [2, -1]}
+  - {from: [30, -7], to: [30, -2]}
+
+  # Cross corridor (x 14 to 16) through the junction at (15, 0): dead end to the north, south entrance
+  - {from: [14, 1], to: [14, 10]}
+  - {from: [16, 1], to: [16, 10]}
+  - {from: [14, 10], to: [16, 10]}
+  - {from: [14, -10], to: [14, -1]}
+  - {from: [16, -10], to: [16, -1]}
+  - {from: [14, -10], to: [16, -10], doors: [{at: 1.0, width: 1.4}]}
+  # South porch
+  - {from: [13, -13], to: [13, -10]}
+  - {from: [17, -13], to: [17, -10]}
+  - {from: [13, -13], to: [17, -13]}
+  - {from: [13, -10], to: [14, -10]}
+  - {from: [16, -10], to: [17, -10]}
+
+# Free-standing boxes: centre, size (x, y, z), yaw. Pillars and furniture give scan matching something to lock on to.
+obstacles:
+  - {name: atrium_pillar_n, centre: [-5, 2.5], size: [0.4, 0.4, 2.4]}
+  - {name: atrium_pillar_s, centre: [-5, -2.5], size: [0.4, 0.4, 2.4]}
+  - {name: atrium_bench, centre: [-2.5, 3.8], size: [1.6, 0.5, 0.45]}
+  - {name: lab_bench, centre: [8, -4.5], size: [3.0, 0.8, 0.9]}
+  - {name: r4_desk, centre: [19.5, 5.0], size: [1.4, 0.7, 0.75]}
+  - {name: r5_cabinet, centre: [29.4, 6.2], size: [0.6, 1.2, 1.8], yaw: 0.0}
+
+# Robot start poses, just inside each entrance, facing into the building. x, y in metres, yaw in radians.
+entrances:
+  west:  {x: -9.0, y: 0.0, yaw: 0.0, name: "West entrance (atrium)"}
+  south: {x: 15.0, y: -9.0, yaw: 1.5708, name: "South entrance"}
+  east:  {x: 29.0, y: 0.0, yaw: 3.1416, name: "East entrance"}
