@@ -49,14 +49,38 @@ their GitHub sources instead.
 ## Related work (found via Consensus, 2026-11-02 - read before citing)
 | Tag | Source | Key finding |
 | --- | --- | --- |
-| L1 | C. Case et al., "Autonomous sign reading for semantic mapping," Proc. IEEE ICRA, 2011 | Closest prior work: SLAM map annotated with room numbers read from wall signs; named locations recognised in 84% of cases |
-| L2 | D. Balaban et al., "Automatic sign reading and localization for semantic mapping with an office robot," arXiv, 2022 | YOLOv5 sign detection + text recognition; placards localised from RGB-D point cloud; reports placement accuracy and text correctness |
-| L3 | X. Song et al., "Semantic mapping techniques for indoor mobile robots: Review and prospect," Measurement and Control, 2024 | Recent review for the literature-review section |
-| L4 | R. Alqobali et al., "A real-time semantic map production system for indoor robot navigation," Sensors, 2024 | LiDAR + YOLO in ROS; reports object localisation error - useful comparison for O4 |
+| L1 | C. Case et al., "Autonomous sign reading for semantic mapping," Proc. IEEE ICRA, 2011 | Closest prior work: SLAM map annotated with room numbers read from wall signs; named locations recognised in 84% of cases. Verified 2026-11-05: pp. 3297-3303, DOI 10.1109/ICRA.2011.5980523 = [LB-3.6] |
+| L2 | D. Balaban et al., "Automatic sign reading and localization for semantic mapping with an office robot," arXiv, 2022 | YOLOv5 sign detection + text recognition; placards localised from RGB-D point cloud; reports placement accuracy and text correctness. **Correction 2026-11-05:** only two authors (D. Balaban and J. Hart), so not "et al."; arXiv:2209.11432; mapping uses a modified ORB-SLAM on Azure Kinect RGB-D video = [LB-3.7] |
+| L3 | X. Song et al., "Semantic mapping techniques for indoor mobile robots: Review and prospect," Measurement and Control, 2024 | Recent review for the literature-review section. **Correction 2026-11-05:** online 2024 but in vol. 58 (2025); DOI 10.1177/00202940241259903; pages and third author's name order unverified = [LB-3.2] |
+| L4 | R. Alqobali et al., "A real-time semantic map production system for indoor robot navigation," Sensors, 2024 | LiDAR + YOLO in ROS; reports object localisation error - useful comparison for O4. Verified: vol. 24, no. 20, Art. 6691, DOI 10.3390/s24206691; results are from **simulation** = [LB-3.8] |
+
+## Literature base for the report (branch `lit-review`, 2026-11-05)
+Full IEEE references, DOIs, summaries, relevance and objectives are in `docs/research/literature_base.md`; the
+proposed review structure and research gap are in `docs/research/lit_review_outline.md`. Checked through search
+results quoting publisher pages, dblp and repositories (direct DOI/arXiv fetches were blocked); fields marked
+UNVERIFIED there still need checking on the DOI page. Key: tag, first author + year, DOI, objectives.
+| Topic | Tags (first author year, DOI) | Objectives |
+| --- | --- | --- |
+| 1 2D LIDAR SLAM | LB-1.1 Grisetti 2007 10.1109/TRO.2006.889486; 1.2 Grisetti 2010 10.1109/MITS.2010.939925; 1.3 Konolige 2010 10.1109/IROS.2010.5649043; 1.4 Hess 2016 10.1109/ICRA.2016.7487258; 1.5 Macenski 2021 10.21105/joss.02783; 1.6 Santos 2013 10.1109/SSRR.2013.6719348; 1.7 Yagfarov 2018 10.1109/ICARCV.2018.8581131; 1.8 Cadena 2016 10.1109/TRO.2016.2624754; 1.9 Kohlbrecher 2011 (DOI unverified) | O1, O2 |
+| 2 Exploration | 2.1 Yamauchi 1997 10.1109/CIRA.1997.613851; 2.2 Holz 2010 (no DOI); 2.3 Juliá 2012 10.1007/s10514-012-9298-8; 2.4 Bircher 2016 10.1109/ICRA.2016.7487281; 2.5 Umari 2017 10.1109/IROS.2017.8202319; 2.6 Oršulić 2019 10.1109/LRA.2019.2928203; 2.7 Lluvia 2021 10.3390/s21072445; 2.8 Liu 2025 10.1038/s41598-025-97231-9; 2.9 Macenski 2020 (Nav2) 10.1109/IROS45743.2020.9341207 | O2, O5 |
+| 3 Semantic mapping | 3.1 Kostavelis 2015 10.1016/j.robot.2014.12.006; 3.2 Song 2025 (=L3); 3.3 Martínez Mozos 2005 10.1109/ROBOT.2005.1570363; 3.4 Bormann 2016 10.1109/ICRA.2016.7487234; 3.5 Sünderhauf 2017 10.1109/IROS.2017.8206392; 3.6 Case 2011 (=L1); 3.7 Balaban 2022 (=L2); 3.8 Alqobali 2024 (=L4) | O3, O4, O5 |
+| 4 Scene text / OCR | 4.1 Long 2021 10.1007/s11263-020-01369-0; 4.2 Shi 2017 10.1109/TPAMI.2016.2646371; 4.3 Liao 2020 10.1609/aaai.v34i07.6812; 4.4 Du 2020 arXiv:2009.09941; 4.5 Cui 2025 arXiv:2507.05595; 4.6 Baek 2019 10.1109/ICCV.2019.00481; 4.7 Smith 2007 10.1109/ICDAR.2007.56; 4.8 Fajrianti 2024 10.3390/network4030014 | O3 |
+| 5 Embedded detection | 5.1 Redmon 2016 10.1109/CVPR.2016.91; 5.2 Terven 2023 10.3390/make5040083; 5.3 Wang 2024 (YOLOv10, NeurIPS) arXiv:2405.14458; 5.4 Ultralytics YOLO11 software; 5.5 Lema 2024 10.1016/j.vlsi.2023.102127; 5.6 Shakya 2026 10.1109/ACCESS.2025.3648968; 5.7 Alqahtani 2024 arXiv:2409.16808 | O3, O4 |
+| 6 Fusion / scan odometry | 6.1 Thrun 2005 (book); 6.2 Moore 2016 10.1007/978-3-319-08338-4_25; 6.3 Jaimez 2016 (RF2O) 10.1109/ICRA.2016.7487647; 6.4 Censi 2008 10.1109/ROBOT.2008.4543181; 6.5 Olson 2009 10.1109/ROBOT.2009.5152375; 6.6 Zhang 2016 10.1109/ICRA.2016.7487211; 6.7 Li 2021 10.1109/JSEN.2019.2910826; 6.8 Kudriashov 2026 (DOI unverified); 6.9 Macenski 2023 10.1016/j.robot.2023.104493 | O1, O8 |
+| 7 Landmark localisation | 7.1 Martins 2020 10.1007/s10846-019-01136-5; 7.2 Rollo 2023 10.1109/ECMR59166.2023.10256373; 7.3 Nicholson 2019 10.1109/LRA.2018.2866205; 7.4 Keselman 2017 10.1109/CVPRW.2017.167; 7.5 Zhang 2000 10.1109/34.888718 | O4, O8 |
+| 8 Visitor wayfinding | 8.1 Fallah 2013 10.1093/iwc/iws010; 8.2 Kunhoth 2020 10.1186/s13673-020-00222-0; 8.3 Zafari 2019 10.1109/COMST.2019.2911558; 8.4 Mulloni 2009 10.1109/MPRV.2009.30; 8.5 Beeharee 2006 10.1145/1152215.1152233; 8.6 May 2003 10.1007/s00779-003-0248-5; 8.7 Garrido-Jurado 2014 10.1016/j.patcog.2014.01.005; 8.8 Tünger 2022 10.4305/METU.JFA.2022.2.4; 8.9 Fajrianti 2023 10.3390/info14070359 | O6, O7 |
+| 9 Evaluation | 9.1 Kümmerle 2009 10.1007/s10514-009-9155-6; 9.2 Sturm 2012 10.1109/IROS.2012.6385773; 9.3 Zhang 2018 10.1109/IROS.2018.8593941; 9.4 Filatov 2017 10.23919/FRUCT.2017.8250173; 9.5 Schwertfeger 2016 10.1007/s10514-015-9493-5; 9.6 Amigoni 2009 10.1007/s10514-009-9137-8; 9.7 JCGM 100:2008 10.59161/JCGM100-2008E | O2, O4, O8 |
 
 ## Tool notes
 - Context7 does not index `robot_localization` (checked 2026-11-02); use docs.ros.org for ROS packages.
+- 2026-11-05 cloud session: doi.org, arXiv, Crossref, OpenAlex and JOSS were blocked for direct fetch. WebSearch and
+  Consensus still worked; dblp and repository records in search results gave DOIs and pages.
 
 ## To find (for literature review)
-- Evaluation methods for 2D occupancy map accuracy against floor plans.
-- Robot-built maps for indoor wayfinding / QR-anchored navigation.
+- ~~Evaluation methods for 2D occupancy map accuracy against floor plans.~~ Covered: LB-1.7, LB-9.1, LB-9.4, LB-9.5.
+- Robot-built maps for indoor wayfinding / QR-anchored navigation: QR wayfinding covered (LB-8.4, LB-8.8, LB-8.9);
+  **no source found where a robot-built map feeds visitor directions** - one more targeted search before claiming
+  the gap in the report.
+- A peer-reviewed real-robot SLAM Toolbox vs Cartographer comparison (only preprints found so far).
+- Fill the UNVERIFIED fields in `docs/research/literature_base.md` from the DOI pages.
+- Proposal refs [1]-[10] are not in the repo; add them here so they can be checked.
