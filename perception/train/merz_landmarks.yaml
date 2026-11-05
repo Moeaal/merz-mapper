@@ -1,0 +1,16 @@
+# PROPOSED Ultralytics dataset file for the Merz Court landmark model. Not trained yet.
+# Folder layout made by split_dataset.py (images and YOLO .txt labels side by side):
+#   <path>/images/train  <path>/labels/train
+#   <path>/images/val    <path>/labels/val
+# Class names must match ros2_ws/src/merz_perception/config/perception.yaml (allowed_labels) when this moves to ROS.
+# NOTE: the ROS config calls the sign class 'room_sign'; this prototype uses 'door_sign'. Pick one name before
+# training (decision needed; see docs/research/perception_plan.md, section 7).
+path: ../../data/merz_landmarks   # relative to this file; keep photos out of git (privacy + repo size)
+train: images/train
+val: images/val
+names:
+  0: door
+  1: lift
+  2: stairs
+  3: exit_sign
+  4: door_sign

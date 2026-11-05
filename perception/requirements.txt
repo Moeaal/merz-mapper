@@ -1,0 +1,11 @@
+# PROPOSED prototype dependencies (Python 3.12). Versions are the ones run on 2026-11-05 in a cloud container.
+numpy
+pyyaml
+opencv-python-headless   # use opencv-python instead if you want the webcam --show window
+pillow                   # synthetic sample generator only
+pytest
+paddleocr>=3.0           # ran 3.7.0 install only; its models could not be downloaded in the cloud session
+paddlepaddle             # CPU build; GPU/Jetson builds differ (see the merz-perception-jetson skill)
+rapidocr_onnxruntime     # fallback OCR with bundled PP-OCR ONNX models; ran 1.4.4
+ultralytics              # YOLO / YOLOE; ran 8.4.202
+# YOLOE text prompts also need: pip install "git+https://github.com/ultralytics/CLIP.git"

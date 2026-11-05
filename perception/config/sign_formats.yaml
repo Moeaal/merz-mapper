@@ -1,0 +1,36 @@
+# PROPOSED. Room-number formats for Merz Court door signs.
+# The real format is UNKNOWN until signs are photographed (perception/PHOTO_CHECKLIST.md). After the photo walk,
+# list every distinct format seen, replace the placeholder patterns below, and re-run tests + score_ocr.py.
+#
+# Each pattern must match a whole token (Python re.fullmatch) after normalising: uppercase, spaces removed,
+# only A-Z 0-9 . - kept. Keep patterns tight: a loose pattern turns random words into "room numbers".
+room_patterns:
+  # Placeholder, same as ros2_ws/src/merz_perception/config/perception.yaml (room_regex): an optional letter,
+  # 1-2 digits, an optional dot, then 1-3 digits, e.g. M4.13, 2.07, M413.
+  - '[A-Z]?\d{1,2}\.?\d{1,3}'
+  # Example of a second format, disabled until seen on a real sign (letter suffix, e.g. M4.13A):
+  # - '[A-Z]\d{1,2}\.\d{1,3}[A-Z]'
+
+# How many leading characters may be genuine letters (never "repaired" to digits).
+prefix_letters: 1
+
+# Pipeline settings.
+sign_label: door_sign        # detector class whose crops are sent to OCR
+crop_margin: 0.10            # grow each sign box by 10% per side before OCR
+min_crop_height: 96          # upscale crops shorter than this (pixels)
+min_sharpness: 0.0           # 0 = never reject; set from real crops later (variance of Laplacian)
+
+# Detector settings (see merz_signs/detector.py). Default = none, so OCR can be tested on cropped photos today.
+detector:
+  mode: none                 # none | yoloe | yolo
+  weights: yoloe-11s-seg.pt  # yoloe mode; for yolo mode use the fine-tuned merz_landmarks.pt (or .engine)
+  confidence: 0.25
+  image_size: 640
+  # yoloe mode only: text prompt -> pipeline label. Zero-shot stopgap until the custom model is trained.
+  prompts:
+    door sign: door_sign
+    room number sign: door_sign
+    door: door
+    elevator door: lift
+    staircase: stairs
+    exit sign: exit_sign
