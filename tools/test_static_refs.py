@@ -23,6 +23,7 @@ THIRD_PARTY_EXECUTABLES = {
     ('slam_toolbox', 'async_slam_toolbox_node'), ('robot_state_publisher', 'robot_state_publisher'), ('rviz2', 'rviz2'),
     ('explore_lite', 'explore'), ('nav2_map_server', 'map_server'), ('nav2_map_server', 'costmap_filter_info_server'),
     ('nav2_lifecycle_manager', 'lifecycle_manager'),
+    ('ros_gz_sim', 'create'), ('ros_gz_bridge', 'parameter_bridge'), ('depth_image_proc', 'point_cloud_xyz_node'),
 }
 
 
@@ -58,7 +59,7 @@ def yaml_sections(package: str, file_name: str) -> set[str]:
 def test_the_workspace_was_found():
     assert len(LAUNCH_FILES) >= 12
     assert set(PACKAGES) == {'merz_interfaces', 'merz_description', 'merz_bringup', 'merz_perception',
-                             'merz_semantic_map', 'merz_exploration', 'merz_base'}
+                             'merz_semantic_map', 'merz_exploration', 'merz_base', 'merz_sim'}
 
 
 @pytest.mark.parametrize('path', sorted(SRC.rglob('*.yaml')), ids=lambda p: p.name)
