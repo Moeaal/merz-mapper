@@ -1,5 +1,5 @@
 """Make one printable A4 QR poster per entrance (PNG each, plus one PDF with them all), in the website's design
-(docs/WEBSITE_DESIGN.md). The QR code opens the website at that entrance. The robot's own map is printed faintly
+(docs/website/design-brief.md). The QR code opens the website at that entrance. The robot's own map is printed faintly
 behind, with the entrance marked.
 
     python web/qr_posters.py --database web/data/sample/api/merz.sqlite --base-url https://<user>.github.io/merz-mapper --out posters

@@ -43,7 +43,7 @@ ekf_filter_node:
     imu0_remove_gravitational_acceleration: false
 
     # Trust in the motion model, per state. Higher means trust measurements more.
-    # TODO: measure on rover. Tune with the stationary and square-path tests in docs/BUILD_GUIDE.md section 5.
+    # TODO: measure on rover. Tune with the stationary and square-path tests in docs/runbooks/build-guide.md section 5.
     process_noise_covariance: [0.05, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,   0.0,   0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
                                0.0,  0.05, 0.0,  0.0,  0.0,  0.0,  0.0,   0.0,   0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
                                0.0,  0.0,  0.06, 0.0,  0.0,  0.0,  0.0,   0.0,   0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,

@@ -3,7 +3,7 @@
     python train/split_dataset.py --src labelled/ --out ../data/merz_landmarks --val-areas F3-east
 
 Why by area: photos of the same sign from 1 m and 2 m are near-duplicates. A random photo split puts one in train and
-one in val, so the val score flatters the model (docs/EXPERIMENTS.md, O3 threats: "hold back one corridor").
+one in val, so the val score flatters the model (docs/planning/experiments.md, O3 threats: "hold back one corridor").
 
 Expects photo names that start with an area tag, as in the checklist: <area>_<sign-or-landmark>_<nn>.jpg
 (e.g. F3-east_M3.12_04.jpg), with a YOLO .txt label next to each image (Label Studio "YOLO" export or CVAT

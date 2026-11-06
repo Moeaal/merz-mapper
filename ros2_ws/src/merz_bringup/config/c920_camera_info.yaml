@@ -1,5 +1,5 @@
 # TODO: measure on rover. PLACEHOLDER intrinsics, NOT a calibration: replace this file with the output of
-# `ros2 run camera_calibration cameracalibrator` (see docs/BUILD_GUIDE.md, section 5).
+# `ros2 run camera_calibration cameracalibrator` (see docs/runbooks/build-guide.md, section 5).
 image_width: 1920
 image_height: 1080
 camera_name: sign_camera

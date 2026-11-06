@@ -1,7 +1,7 @@
 # Evaluation tools
 
 **Status: IMPLEMENTED - not yet used on real data.** Only tested with synthetic data. These produce no result for the
-report until real runs exist. Procedures, ground truth and pass rules are in `docs/EXPERIMENTS.md`.
+report until real runs exist. Procedures, ground truth and pass rules are in `docs/planning/experiments.md`.
 
 | Script | Objective | Input |
 | --- | --- | --- |

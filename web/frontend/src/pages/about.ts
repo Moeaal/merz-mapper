@@ -62,7 +62,7 @@ export default async function about(ctx: PageContext) {
         h('li', {}, h('span', { class: 'mono', text: 'Next' }), 'Assemble the rover, bring up each sensor, record the first map by driving it by hand.'),
         h('li', {}, h('span', { class: 'mono', text: 'Then' }), 'Explore Merz Court autonomously, one entrance at a time, and measure every objective.'),
         h('li', {}, h('span', { class: 'mono', text: 'Finally' }), 'Replace the synthetic sample data on this site with the rover’s own run, using one command.'))),
-    h('footer', { class: 'site-footer' }, h('p', { class: 'small muted', text: 'EEE3094 individual project. Design notes: docs/WEBSITE_DESIGN.md.' })));
+    h('footer', { class: 'site-footer' }, h('p', { class: 'small muted', text: 'EEE3094 individual project. Design notes: docs/website/design-brief.md.' })));
   reveal(root.querySelectorAll('.about-hero > *'), 0.05, 0.1);
   revealOnScroll(root);
   animateExploded(exploded);

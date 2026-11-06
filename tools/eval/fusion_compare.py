@@ -4,7 +4,7 @@
 
 For each landmark seen at least --min-observations times, this compares the error of a single observation (the first, as
 if the robot had looked once) with the fused estimate (the mean of all observations). Because both use the same landmarks,
-the comparison is paired. The primary O8 comparison has still to be agreed with the supervisor (see docs/EXPERIMENTS.md).
+the comparison is paired. The primary O8 comparison has still to be agreed with the supervisor (see docs/planning/experiments.md).
 """
 from __future__ import annotations
 

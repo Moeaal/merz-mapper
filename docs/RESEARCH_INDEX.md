@@ -55,8 +55,8 @@ their GitHub sources instead.
 | L4 | R. Alqobali et al., "A real-time semantic map production system for indoor robot navigation," Sensors, 2024 | LiDAR + YOLO in ROS; reports object localisation error - useful comparison for O4. Verified: vol. 24, no. 20, Art. 6691, DOI 10.3390/s24206691; results are from **simulation** = [LB-3.8] |
 
 ## Literature base for the report (branch `lit-review`, 2026-11-05)
-Full IEEE references, DOIs, summaries, relevance and objectives are in `docs/research/literature_base.md`; the
-proposed review structure and research gap are in `docs/research/lit_review_outline.md`. Checked through search
+Full IEEE references, DOIs, summaries, relevance and objectives are in `docs/research/literature-base.md`; the
+proposed review structure and research gap are in `docs/research/lit-review-outline.md`. Checked through search
 results quoting publisher pages, dblp and repositories (direct DOI/arXiv fetches were blocked); fields marked
 UNVERIFIED there still need checking on the DOI page. Key: tag, first author + year, DOI, objectives.
 | Topic | Tags (first author year, DOI) | Objectives |
@@ -82,5 +82,5 @@ UNVERIFIED there still need checking on the DOI page. Key: tag, first author + y
   **no source found where a robot-built map feeds visitor directions** - one more targeted search before claiming
   the gap in the report.
 - A peer-reviewed real-robot SLAM Toolbox vs Cartographer comparison (only preprints found so far).
-- Fill the UNVERIFIED fields in `docs/research/literature_base.md` from the DOI pages.
+- Fill the UNVERIFIED fields in `docs/research/literature-base.md` from the DOI pages.
 - Proposal refs [1]-[10] are not in the repo; add them here so they can be checked.

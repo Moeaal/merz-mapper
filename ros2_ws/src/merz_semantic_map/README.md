@@ -2,7 +2,7 @@
 
 **Status: IMPLEMENTED - not yet built or tested on hardware.**
 
-Works out where each detected landmark is in the map (O4) and stores it in SQLite (O6). Schema: `docs/DATABASE_SCHEMA.md`.
+Works out where each detected landmark is in the map (O4) and stores it in SQLite (O6). Schema: `docs/software/database-schema.md`.
 
 ## How it works
 For each detection from the D455:

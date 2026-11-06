@@ -11,7 +11,7 @@ sudo apt install ros-humble-usb-cam ros-humble-joy ros-humble-teleop-twist-joy r
   ros-humble-rosbag2-storage-mcap ros-humble-robot-localization ros-humble-slam-toolbox \
   ros-humble-navigation2 ros-humble-nav2-bringup ros-humble-xacro ros-humble-camera-calibration
 # sllidar_ros2, rf2o and m-explore-ros2 are source builds: see ros2_ws/merz.repos
-# librealsense + realsense2_camera: RSUSB source build, see docs/BUILD_GUIDE.md section 3 (OPEN_ISSUES #3)
+# librealsense + realsense2_camera: RSUSB source build, see docs/runbooks/build-guide.md section 3 (OPEN_ISSUES #3)
 ```
 
 ## One sensor at a time
@@ -63,9 +63,9 @@ Software stops are not proof the wheels stop. These checks have not yet been don
 - [ ] First run with the **wheels off the ground**: test that the deadman stops teleop, that holding it halts autonomy,
       and that stopping the publishers of `/cmd_vel_mux` stops the motors within `command_timeout_s`.
 - [ ] Kill `base_node` with `kill -9` while the wheels turn. The node's timeout cannot act once it is dead, so the
-      wheels stop only if the motor controller has its own watchdog (docs/REVIEW.md R1, decisions #19).
+      wheels stop only if the motor controller has its own watchdog (docs/software/safety-review.md R1, decisions #19).
 - [ ] Switch the gamepad off while holding the deadman with a stick deflected: `/cmd_vel_teleop` must stop
-      (docs/REVIEW.md R2).
+      (docs/software/safety-review.md R2).
 - [ ] Footprint and speed limits in `nav2.yaml` measured, not placeholders. First runs at reduced `max_vel_x`.
 - [ ] TF checked in RViz: scan lines up with the walls and the rover faces the right way.
 - [ ] Test area clear, permission to test obtained (minutes 2026-11-02), and people nearby informed.

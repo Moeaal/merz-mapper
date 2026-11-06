@@ -2,10 +2,10 @@
 
 **Status: IMPLEMENTED - not yet built or tested on hardware.** This code was written on a Windows laptop with no ROS 2.
 A cloud check on ROS 2 Humble (RoboStack, 2026-11-04) passed `colcon build` and `colcon test`; it has not yet been built on the
-Jetson or Pi (`docs/BUILD_PROGRESS.md`).
+Jetson or Pi (`docs/archive/build-progress.md`).
 
 **Target:** ROS 2 Humble, Ubuntu 22.04, JetPack 6.x (decisions #6, still PROPOSED). The full step-by-step
-procedure is in `docs/BUILD_GUIDE.md`.
+procedure is in `docs/runbooks/build-guide.md`.
 
 ## Packages
 | Package | Purpose | Type |
@@ -17,6 +17,7 @@ procedure is in `docs/BUILD_GUIDE.md`.
 | `merz_semantic_map` | Landmark localisation and the SQLite database | ament_python |
 | `merz_exploration` | Frontier exploration, access zones, junction photos, mission end | ament_python |
 | `merz_base` | `/cmd_vel` to motors, with a command timeout | ament_python |
+| `merz_sim` | Gazebo simulation of the rover and a made-up floor, for SLAM, Nav2 and exploration (never launched yet) | ament_python |
 
 ## Design rule
 Every package keeps its logic in plain Python modules with no `rclpy` import, and wraps them in a thin

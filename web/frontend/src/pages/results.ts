@@ -143,7 +143,7 @@ export default async function results(ctx: PageContext) {
   }
 
   root.append(gallery(ctx));
-  root.append(h('footer', { class: 'site-footer' }, h('p', { class: 'small muted', text: 'Procedures and pass rules: docs/EXPERIMENTS.md. An objective is only called TESTED once its result is logged in docs/logbook.' })));
+  root.append(h('footer', { class: 'site-footer' }, h('p', { class: 'small muted', text: 'Procedures and pass rules: docs/planning/experiments.md. An objective is only called TESTED once its result is logged in docs/logbook.' })));
   revealOnScroll(root);
 
   const scene = await ctx.scene();

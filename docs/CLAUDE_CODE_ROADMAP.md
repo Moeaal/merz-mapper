@@ -23,7 +23,7 @@ Rules for this stage:
 ```
 
 ## Stages
-Stages 1-11 were written together on branch `build/all-code` (`docs/BUILD_ALL_PROMPT.md`). "Implemented, untested" means the code exists and its pure-Python unit tests pass on Windows, but it has not been built with colcon or run on hardware. Stage 11 was written before the rover's spec was known.
+Stages 1-11 were written together on branch `build/all-code` (`docs/archive/build-all-prompt.md`). "Implemented, untested" means the code exists and its pure-Python unit tests pass on Windows, but it has not been built with colcon or run on hardware. Stage 11 was written before the rover's spec was known.
 
 - [x] **1. Workspace and interfaces [Pi]** - implemented, untested
 ```
@@ -89,7 +89,7 @@ Stage 9: tools/eval/ for O2-O8. Scripts: map coverage vs a corridor polygon; wal
 (mean, max, RMSE of distances); OCR read rate vs a manual sign list; landmark error vs laser-measured ground
 truth; fused vs single-sensor comparison; access zones vs manual survey table; route-query timing. Each script
 takes files as input, prints a table and saves report-ready plots (labelled axes, units). Unit tests with
-synthetic data. Write docs/EXPERIMENTS.md with the procedure for each objective (ground truth, repeats, pass/fail).
+synthetic data. Write docs/planning/experiments.md with the procedure for each objective (ground truth, repeats, pass/fail).
 ```
 - [x] **10. Demonstrator website [Laptop]** (keep small - demonstrator only) - implemented, untested
 ```
@@ -108,4 +108,4 @@ from params. Ask me before guessing anything about the motor interface.
 
 ## After the hardware arrives (not code-writing - measuring)
 Measure sensor poses -> update YAML; calibrate C920; tune EKF covariances (stationary + square-path tests);
-record rosbags; first manual map (G1, by 18 Dec). Ask Claude Code: "help me run and log test X from EXPERIMENTS.md".
+record rosbags; first manual map (G1, by 18 Dec). Ask Claude Code: "help me run and log test X from docs/planning/experiments.md".

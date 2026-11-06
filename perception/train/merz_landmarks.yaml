@@ -4,7 +4,7 @@
 #   <path>/images/val    <path>/labels/val
 # Class names must match ros2_ws/src/merz_perception/config/perception.yaml (allowed_labels) when this moves to ROS.
 # NOTE: the ROS config calls the sign class 'room_sign'; this prototype uses 'door_sign'. Pick one name before
-# training (decision needed; see docs/research/perception_plan.md, section 7).
+# training (decision needed; see docs/research/perception-plan.md, section 7).
 path: ../../data/merz_landmarks   # relative to this file; keep photos out of git (privacy + repo size)
 train: images/train
 val: images/val
