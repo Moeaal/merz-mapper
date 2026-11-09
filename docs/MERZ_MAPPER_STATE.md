@@ -25,7 +25,7 @@
 - Repo tidy-up (PR #14, merged 2026-11-06): docs sorted into `planning/`, `runbooks/`, `software/`, `website/`, `research/`, `archive/` (index: `docs/INDEX.md`); new root README; `tools/test_md_links.py` checks Markdown links. No robot code changed.
 - 2026-11-07: student ran the perception prototype on a Windows laptop (synthetic crops + laptop webcam, `--ocr rapid`). Result to be logged. OpenCV headless/GUI conflict found and documented in `perception/README.md`.
 - Memory sync (branch `memory-sync-2026-11-09`): applied PR #10-#14 suggestions to decisions, OPEN_ISSUES, HARDWARE_REGISTER, RESEARCH_INDEX, SOFTWARE_ARCHITECTURE; ported the OCR split-row fix into `merz_perception` (decisions #24, unit tests only); logbook drafts for 5-7 Nov (student to add hours + reflection).
-- Hardware: parts list ordered by supervisor; delivery expected within days of 3 Nov, rover arriving with them; rover CAD to be shared. Gamepad, mast, mounts, checkerboard, QR posters not yet ordered.
+- Hardware: parts list ordered by supervisor; delivery expected within days of 3 Nov, rover arriving with them; rover CAD to be shared. Gamepad, mast, checkerboard, QR posters: already owned (student, 2026-11-09).
 - Rover: university-built simple rover; spec unknown until received.
 - Confirmed 2026-11-02: QR + phone image-to-image navigation for demonstrator (decisions #12); Claude use allowed (#13).
 - Encoders: **none** (decisions #10, DECIDED by student 2026-11-09) -> odometry from LIDAR scan matching + D455 IMU.
