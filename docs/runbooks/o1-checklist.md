@@ -92,7 +92,7 @@ go on to the next Tier 1 item; do not start Tier 2. Tier 3 waits until Tier 1 is
 - [ ] **Long plain corridor bag**: does `/odom_scan` keep counting? If not, tell Dr Wright at once (OPEN_ISSUES #17)
 - [ ] EKF 2 m square, 3 times each way (build-guide.md §5)
 - [ ] D455 flat-wall test at 1, 2, 3 and 4 m (build-guide.md §5)
-- [ ] Test whether `m-explore-ros2` `main` builds on apt Humble (runbook §4.4); if so, propose replacing the pin in decisions #19
+- [ ] Test whether `m-explore-ros2` `main` builds on apt Humble (runbook §4.4); if so, propose replacing the pin in decisions #19b
 - [ ] Power budget: measured current of each device and of the whole rig; battery runtime estimate (O1 threat in experiments.md)
 
 ## Tier 3: useful before leave, but not O1 (only if Tier 1 and 2 are done)

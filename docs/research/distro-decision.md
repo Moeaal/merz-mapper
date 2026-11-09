@@ -138,7 +138,7 @@ failed on the cloud RoboStack Humble build (build-progress.md). However, Humble'
 `0b54e91` (2025-07-24, "Change tf2_ros C to C++ headers (backport #807)"), first in tag 0.25.16 (2025-07-25). The current Humble
 release is **0.25.24** [S3, S29]. Upstream `m-explore-ros2` CI also builds Humble [S31]. So `main` (now `326cf8a`, 2026-06-02,
 which includes upstream #51) **probably builds on apt Humble on the Jetson**; the RoboStack build most likely had an older
-geometry2. This is an inference: test it on the Jetson (runbook step 4.4) before changing decisions #19.
+geometry2. This is an inference: test it on the Jetson (runbook step 4.4) before changing decisions #19b.
 
 ---
 

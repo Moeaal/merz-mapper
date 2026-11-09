@@ -193,14 +193,14 @@ cd ~/merz-mapper/ros2_ws
 colcon build --packages-select rf2o_laser_odometry         # decisions #14: Humble support proved only in the cloud so far
 colcon build --packages-select sllidar_ros2
 colcon build --packages-up-to realsense2_camera            # slow; add --parallel-workers 2 on a 4 GB module
-colcon build --packages-up-to explore_lite                 # pinned commit 926033f (decisions #19)
+colcon build --packages-up-to explore_lite                 # pinned commit 926033f (decisions #19b)
 colcon build --symlink-install                             # everything
 source install/setup.bash && echo "source ~/merz-mapper/ros2_ws/install/setup.bash" >> ~/.bashrc
 colcon test && colcon test-result --verbose
 ```
 **Extra check (do not change `merz.repos` yet):** in a scratch workspace, test whether `m-explore-ros2` **`main`** now builds on apt Humble.
 Humble's geometry2 has had the `tf2_ros/*.hpp` headers since 0.25.16 (July 2025), and the current release is 0.25.24
-(distro-decision.md §3.3) [S29]. If it builds, propose replacing the pin in decisions #19, which would bring back upstream #51.
+(distro-decision.md §3.3) [S29]. If it builds, propose replacing the pin in decisions #19b, which would bring back upstream #51.
 ```bash
 mkdir -p ~/scratch_ws/src && cd ~/scratch_ws/src && git clone https://github.com/robo-friends/m-explore-ros2.git
 cd ~/scratch_ws && colcon build --packages-select explore_lite && git -C src/m-explore-ros2 rev-parse HEAD

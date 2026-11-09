@@ -29,6 +29,26 @@ python -m venv .venv && .venv/bin/pip install -r perception/requirements.txt
 On Windows use `.venv\Scripts\pip`. The first PaddleOCR run downloads its models. If that fails, use `--ocr rapid`
 (the models ship in the pip wheel).
 
+### Windows (PowerShell), one command per line
+PowerShell 5 does not accept `&&`, and the paths use `\Scripts\` instead of `/bin/`. From inside `perception\`:
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1          # if blocked: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+pip install -r requirements.txt     # if paddlepaddle/paddleocr fail, they are not needed for --ocr rapid
+python samples\make_synthetic_signs.py
+```
+`samples/synthetic/` is generated, not committed: run `make_synthetic_signs.py` before the commands below.
+
+**Webcam (`--show`) needs the GUI build of OpenCV.** `requirements.txt` installs `opencv-python-headless`, which
+has no preview window. `opencv-python` and `opencv-python-headless` share one `cv2` folder, so uninstalling one breaks
+the other (`module 'cv2' has no attribute 'VideoCapture'`). Remove all variants, then install one cleanly:
+```powershell
+pip uninstall -y opencv-python opencv-python-headless opencv-contrib-python opencv-contrib-python-headless
+pip install --force-reinstall --no-cache-dir opencv-python
+python run.py --source 0 --detector none --ocr rapid --show
+```
+Re-running `pip install -r requirements.txt` brings the headless build back; repeat the two lines above if it does.
+
 ## Run
 ```bash
 cd perception

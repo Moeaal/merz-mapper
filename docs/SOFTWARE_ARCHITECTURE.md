@@ -17,6 +17,8 @@ Design rule: each package keeps its logic in plain Python modules with no `rclpy
 | `merz_semantic_map` | `landmark_node`, SQLite database | O4, O6, O8 | IMPLEMENTED |
 | `merz_exploration` | explore_lite launch; `access_zone_node`, `junction_photo_node`, `mission_node`; `compute_access_zones` | O2, O5, O7 | IMPLEMENTED |
 | `merz_base` | `base_node`: serial, Jetson GPIO and mock backends, timeout, limits | O1 | IMPLEMENTED (rover unknown; mock by default) |
+| `merz_sim` | Gazebo simulation: parametric diff-drive rover, generated 3-entrance world, `odom_mode:=wheel|scan`; reuses the real `merz_bringup` configs (decisions #23) | O1, O2 | IMPLEMENTED (unit tests only; never built or launched) |
+| `perception/` (not ROS) | Laptop prototype: detector -> sign crop -> OCR -> room regex -> JSON; `score_ocr.py` for O3; training scripts | O3 | IMPLEMENTED (synthetic images and a laptop webcam only) |
 | `web/` (not ROS) | FastAPI route API, mobile page, QR posters, sample data | O6, O7 | IMPLEMENTED (sample data only) |
 | `tools/eval/` (not ROS) | Scripts for O2-O8 | O2-O8 | IMPLEMENTED (synthetic data only) |
 
@@ -28,6 +30,7 @@ Design rule: each package keeps its logic in plain Python modules with no `rclpy
 | `merz_bringup mapping` | Manual mapping for G1: sensors, teleop, base, localisation, SLAM |
 | `merz_bringup explore_from_entrance entrance:=X` | Full autonomy run |
 | `merz_bringup record_bag` | Rosbag of a run |
+| `merz_sim sim odom_mode:=scan` | Simulated rover + world with the real SLAM/Nav2/exploration configs (needs an x86 Ubuntu PC) |
 
 ## Data flow
 ```
