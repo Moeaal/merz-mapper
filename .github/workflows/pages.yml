@@ -32,6 +32,8 @@ jobs:
       - name: Export the static site
         run: python tools/web_export.py --out _site --base "/${{ github.event.repository.name }}/"
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
