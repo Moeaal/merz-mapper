@@ -5,7 +5,7 @@
 > **TESTED** (measured result logged), **PLANNED** (in proposal), **PROPOSED**
 > (suggested, not agreed), **UNKNOWN**.
 
-**Last updated:** 2026-11-09 | **Phase:** Proposal submitted; hardware procurement (pre-O1)
+**Last updated:** 2026-11-09 (pm) | **Phase:** Proposal submitted; hardware procurement (pre-O1)
 
 ## Where things stand
 - Repo: memory docs, Claude Code config (PR #1 merged 2026-11-02). All pre-hardware code written on `build/all-code` (2026-11-03), merged to `main` via PR #2.
@@ -28,8 +28,19 @@
 - Hardware: parts list ordered by supervisor; delivery expected within days of 3 Nov, rover arriving with them; rover CAD to be shared. Gamepad, mast, mounts, checkerboard, QR posters not yet ordered.
 - Rover: university-built simple rover; spec unknown until received.
 - Confirmed 2026-11-02: QR + phone image-to-image navigation for demonstrator (decisions #12); Claude use allowed (#13).
-- Encoders: supervisor suggests none (decisions #10, PROPOSED) -> odometry from LIDAR scan matching + D455 IMU.
+- Encoders: **none** (decisions #10, DECIDED by student 2026-11-09) -> odometry from LIDAR scan matching + D455 IMU.
 - Practice: supervisor's YOLO webcam script in `tools/yolo_practice/` (not robot code); Raspberry Pi 5 with Ubuntu + ROS 2 installed for learning (distro to confirm). Laptop dual-boot abandoned (BitLocker).
+
+## Settled by the student - do NOT raise again
+(2026-11-09. The student owns engineering choices; only bring to the supervisor what truly needs him.)
+- **No wheel encoders** (decisions #10). Only if the D455 IMU or scan matching fails in practice will wheel encoders be requested (decisions #22, OPEN_ISSUES #17, #22).
+- **OS / JetPack / ROS 2 distro is the student's choice**, made and solved at bring-up. Not a supervisor question.
+- **Testing in Merz Court is allowed** (university-supervised project).
+- **No floor plan needed.** O2 wall check uses laser-meter measurements (OPEN_ISSUES #14).
+- **No extra PC.** Development happens on the Jetson when it arrives; the simulation is optional.
+- **Gamepad, mast, checkerboard, QR posters: already owned.**
+- **Battery, controller, mounting: checked when the parts arrive**, not before.
+- Focus advice on **what can be done now**, not on future hardware questions.
 
 ## Key dates
 | What | Date | Notes |
@@ -46,15 +57,14 @@
 2. ROS 2 tutorials on the Pi 5 (nodes, topics, launch). First real check is `colcon build` on the Pi, including rf2o (decisions #14); a cloud Humble build already passed.
 3. 3D design of mast/sensor mounts once rover CAD arrives.
 4. Inspect parts and rover on arrival; fill HARDWARE_REGISTER.
-5. Next meeting: encoders (#10), distro + D455 IMU risk and fallback (questions in `docs/research/distro-decision.md` §6), floor plan, test permission, risk assessment, privacy/ethics for corridor photos, x86 Ubuntu PC for Gazebo, unlisted parts.
+5. Supervisor meetings: progress update, agreed actions, rover CAD and parts collection only (see "Settled" above).
 6. Merz Court photo walk for perception data (`perception/PHOTO_CHECKLIST.md`); record the room-sign format (OPEN_ISSUES #23).
 7. Flash Jetson, install ROS 2, bring up each sensor one at a time (`docs/runbooks/jetson-bringup.md`), record bags.
 
 ## Active blockers
 - Rover spec unknown until received (OPEN_ISSUES #1).
-- ROS 2 distro / JetPack undecided (OPEN_ISSUES #2); PROPOSED JetPack 6.2.x + Humble awaits Dr Wright.
-- D455 IMU on JetPack 6 may not work; the no-encoder odometry plan depends on it (OPEN_ISSUES #22).
-- Encoder plan and proposal wording ("wheel odometry") unresolved until next meeting (OPEN_ISSUES #15).
+- Parts and Jetson not yet arrived; distro chosen by the student at bring-up (OPEN_ISSUES #2).
+- Watch item (not a blocker): D455 IMU on JetPack 6 - day-1 test; fallback wheel encoders (OPEN_ISSUES #22).
 
 ## Memory files
 `docs/INDEX.md` (all docs by category) | `docs/decisions.md` (engineering decisions) | `docs/HARDWARE_REGISTER.md` | `docs/SOFTWARE_ARCHITECTURE.md` | `docs/OPEN_ISSUES.md` | `docs/RESEARCH_INDEX.md` | `docs/logbook/` | `docs/meetings/` | `docs/CLAUDE_CODE_ROADMAP.md` (code build plan, stage prompts) | `docs/runbooks/build-guide.md` (hardware procedure) | `docs/planning/hardware-arrival-plan.md` (day-by-day timeline) | `docs/planning/experiments.md` | `docs/software/database-schema.md` | `docs/archive/` (finished build-all prompt and progress)
