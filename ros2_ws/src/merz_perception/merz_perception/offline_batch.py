@@ -14,7 +14,7 @@ from typing import Optional
 import numpy as np
 
 from merz_perception.engines import Detection, DetectorEngine, clip_box, make_engine
-from merz_perception.ocr import OcrEngine, make_ocr, prepare_crop
+from merz_perception.ocr import OcrEngine, make_ocr, prepare_crop, read_room_number
 from merz_perception.room_numbers import RoomNumberValidator
 from merz_perception.sharpness import variance_of_laplacian
 
@@ -47,10 +47,10 @@ def process_image(image_name: str, image: np.ndarray, detector: Optional[Detecto
             sharp = sharpness >= min_sharpness
             row.update(sharpness=round(sharpness, 1), sharp_enough=sharp)
             if sharp and ocr is not None:
-                result = ocr.read(prepare_crop(crop))
+                result, room = read_room_number(ocr, prepare_crop(crop), validator)
                 if result is not None:
                     row.update(raw_text=result.text, ocr_confidence=round(result.confidence, 4),
-                               room_number=validator.validate(result.text) or '')
+                               room_number=room or '')
         rows.append(row)
     return rows
 

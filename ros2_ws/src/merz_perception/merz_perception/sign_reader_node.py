@@ -8,7 +8,7 @@ from sensor_msgs.msg import Image
 
 from merz_interfaces.msg import DetectionArray, SignReading
 from merz_perception.engines import Detection, clip_box
-from merz_perception.ocr import make_ocr, prepare_crop
+from merz_perception.ocr import make_ocr, prepare_crop, read_room_number
 from merz_perception.room_numbers import ReadAgreement, RoomNumberValidator
 from merz_perception.sharpness import is_sharp
 
@@ -47,10 +47,9 @@ class SignReaderNode(Node):
             crop = image[y0:y1, x0:x1]
             if crop.size == 0 or not is_sharp(crop, self._min_sharpness):
                 continue
-            result = self._ocr.read(prepare_crop(crop))
+            result, text = read_room_number(self._ocr, prepare_crop(crop), self._validator)
             if result is None:
                 continue
-            text = self._validator.validate(result.text)
             if text is None:
                 self.get_logger().info(f"Rejected OCR text '{result.text}'")
                 continue

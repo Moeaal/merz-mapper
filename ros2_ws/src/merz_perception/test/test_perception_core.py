@@ -225,3 +225,78 @@ def test_config_regex_matches_the_default_and_compiles():
 def test_c920_detector_only_looks_for_signs():
     params = yaml.safe_load((PACKAGE / 'config' / 'perception.yaml').read_text())
     assert params['detector_c920']['ros__parameters']['allowed_labels'] == ['room_sign']
+
+
+# ---- split-row fix (decisions #24): "M1.14" detected as overlapping pieces "M1.1" + "14"
+from merz_perception.ocr import parse_paddle_lines, parse_rapidocr_lines, read_room_number, row_groups  # noqa: E402
+
+
+class SplitRowOcr:
+    """Fake engine that reproduces the PP-OCR split seen on synthetic signs in perception/."""
+
+    def __init__(self, merged='M1.14'):
+        self._merged = merged
+        self.recognised = []
+
+    def read_lines(self, image):
+        return [OcrResult('M1.1', 0.80, (10, 10, 60, 40)), OcrResult('14', 0.95, (55, 10, 85, 40))]
+
+    def recognise(self, image):
+        self.recognised.append(image.shape[:2])
+        return OcrResult(self._merged, 0.90) if self._merged else None
+
+
+def test_row_groups_joins_overlapping_pieces_on_one_row_only():
+    lines = [OcrResult('M1.1', .8, (10, 10, 60, 40)), OcrResult('14', .9, (55, 10, 85, 40)),
+             OcrResult('OFFICE', .9, (10, 80, 90, 100))]
+    assert row_groups(lines) == [(10, 10, 85, 40)]
+    assert row_groups([OcrResult('a', .9, (0, 0, 10, 10)), OcrResult('b', .9, (200, 0, 210, 10))]) == []
+    assert row_groups([OcrResult('a', .9)]) == []
+
+
+def test_split_row_is_re_read_and_the_fragment_is_not_a_room():
+    ocr = SplitRowOcr()
+    line, room = read_room_number(ocr, np.zeros((60, 100, 3), np.uint8), VALIDATOR)
+    assert room == 'M1.14' and line.text == 'M1.14'
+    assert len(ocr.recognised) == 1
+
+
+def test_without_a_re_read_the_old_behaviour_is_kept():
+    # No merged reading: the most confident valid line still wins (the known weakness; see decisions #24).
+    line, room = read_room_number(SplitRowOcr(merged=None), np.zeros((60, 100, 3), np.uint8), VALIDATOR)
+    assert room == '14'
+
+
+def test_fragment_of_a_longer_reading_on_another_line_is_dropped():
+    class TwoLines:
+        def read_lines(self, image):
+            return [OcrResult('14', 0.99), OcrResult('M1.14', 0.70)]
+    assert read_room_number(TwoLines(), np.zeros((10, 10, 3), np.uint8), VALIDATOR)[1] == 'M1.14'
+
+
+def test_a_label_word_next_to_the_number_is_ignored():
+    class Labelled:
+        def read_lines(self, image):
+            return [OcrResult('Room M2.14', 0.9)]
+    assert read_room_number(Labelled(), np.zeros((10, 10, 3), np.uint8), VALIDATOR)[1] == 'M2.14'
+
+
+def test_engines_with_only_read_still_work_and_rejections_return_the_raw_line():
+    assert read_room_number(FakeOcr('m2.14'), np.zeros((10, 10, 3), np.uint8), VALIDATOR)[1] == 'M2.14'
+    line, room = read_room_number(FakeOcr('EXIT'), np.zeros((10, 10, 3), np.uint8), VALIDATOR)
+    assert room is None and line.text == 'EXIT'
+
+    class Empty:
+        def read(self, image):
+            return None
+    assert read_room_number(Empty(), np.zeros((10, 10, 3), np.uint8), VALIDATOR) == (None, None)
+
+
+def test_line_parsers_keep_boxes():
+    v3 = [{'rec_texts': ['M1.1', '14'], 'rec_scores': [0.8, 0.9],
+           'rec_polys': [[[10, 10], [60, 10], [60, 40], [10, 40]], [[55, 10], [85, 10], [85, 40], [55, 40]]]}]
+    assert [l.box for l in parse_paddle_lines(v3)] == [(10, 10, 60, 40), (55, 10, 85, 40)]
+    v2 = [[[[[0, 0], [5, 0], [5, 5], [0, 5]], ('M2.14', 0.8)]]]
+    assert parse_paddle_lines(v2)[0].box == (0, 0, 5, 5)
+    rapid = ([[[[1, 2], [9, 2], [9, 8], [1, 8]], 'M2.14', 0.7]], [0.1])
+    assert parse_rapidocr_lines(rapid)[0].box == (1, 2, 9, 8)

@@ -85,7 +85,7 @@ source /opt/ros/humble/setup.bash
 colcon build --symlink-install
 source install/setup.bash
 ```
-`merz.repos` brings rf2o and explore_lite (m-explore-ros2, pinned for Humble; decisions #19). `rosdep` will also want the
+`merz.repos` brings rf2o and explore_lite (m-explore-ros2, pinned for Humble; decisions #19b). `rosdep` will also want the
 real-sensor drivers that `merz_bringup` depends on (realsense2_camera, usb_cam); they install but are not used here.
 
 ## Run

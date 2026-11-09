@@ -71,6 +71,36 @@ UNVERIFIED there still need checking on the DOI page. Key: tag, first author + y
 | 8 Visitor wayfinding | 8.1 Fallah 2013 10.1093/iwc/iws010; 8.2 Kunhoth 2020 10.1186/s13673-020-00222-0; 8.3 Zafari 2019 10.1109/COMST.2019.2911558; 8.4 Mulloni 2009 10.1109/MPRV.2009.30; 8.5 Beeharee 2006 10.1145/1152215.1152233; 8.6 May 2003 10.1007/s00779-003-0248-5; 8.7 Garrido-Jurado 2014 10.1016/j.patcog.2014.01.005; 8.8 Tünger 2022 10.4305/METU.JFA.2022.2.4; 8.9 Fajrianti 2023 10.3390/info14070359 | O6, O7 |
 | 9 Evaluation | 9.1 Kümmerle 2009 10.1007/s10514-009-9155-6; 9.2 Sturm 2012 10.1109/IROS.2012.6385773; 9.3 Zhang 2018 10.1109/IROS.2018.8593941; 9.4 Filatov 2017 10.23919/FRUCT.2017.8250173; 9.5 Schwertfeger 2016 10.1007/s10514-015-9493-5; 9.6 Amigoni 2009 10.1007/s10514-009-9137-8; 9.7 JCGM 100:2008 10.59161/JCGM100-2008E | O2, O4, O8 |
 
+## Perception data and tools (PR #13, accessed 2026-11-05)
+Full links, licences and notes in `docs/research/perception-plan.md`.
+| Tag | Source | Key finding |
+| --- | --- | --- |
+| P1 | Open Images V7, boxable class list | Annotations CC BY 4.0, images CC BY 2.0 with no per-image warranty; Door and Stairs present; no Elevator or exit sign |
+| P2 | Ultralytics OIV7 YOLOv8 models; YOLOE docs (read from GitHub source) | OIV7 models: n mAP 18.4 ... x 36.3; YOLOE `set_classes` + baked-class TensorRT export; text encoder 572 MB |
+| P3 | DoorDetect dataset | 1,213 images, 4 classes, YOLO format, **no licence file** |
+| P4 | MCIndoor20000 | No longer downloadable |
+| P5 | PaddleOCR 3.7.0 | Apache-2.0; Python 3.8-3.12 |
+| P6 | Label Studio | Apache-2.0 labelling tool |
+
+## Jetson / distro sources (PR #12, accessed 2026-11-05)
+Tags S1-S40 (EOL dates, rosdistro versions, librealsense/realsense-ros releases, D455 IMU on JetPack 6 reports, geometry2
+headers, Ultralytics Jetson wheels, PyPI wheel platforms) are in the table in `docs/research/distro-decision.md` §7. Sources
+marked *(search)* there were seen only as search summaries: check them on NVIDIA's own pages before citing.
+
+## Simulation sources (PR #11, accessed 2026-11-05)
+| Tag | Source | Key finding |
+| --- | --- | --- |
+| G1 | `gazebosim/ros_gz` README version table | Humble binaries pair with Gazebo Fortress; Harmonic with Humble only via the Gazebo repo |
+| G2 | CPS Gazebo docs page (secondary) | Fortress end of life Sep 2026 - **to confirm** on gazebosim.org |
+| G3 | Open Robotics Discourse thread on Harmonic with Humble | Community route for Harmonic on Humble |
+
+## Proposal references (D1, submitted 2026-11)
+[1] Zafari et al., IEEE COMST 2019 (= LB-8.3). [2] Macenski et al., "Robot Operating System 2", Science Robotics 7(66), 2022.
+[3] Macenski and Jambrecic, JOSS 6(61) 2783, 2021 (= LB-1.5, matches). [4] Macenski et al., "The Marathon 2", IROS 2020 (= LB-2.9, matches).
+[5] Kostavelis and Gasteratos, RAS 66, 2015 (= LB-3.1). [6] Yamauchi, CIRA 1997 (= LB-2.1, matches). [7] Redmon et al., CVPR 2016 (= LB-5.1).
+[8] Du et al., PP-OCR, arXiv:2009.09941 (= LB-4.4). [9] Moore and Stouch, IAS-13, 2016 (= LB-6.2). [10] Rustler, Volprecht and Hoffmann,
+IEEE Access 13, 2025 (not yet in the literature base: verify vol./pages before reusing in the report).
+
 ## Tool notes
 - Context7 does not index `robot_localization` (checked 2026-11-02); use docs.ros.org for ROS packages.
 - 2026-11-05 cloud session: doi.org, arXiv, Crossref, OpenAlex and JOSS were blocked for direct fetch. WebSearch and
@@ -83,4 +113,4 @@ UNVERIFIED there still need checking on the DOI page. Key: tag, first author + y
   the gap in the report.
 - A peer-reviewed real-robot SLAM Toolbox vs Cartographer comparison (only preprints found so far).
 - Fill the UNVERIFIED fields in `docs/research/literature-base.md` from the DOI pages.
-- Proposal refs [1]-[10] are not in the repo; add them here so they can be checked.
+- ~~Proposal refs [1]-[10] are not in the repo.~~ Added 2026-11-09 in "Proposal references" above.
