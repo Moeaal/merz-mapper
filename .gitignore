@@ -57,3 +57,4 @@ CLAUDE.local.md
 # Website build
 _site/
 web/frontend/node_modules/
+ros2_ws/src/third_party/
