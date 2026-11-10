@@ -245,7 +245,7 @@ Rules for this section:
 ### 6.1 RPLIDAR S2
 Plug the USB adapter into the **powered hub** (start-up current up to 1.5 A at 5 V [H1]).
 ```bash
-ros2 launch merz_bringup lidar.launch.py
+ros2 launch merz_bringup lidar.launch.py lidar_model:=s2   # C1 stand-in: lidar_model:=c1 (default), decisions #33
 ros2 topic hz /scan                                   # expect about 10 Hz (S2 typical scan rate [H1])
 ros2 topic echo --once /scan --field header           # frame_id must be 'laser'
 ros2 topic echo --once /scan --field ranges | head    # numbers, not all inf

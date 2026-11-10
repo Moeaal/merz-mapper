@@ -1,0 +1,12 @@
+# RPLIDAR C1 (sllidar_ros2): TEMPORARY stand-in until the S2 arrives (decisions #31, #33).
+# Baud rate and scan mode are from the driver's own sllidar_c1_launch.py (sllidar_ros2 commit 3430009, checked 2026-11-10).
+# Selected with lidar_model:=c1 (the default in lidar.launch.py until the S2 arrives). The S2 settings are in lidar_s2.yaml.
+/**:
+  ros__parameters:
+    channel_type: serial
+    serial_port: /dev/rplidar     # udev symlink from udev/99-merz-rplidar.rules (check the C1 adapter's USB IDs match)
+    serial_baudrate: 460800
+    frame_id: laser               # must match the URDF
+    inverted: false
+    angle_compensate: true
+    scan_mode: Standard

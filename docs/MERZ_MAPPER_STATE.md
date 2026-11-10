@@ -8,7 +8,7 @@
 **Last updated:** 2026-11-10 (eve) | **Phase:** Hardware bring-up (pre-O1); about one week ahead of `hardware-arrival-plan.md`
 
 ## Where things stand
-- **2026-11-10 Jetson bring-up (student; logbook 2026-11-10, values to fill):** JetPack 6.2.x flashed from microSD (firmware already compatible) -> **L4T R36.4.7, Ubuntu 22.04.5**; SSH, GitHub (SSH key) and Claude Code on the Jetson; **ROS 2 Humble** (`ros-humble-desktop` + `ros-dev-tools`, decisions #32); `sllidar_ros2` built; **RPLIDAR C1 publishing `/scan`** with `sllidar_c1_launch.py` (decisions #31). Rate, 1 m check and USB IDs still to log. `.gitignore` now ignores `ros2_ws/src/third_party/` (e4700f8). Whole workspace NOT yet built on the Jetson.
+- **2026-11-10 Jetson bring-up (student; logbook 2026-11-10, values to fill):** JetPack 6.2.x flashed from microSD (firmware already compatible) -> **L4T R36.4.7, Ubuntu 22.04.5**; SSH, GitHub (SSH key) and Claude Code on the Jetson; **ROS 2 Humble** (`ros-humble-desktop` + `ros-dev-tools`, decisions #32); `sllidar_ros2` built; **RPLIDAR C1 publishing `/scan`** with `sllidar_c1_launch.py` (decisions #31). Rate, 1 m check and USB IDs still to log. Repo now has separate C1/S2 LIDAR configs (decisions #33). `.gitignore` now ignores `ros2_ws/src/third_party/` (e4700f8). Whole workspace NOT yet built on the Jetson.
 - **2026-11-09 hardware received:** Jetson Orin Nano 8 GB Dev Kit, 4-wheel rover (12 V motors, no encoders), C920, RPLIDAR C1 (stand-in), 2x Waveshare Motor Driver HAT (PCA9685 + TB6612FNG, I2C). **D455 and S2 on the way.** Bench power from mains; battery not chosen (4S LiPo considered).
 - **Motor/power plan (PROPOSED):** HATs jumper-wired to the Jetson I2C (decisions #28); kill switch on the 12 V motor supply before any wheel test (#29); 4S LiPo -> buck to 12 V (#30). PCA9685 backend for `merz_base` still to write.
 - Repo: memory docs, Claude Code config (PR #1 merged 2026-11-02). All pre-hardware code written on `build/all-code` (2026-11-03), merged to `main` via PR #2.
@@ -57,7 +57,7 @@
 ## Immediate next tasks (to G1)
 1. Fill the blanks in logbook 2026-11-09/10 (C1 rate, 1 m check, USB IDs, versions, hours, reflection) and merge the logbook PR.
 2. **Build the whole workspace on the Jetson** (plan §5.2 Thu): `rosdep install ... --skip-keys librealsense2`, `rf2o_laser_odometry` alone first (decisions #14), then `explore_lite` (test `main` vs pin, #19b), then everything; `colcon test`; log `vcs export src --exact`.
-3. **LIDAR via the repo launch** (plan §5.3 Mon): C1 params for `merz_bringup` (PROPOSED: a `lidar_model` launch arg or `lidar_c1.yaml`, needs student approval); 1-minute bench bag.
+3. **LIDAR via the repo launch** (plan §5.3 Mon): `lidar_c1.yaml` / `lidar_s2.yaml` + `lidar_model:=c1|s2` IMPLEMENTED (decisions #33, static tests only) -> run `ros2 launch merz_bringup lidar.launch.py` on the Jetson; 1-minute bench bag.
 4. **C920** bring-up (plan §5.3 Wed); photograph 10 Merz Court door signs -> room format (OPEN_ISSUES #23).
 5. **Kill switch + motor bench test** (plan §5.4, can start early): set HAT addresses, jumper-wire, `i2cdetect`, spin each wheel from a script; then Claude Code writes the PCA9685 backend in `merz_base`.
 6. Supervisor/technician: motor stall current (#28), LiPo rules + battery/buck loan (#29), rover CAD for mounts.
@@ -67,7 +67,7 @@
 ## Active blockers
 - D455 and S2 not yet arrived (D455 needed for the IMU in the EKF; not needed for a scan-only first map).
 - Battery not chosen (blocks untethered corridor driving) - OPEN_ISSUES #29.
-- Motor stall current unknown - OPEN_ISSUES #28.
+- Motor stall current unknown - not a blocker for bench tests (HAT current limit + student's own supply); needed for battery wiring (OPEN_ISSUES #28).
 - Watch: D455 IMU on JetPack 6 (#22); L4T 36.4.7 vs planned 36.5.2 (#27).
 
 ## Memory files

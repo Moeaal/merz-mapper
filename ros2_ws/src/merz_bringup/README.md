@@ -17,7 +17,7 @@ sudo apt install ros-humble-usb-cam ros-humble-joy ros-humble-teleop-twist-joy r
 ## One sensor at a time
 | Command | Expect |
 | --- | --- |
-| `ros2 launch merz_bringup lidar.launch.py` | `/scan` at about 10 Hz |
+| `ros2 launch merz_bringup lidar.launch.py` (C1, default) or `... lidar_model:=s2` | `/scan` at about 10 Hz |
 | `ros2 launch merz_bringup d455.launch.py` | `/camera/camera/color/image_raw`, `/camera/camera/aligned_depth_to_color/image_raw`, `/camera/camera/imu` |
 | `ros2 launch merz_bringup c920.launch.py` | `/sign_cam/image_raw` at about 10 Hz |
 | `ros2 launch merz_bringup teleop.launch.py` | `/joy`; `/cmd_vel_mux` moves only while the deadman is held |
