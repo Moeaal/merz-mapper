@@ -236,7 +236,7 @@ thin `*_node.py` connects it to ROS.
 | `launch/explore_from_entrance.launch.py` | **The full autonomous run**: everything above plus exploration, perception and the semantic map |
 | `launch/record_bag.launch.py` | Records a bag in `~/merz_data/bags`. `images:=true` adds camera images (large) |
 | `merz_bringup/scan_odom_relay_node.py` + `odom_covariance.py` | Adds the covariance that rf2o leaves at zero, and drops implausible jumps |
-| `config/lidar.yaml`, `d455.yaml`, `c920.yaml`, `c920_camera_info.yaml` | Driver settings; the C920 calibration result goes in `c920_camera_info.yaml` |
+| `config/lidar_c1.yaml`, `lidar_s2.yaml`, `d455.yaml`, `c920.yaml`, `c920_camera_info.yaml` | Driver settings; the C920 calibration result goes in `c920_camera_info.yaml` |
 | `config/teleop.yaml` | Gamepad axes, deadman button, speeds. **Axis numbers are guesses: fix in Week 4** |
 | `config/twist_mux.yaml` | Priorities: teleop 100 over navigation 10, 0.5 s timeouts |
 | `config/scan_odometry.yaml` | rf2o settings, and the noise values (`vx_std` etc.) to measure in Week 5 |
@@ -409,7 +409,7 @@ Find out and write down, with photos:
 Bench work: the sensors sit on the desk, connected to the Jetson. Follow build-guide.md section 4, one device per day.
 
 **Mon 23 Nov: LIDAR**
-- `ros2 launch merz_bringup lidar.launch.py`; `ros2 topic hz /scan` (about 10 Hz).
+- `ros2 launch merz_bringup lidar.launch.py` (C1 by default; `lidar_model:=s2` for the S2, decisions #33); `ros2 topic hz /scan` (about 10 Hz).
 - View the scan in Foxglove or RViz (fixed frame `laser`). Hold a box at a measured distance and compare with the laser meter.
 - Record a 1-minute bag: `ros2 launch merz_bringup record_bag.launch.py name:=lidar_bench`.
 - *Done when:* the rate is steady and the room outline looks right.

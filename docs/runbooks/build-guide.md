@@ -115,7 +115,7 @@ ls -l /dev/rplidar /dev/c920
 Do these with the rover on blocks, and log each one. A failure at one step stops you: do not go on and debug it all at once.
 | Device | Command | What "working" looks like |
 | --- | --- | --- |
-| LIDAR | `ros2 launch merz_bringup lidar.launch.py` | `ros2 topic hz /scan` about 10 Hz. In RViz (fixed frame `laser`), the room outline looks right |
+| LIDAR | `ros2 launch merz_bringup lidar.launch.py` (C1 stand-in; add `lidar_model:=s2` for the S2, decisions #33) | `ros2 topic hz /scan` about 10 Hz. In RViz (fixed frame `laser`), the room outline looks right |
 | D455 | `ros2 launch merz_bringup d455.launch.py` | Image and depth appear in RViz; depth about 15 Hz; a flat wall at a known distance measures correctly |
 | D455 IMU | same | `ros2 topic hz /camera/camera/imu` near the gyro rate. Rotating by hand changes the angular velocity on the expected axis |
 | C920 | `ros2 launch merz_bringup c920.launch.py` | `/sign_cam/image_raw` about 10 Hz. A door sign is readable in the image at working distance |

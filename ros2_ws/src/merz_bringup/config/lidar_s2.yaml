@@ -1,4 +1,5 @@
-# RPLIDAR S2 (sllidar_ros2). Baud rate and scan mode are from the driver's own S2 launch file.
+# RPLIDAR S2 (sllidar_ros2): the planned LIDAR. Baud rate and scan mode are from the driver's own S2 launch file.
+# Selected with lidar_model:=s2 (lidar.launch.py). The C1 stand-in has its own file, lidar_c1.yaml (decisions #33).
 /**:
   ros__parameters:
     channel_type: serial

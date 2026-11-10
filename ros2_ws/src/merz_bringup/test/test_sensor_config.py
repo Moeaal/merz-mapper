@@ -48,7 +48,23 @@ def test_each_device_has_its_own_udev_rules_file():
 
 
 def test_driver_device_paths_match_the_udev_symlinks():
-    assert load('lidar.yaml')['/**']['ros__parameters']['serial_port'] == '/dev/rplidar'
+    for lidar in ('lidar_c1.yaml', 'lidar_s2.yaml'):
+        assert load(lidar)['/**']['ros__parameters']['serial_port'] == '/dev/rplidar'
     assert 'SYMLINK+="rplidar"' in (PACKAGE / 'udev' / '99-merz-rplidar.rules').read_text()
     assert load('c920.yaml')['/**']['ros__parameters']['video_device'] == '/dev/c920'
     assert 'SYMLINK+="c920"' in (PACKAGE / 'udev' / '99-merz-c920.rules').read_text()
+
+
+def test_each_lidar_uses_its_own_driver_settings():
+    """Values from sllidar_ros2's own sllidar_c1_launch.py and sllidar_s2_launch.py (decisions #33)."""
+    c1 = load('lidar_c1.yaml')['/**']['ros__parameters']
+    s2 = load('lidar_s2.yaml')['/**']['ros__parameters']
+    assert (c1['serial_baudrate'], c1['scan_mode']) == (460800, 'Standard')
+    assert (s2['serial_baudrate'], s2['scan_mode']) == (1000000, 'DenseBoost')
+    assert c1['frame_id'] == s2['frame_id'] == 'laser'
+
+
+def test_lidar_launch_offers_one_config_per_model():
+    text = (PACKAGE / 'launch' / 'lidar.launch.py').read_text()
+    assert "choices=['c1', 's2']" in text
+    assert 'lidar_c1.yaml' in text and 'lidar_s2.yaml' in text
