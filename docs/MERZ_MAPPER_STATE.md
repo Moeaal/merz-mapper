@@ -5,9 +5,12 @@
 > **TESTED** (measured result logged), **PLANNED** (in proposal), **PROPOSED**
 > (suggested, not agreed), **UNKNOWN**.
 
-**Last updated:** 2026-11-09 (pm) | **Phase:** Proposal submitted; hardware procurement (pre-O1)
+**Last updated:** 2026-11-10 (eve) | **Phase:** Hardware bring-up (pre-O1); about one week ahead of `hardware-arrival-plan.md`
 
 ## Where things stand
+- **2026-11-10 Jetson bring-up (student; logbook 2026-11-10, values to fill):** JetPack 6.2.x flashed from microSD (firmware already compatible) -> **L4T R36.4.7, Ubuntu 22.04.5**; SSH, GitHub (SSH key) and Claude Code on the Jetson; **ROS 2 Humble** (`ros-humble-desktop` + `ros-dev-tools`, decisions #32); `sllidar_ros2` built; **RPLIDAR C1 publishing `/scan`** with `sllidar_c1_launch.py` (decisions #31). Rate, 1 m check and USB IDs still to log. `.gitignore` now ignores `ros2_ws/src/third_party/` (e4700f8). Whole workspace NOT yet built on the Jetson.
+- **2026-11-09 hardware received:** Jetson Orin Nano 8 GB Dev Kit, 4-wheel rover (12 V motors, no encoders), C920, RPLIDAR C1 (stand-in), 2x Waveshare Motor Driver HAT (PCA9685 + TB6612FNG, I2C). **D455 and S2 on the way.** Bench power from mains; battery not chosen (4S LiPo considered).
+- **Motor/power plan (PROPOSED):** HATs jumper-wired to the Jetson I2C (decisions #28); kill switch on the 12 V motor supply before any wheel test (#29); 4S LiPo -> buck to 12 V (#30). PCA9685 backend for `merz_base` still to write.
 - Repo: memory docs, Claude Code config (PR #1 merged 2026-11-02). All pre-hardware code written on `build/all-code` (2026-11-03), merged to `main` via PR #2.
 - Safety review of `ros2_ws` (2026-11-04, branch `build/safety-review`): 3 bugs fixed with tests (limit validation in `merz_base`, wheel saturation changing the arc, blocking TF lookup in `landmark_node`); 12 open findings in `docs/software/safety-review.md`, two **High**: no stop path independent of the Jetson (decisions #19, PROPOSED) and untested wireless-gamepad link loss. Unit tests only (L0-L1); nothing run on ROS or hardware.
 - Website (demonstrator) redesigned on branch `build/website-design` (PR #5, merged 2026-11-04): pan/zoom occupancy-grid map with route, swipeable photo steps synced to the map, searchable room picker, About page, accessible light/dark design, QR poster PDF, sample data. **IMPLEMENTED**; checked only in a headless browser and `pytest`, not on real phones or with rover data.
@@ -39,7 +42,7 @@
 - **No floor plan needed.** O2 wall check uses laser-meter measurements (OPEN_ISSUES #14).
 - **No extra PC.** Development happens on the Jetson when it arrives; the simulation is optional.
 - **Gamepad, mast, checkerboard, QR posters: already owned.**
-- **Battery, controller, mounting: checked when the parts arrive**, not before.
+- **Bench power from mains for now; battery decided later** (by ~end Nov, before the first corridor map).
 - Focus advice on **what can be done now**, not on future hardware questions.
 
 ## Key dates
@@ -53,18 +56,20 @@
 | D3 demo, D4 report | May 2027 | TBC |
 
 ## Immediate next tasks (to G1)
-1. Review and merge the memory-sync PR; add hours + reflection to the logbook drafts (5, 6, 7 Nov) and log the webcam test result.
-2. ROS 2 tutorials on the Pi 5 (nodes, topics, launch). First real check is `colcon build` on the Pi, including rf2o (decisions #14); a cloud Humble build already passed.
-3. 3D design of mast/sensor mounts once rover CAD arrives.
-4. Inspect parts and rover on arrival; fill HARDWARE_REGISTER.
-5. Supervisor meetings: progress update, agreed actions, rover CAD and parts collection only (see "Settled" above).
-6. Merz Court photo walk for perception data (`perception/PHOTO_CHECKLIST.md`); record the room-sign format (OPEN_ISSUES #23).
-7. Flash Jetson, install ROS 2, bring up each sensor one at a time (`docs/runbooks/jetson-bringup.md`), record bags.
+1. Fill the blanks in logbook 2026-11-09/10 (C1 rate, 1 m check, USB IDs, versions, hours, reflection) and merge the logbook PR.
+2. **Build the whole workspace on the Jetson** (plan §5.2 Thu): `rosdep install ... --skip-keys librealsense2`, `rf2o_laser_odometry` alone first (decisions #14), then `explore_lite` (test `main` vs pin, #19b), then everything; `colcon test`; log `vcs export src --exact`.
+3. **LIDAR via the repo launch** (plan §5.3 Mon): C1 params for `merz_bringup` (PROPOSED: a `lidar_model` launch arg or `lidar_c1.yaml`, needs student approval); 1-minute bench bag.
+4. **C920** bring-up (plan §5.3 Wed); photograph 10 Merz Court door signs -> room format (OPEN_ISSUES #23).
+5. **Kill switch + motor bench test** (plan §5.4, can start early): set HAT addresses, jumper-wire, `i2cdetect`, spin each wheel from a script; then Claude Code writes the PCA9685 backend in `merz_base`.
+6. Supervisor/technician: motor stall current (#28), LiPo rules + battery/buck loan (#29), rover CAD for mounts.
+7. Battery decision by ~end Nov (decisions #30).
+8. When the D455 arrives: librealsense RSUSB build (plan §5.2 Wed) and the **IMU go/no-go** (#22) the same day.
 
 ## Active blockers
-- Rover spec unknown until received (OPEN_ISSUES #1).
-- Parts and Jetson not yet arrived; distro chosen by the student at bring-up (OPEN_ISSUES #2).
-- Watch item (not a blocker): D455 IMU on JetPack 6 - day-1 test; fallback wheel encoders (OPEN_ISSUES #22).
+- D455 and S2 not yet arrived (D455 needed for the IMU in the EKF; not needed for a scan-only first map).
+- Battery not chosen (blocks untethered corridor driving) - OPEN_ISSUES #29.
+- Motor stall current unknown - OPEN_ISSUES #28.
+- Watch: D455 IMU on JetPack 6 (#22); L4T 36.4.7 vs planned 36.5.2 (#27).
 
 ## Memory files
 `docs/INDEX.md` (all docs by category) | `docs/decisions.md` (engineering decisions) | `docs/HARDWARE_REGISTER.md` | `docs/SOFTWARE_ARCHITECTURE.md` | `docs/OPEN_ISSUES.md` | `docs/RESEARCH_INDEX.md` | `docs/logbook/` | `docs/meetings/` | `docs/CLAUDE_CODE_ROADMAP.md` (code build plan, stage prompts) | `docs/runbooks/build-guide.md` (hardware procedure) | `docs/planning/hardware-arrival-plan.md` (day-by-day timeline) | `docs/planning/experiments.md` | `docs/software/database-schema.md` | `docs/archive/` (finished build-all prompt and progress)
