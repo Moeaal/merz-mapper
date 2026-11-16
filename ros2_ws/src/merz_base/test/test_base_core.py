@@ -381,3 +381,114 @@ def test_yaml_serial_config_works_with_a_fake_port():
 def test_unknown_backend_is_refused():
     with pytest.raises(ValueError, match='Unknown backend'):
         make_backend('warp', params())
+
+
+
+# ---- PCA9685 (Waveshare HATs), with a fake SMBus
+from merz_base.backends import Pca9685Backend, parse_hat_motors  # noqa: E402
+
+
+class FakeSmbusModule:
+    last = None
+
+    class SMBus:
+        def __init__(self, bus):
+            self.bus_number, self.regs, self.writes, self.closed = bus, {}, [], False
+            FakeSmbusModule.last = self
+
+        def write_byte_data(self, address, register, value):
+            assert 0 <= value <= 0xFF
+            self.regs[(address, register)] = value
+            self.writes.append((address, register, value))
+
+        def read_byte_data(self, address, register):
+            return self.regs.get((address, register), 0)
+
+        def close(self):
+            self.closed = True
+
+
+def off(bus, address, channel):
+    base = 0x06 + 4 * channel
+    return bus.regs[(address, base + 2)] | bus.regs[(address, base + 3)] << 8
+
+
+def hats(tmp_path, **kwargs):
+    left = parse_hat_motors('0x40:A,0x41:A', kwargs.pop('inverted', ''))
+    right = parse_hat_motors('0x40:B,0x41:B')
+    backend = Pca9685Backend(7, left, right, smbus_module=FakeSmbusModule, sysfs=str(tmp_path), **kwargs)
+    return backend, FakeSmbusModule.last
+
+
+def test_pca9685_starts_stopped_at_1khz(tmp_path):
+    _, bus = hats(tmp_path)
+    assert bus.bus_number == 7
+    for address in (0x40, 0x41):
+        assert bus.regs[(address, 0xFE)] == 5
+        assert off(bus, address, 0) == 0 and off(bus, address, 5) == 0
+
+
+def test_pca9685_left_side_drives_motor_a_on_both_hats_and_caps_duty(tmp_path):
+    backend, bus = hats(tmp_path, max_duty=0.5)
+    backend.drive(1.0, -0.5)
+    for address in (0x40, 0x41):
+        assert off(bus, address, 0) == int(4095 * 0.5)                    # left: full command, capped at 50 %
+        assert (off(bus, address, 1), off(bus, address, 2)) == (0, 4095)  # forward: IN1 low, IN2 high
+        assert off(bus, address, 5) == int(4095 * 0.25)                   # right: half of the cap
+        assert (off(bus, address, 3), off(bus, address, 4)) == (4095, 0)  # reverse
+
+
+def test_pca9685_inverted_motor_turns_the_other_way(tmp_path):
+    backend, bus = hats(tmp_path, inverted='0x41:A')
+    backend.drive(0.4, 0.0)
+    assert (off(bus, 0x40, 1), off(bus, 0x40, 2)) == (0, 4095)
+    assert (off(bus, 0x41, 1), off(bus, 0x41, 2)) == (4095, 0)
+
+
+def test_pca9685_cuts_pwm_before_reversing(tmp_path):
+    backend, bus = hats(tmp_path)
+    backend.drive(0.5, 0.0)
+    bus.writes.clear()
+    backend.drive(-0.5, 0.0)
+    pwm_low = (0x40, 0x06 + 2, 0)
+    first_direction = next(i for i, w in enumerate(bus.writes) if w[1] in (0x06 + 4 + 2, 0x06 + 8 + 2))
+    assert bus.writes.index(pwm_low) < first_direction
+
+
+def test_pca9685_close_stops_every_motor_and_releases_the_bus(tmp_path):
+    backend, bus = hats(tmp_path)
+    backend.drive(0.6, 0.6)
+    backend.close()
+    assert bus.closed
+    for address in (0x40, 0x41):
+        assert off(bus, address, 0) == 0 and off(bus, address, 5) == 0
+
+
+def test_pca9685_refuses_a_kernel_owned_address(tmp_path):
+    (tmp_path / '7-0040' / 'driver').mkdir(parents=True)
+    with pytest.raises(ValueError, match='kernel driver'):
+        hats(tmp_path)
+
+
+@pytest.mark.parametrize('spec', ['0x40:C', '0x40', ''])
+def test_pca9685_bad_motor_lists_are_refused(spec):
+    with pytest.raises(ValueError):
+        parse_hat_motors(spec)
+
+
+def test_pca9685_bad_duty_and_frequency_are_refused(tmp_path):
+    with pytest.raises(ValueError):
+        hats(tmp_path, max_duty=1.5)
+    with pytest.raises(ValueError):
+        hats(tmp_path, frequency_hz=5000.0)
+
+
+def test_yaml_pca9685_config_matches_the_measured_wheel_map(tmp_path, monkeypatch):
+    config = params()
+    assert config['pca9685_left_motors'] == '0x40:A,0x41:A'
+    assert config['pca9685_right_motors'] == '0x40:B,0x41:B'
+    assert config['pca9685_max_duty'] <= 0.5
+    monkeypatch.setattr('merz_base.backends.i2c_address_owned_by_kernel', lambda *a, **k: False)
+    backend = make_backend('pca9685', config, module=FakeSmbusModule)
+    backend.drive(0.2, 0.2)
+    assert FakeSmbusModule.last.bus_number == 7
