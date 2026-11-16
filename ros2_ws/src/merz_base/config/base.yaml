@@ -2,7 +2,8 @@
 # The default backend is mock, so nothing can move until someone chooses a real backend on purpose.
 base_node:
   ros__parameters:
-    backend: mock                    # mock, serial or gpio. TODO: measure on rover
+    backend: mock                    # mock (default, moves nothing) or pca9685 (the rover). Choose pca9685 on the
+                                     # command line: ros2 launch merz_base base.launch.py backend:=pca9685
     update_rate_hz: 20.0
     command_timeout_s: 0.5           # stops the motors if no command arrives for this long
 
@@ -13,6 +14,16 @@ base_node:
     max_angular_accel_rad_s2: 1.0
     track_width_m: 0.40              # TODO: measure on rover. Effective width on a skid-steer: identify from fixed turns
     full_speed_m_s: 1.0              # TODO: measure on rover. Wheel speed at full output
+
+    # (0) The rover: 2x Waveshare Motor Driver HAT over I2C (decisions #28, #34, #35).
+    # Wheel map measured with tools/motor_bench/motor_bench_test.py on 2026-11-16 (logbook): 0x40 = front axle,
+    # 0x41 = rear axle; motor A = left, motor B = right; "+" turned every wheel forward, so nothing is inverted.
+    pca9685_bus: 7                   # Jetson header pins 3/5 (i2cdetect -y -r 7 shows 40 and 41)
+    pca9685_left_motors: "0x40:A,0x41:A"    # front-left, rear-left
+    pca9685_right_motors: "0x40:B,0x41:B"   # front-right, rear-right
+    pca9685_inverted: ""             # e.g. "0x41:B" if a wheel is re-wired the other way round
+    pca9685_frequency_hz: 1000.0     # PWM; PCA9685 range 24-1526 Hz
+    pca9685_max_duty: 0.5            # cap on PWM duty whatever is commanded. Raise only after the speed check
 
     # (a) Serial motor controller. TODO: measure on rover, from the controller's manual.
     serial_port: /dev/merz_motors    # TODO: measure on rover (add a udev rule once the device is known)
