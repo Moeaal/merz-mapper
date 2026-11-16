@@ -5,7 +5,7 @@
 > **TESTED** (measured result logged), **PLANNED** (in proposal), **PROPOSED**
 > (suggested, not agreed), **UNKNOWN**.
 
-**Last updated:** 2026-11-10 (eve) | **Phase:** Hardware bring-up (pre-O1); about one week ahead of `hardware-arrival-plan.md`
+**Last updated:** 2026-11-16 | **Phase:** Hardware bring-up (pre-O1); about one week ahead of `hardware-arrival-plan.md`
 
 ## Where things stand
 - **2026-11-10 Jetson bring-up (student; logbook 2026-11-10, values to fill):** JetPack 6.2.x flashed from microSD (firmware already compatible) -> **L4T R36.4.7, Ubuntu 22.04.5**; SSH, GitHub (SSH key) and Claude Code on the Jetson; **ROS 2 Humble** (`ros-humble-desktop` + `ros-dev-tools`, decisions #32); `sllidar_ros2` built; **RPLIDAR C1 publishing `/scan`** with `sllidar_c1_launch.py` (decisions #31). Rate, 1 m check and USB IDs still to log. Repo now has separate C1/S2 LIDAR configs (decisions #33). `.gitignore` now ignores `ros2_ws/src/third_party/` (e4700f8). **Whole workspace built on the Jetson** (all 12 packages; realsense not yet). `colcon test`: 389 tests, 41 third-party lint failures (ignored), 1 ours (merz_sim launch test path; fixed on `logbook/2026-11-10-build`). LIDAR bench bag: 10.0 Hz. Test fix merged (PR #20). **C920 running** via `merz_bringup c920.launch.py` (student report; rate and USB ID to log).
@@ -59,7 +59,7 @@
 2. ~~Build the whole workspace on the Jetson~~ DONE 2026-11-10 (rf2o `b38c68e`, explore_lite pin `926033f`, sllidar `3430009`). Optional: test m-explore `main` vs the pin (#19b).
 3. ~~LIDAR via the repo launch + bench bag~~ DONE 2026-11-10 (C1, 10.0 Hz, decisions #33).
 4. ~~C920 bring-up~~ DONE 2026-11-10. Still: photograph ~10 Merz Court door signs -> room format (OPEN_ISSUES #23).
-5. **Kill switch + motor bench test** (plan §5.4, can start early): set HAT addresses, jumper-wire, `i2cdetect`, spin each wheel from a script; then Claude Code writes the PCA9685 backend in `merz_base`.
+5. **Motor bench test** (plan §5.4, started early): HAT addresses set to 0x40/0x41 (2026-11-16). Wire **SDA/SCL/GND only** (decisions #34), `i2cdetect`, then `tools/motor_bench/motor_bench_test.py` (IMPLEMENTED, unit tests only) -> record wheel map + directions -> PCA9685 backend in `merz_base`.
 6. Supervisor/technician: motor stall current (#28), LiPo rules + battery/buck loan (#29), rover CAD for mounts.
 7. Battery decision by ~end Nov (decisions #30).
 8. When the D455 arrives: librealsense RSUSB build (plan §5.2 Wed) and the **IMU go/no-go** (#22) the same day.
