@@ -55,3 +55,12 @@ def test_motors_stop_even_after_an_error(monkeypatch):
     for address in (0x40, 0x41):
         for pwm, in1, in2 in m.MOTORS.values():
             assert off_count(bus, address, pwm) == 0 and off_count(bus, address, in1) == 0
+
+
+def test_refuses_an_address_a_kernel_driver_owns(tmp_path, monkeypatch):
+    (tmp_path / '1-0040' / 'driver').mkdir(parents=True)
+    assert m.kernel_owns(1, 0x40, str(tmp_path))
+    assert not m.kernel_owns(7, 0x40, str(tmp_path))
+    monkeypatch.setattr(m, 'kernel_owns', lambda bus, address: bus == 1 and address == 0x40)
+    with pytest.raises(SystemExit):
+        m.main(['--bus', '1', '--yes'])

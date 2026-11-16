@@ -15,6 +15,7 @@ and on any error.
 from __future__ import annotations
 
 import argparse
+import os
 import signal
 import sys
 import time
@@ -79,6 +80,12 @@ class DryBus:
         return 0
 
 
+def kernel_owns(bus_number: int, address: int, sysfs: str = '/sys/bus/i2c/devices') -> bool:
+    """True if a kernel driver already uses this address (i2cdetect shows UU). Never write to such a device:
+    on the Jetson, bus 1 address 0x40 is an on-board chip, not a HAT (found 2026-11-16)."""
+    return os.path.exists(os.path.join(sysfs, f'{bus_number}-{address:04x}', 'driver'))
+
+
 def open_bus(bus_number: int, dry_run: bool):
     if dry_run:
         return DryBus()
@@ -104,8 +111,14 @@ def main(argv: list[str] | None = None) -> int:
     if not 0 < args.speed <= MAX_SPEED_PERCENT:
         parser.error(f'--speed must be in (0, {MAX_SPEED_PERCENT}]')
 
+    addresses = [int(a, 0) for a in args.addresses.split(',')]
+    if not args.dry_run:
+        owned = [a for a in addresses if kernel_owns(args.bus, a)]
+        if owned:
+            parser.error(f'bus {args.bus} address(es) {", ".join(hex(a) for a in owned)} belong to a kernel driver '
+                         '(UU in i2cdetect), so they are not the HATs. Use the bus where i2cdetect shows 40 and 41.')
     bus = open_bus(args.bus or 0, args.dry_run)
-    boards = [PCA9685(bus, int(a, 0)) for a in args.addresses.split(',')]
+    boards = [PCA9685(bus, a) for a in addresses]
     signal.signal(signal.SIGINT, lambda *_: (stop_all(boards), sys.exit(130)))
     results = []
     try:
