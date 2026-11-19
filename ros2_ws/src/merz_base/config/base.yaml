@@ -13,17 +13,21 @@ base_node:
     max_linear_accel_m_s2: 0.5
     max_angular_accel_rad_s2: 1.0
     track_width_m: 0.40              # TODO: measure on rover. Effective width on a skid-steer: identify from fixed turns
-    full_speed_m_s: 1.0              # TODO: measure on rover. Wheel speed at full output
+    full_speed_m_s: 1.85             # Wheel speed at 100% duty, BENCH ESTIMATE with wheels lifted (2026-11-19):
+                                     # 13 turns/10 s x pi x 0.08 m = 0.33 m/s at 30% duty, start at ~15% ->
+                                     # 0.33 x (1 - 0.15) / (0.30 - 0.15). TODO: re-measure on the floor
 
     # (0) The rover: 2x Waveshare Motor Driver HAT over I2C (decisions #28, #34, #35).
-    # Wheel map measured with tools/motor_bench/motor_bench_test.py on 2026-11-16 (logbook): 0x40 = front axle,
-    # 0x41 = rear axle; motor A = left, motor B = right; "+" turned every wheel forward, so nothing is inverted.
+    # Wheel map confirmed by the student on 2026-11-19 (bench test, two runs; supersedes the 16 Nov reading):
+    # 0x40 = left side (A rear-left, B front-left), 0x41 = right side (A front-right, B rear-right).
+    # "+" turned every wheel forward on 16 Nov, so nothing is inverted (check again in the first base_node test).
     pca9685_bus: 7                   # Jetson header pins 3/5 (i2cdetect -y -r 7 shows 40 and 41)
-    pca9685_left_motors: "0x40:A,0x41:A"    # front-left, rear-left
-    pca9685_right_motors: "0x40:B,0x41:B"   # front-right, rear-right
+    pca9685_left_motors: "0x40:A,0x40:B"    # rear-left, front-left
+    pca9685_right_motors: "0x41:A,0x41:B"   # front-right, rear-right
     pca9685_inverted: ""             # e.g. "0x41:B" if a wheel is re-wired the other way round
     pca9685_frequency_hz: 1000.0     # PWM; PCA9685 range 24-1526 Hz
-    pca9685_max_duty: 0.5            # cap on PWM duty whatever is commanded. Raise only after the speed check
+    pca9685_max_duty: 0.5            # cap on PWM duty whatever is commanded. Raise only after the floor speed check
+    pca9685_min_duty: 0.15           # lowest duty at which all 4 wheels turned, LIFTED (10%: 2 of 4). Floor: TODO
 
     # (a) Serial motor controller. TODO: measure on rover, from the controller's manual.
     serial_port: /dev/merz_motors    # TODO: measure on rover (add a udev rule once the device is known)

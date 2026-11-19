@@ -175,20 +175,24 @@ def i2c_address_owned_by_kernel(bus: int, address: int, sysfs: str = '/sys/bus/i
 class Pca9685Backend:
     """Skid-steer over the Waveshare HATs. Each side drives every motor listed for it with the same value.
 
-    max_duty caps the PWM duty (0-1) whatever is commanded, as a first safety limit while the speed scaling is
-    unmeasured. The PCA9685 keeps its last output if this process dies (Waveshare manual), so the motor supply
+    Duty model (bench, 2026-11-19): the motors only start turning above min_duty, so a non-zero command v (fraction of
+    full speed, -1 to 1) becomes duty = min_duty + |v| * (1 - min_duty), then clamped to max_duty as a safety cap.
+    Commands below 1% of full speed count as zero, so tiny ramp steps do not kick the motors. The PCA9685 keeps its last output if this process dies (Waveshare manual), so the motor supply
     switch is the real stop (decisions #29); this class stops every motor on stop() and close().
     """
 
     def __init__(self, bus: int, left: list[HatMotor], right: list[HatMotor], frequency_hz: float = 1000.0,
-                 max_duty: float = 0.5, smbus_module: Any = None,
+                 max_duty: float = 0.5, min_duty: float = 0.0, smbus_module: Any = None,
                  sysfs: str = '/sys/bus/i2c/devices') -> None:
         if not 0.0 < max_duty <= 1.0:
             raise ValueError('pca9685_max_duty must be in (0, 1]')
         if not 24.0 <= frequency_hz <= 1526.0:
             raise ValueError('pca9685_frequency_hz must be between 24 and 1526 Hz (PCA9685 range)')
+        if not 0.0 <= min_duty < max_duty:
+            raise ValueError('pca9685_min_duty must be at least 0 and below pca9685_max_duty')
         self._sides = (left, right)
         self._max_duty = max_duty
+        self._min_duty = min_duty
         addresses = sorted({m.address for side in self._sides for m in side})
         owned = [a for a in addresses if i2c_address_owned_by_kernel(bus, a, sysfs)]
         if owned:
@@ -222,6 +226,8 @@ class Pca9685Backend:
 
     def _set_motor(self, motor: HatMotor, value: float) -> None:
         value = max(-1.0, min(1.0, -value if motor.inverted else value))
+        if abs(value) < 0.01:
+            value = 0.0
         pwm, in1, in2 = PCA9685_MOTOR_CHANNELS[motor.motor]
         key = (motor.address, motor.motor)
         direction = (value > 0) - (value < 0)
@@ -231,7 +237,8 @@ class Pca9685Backend:
             self._set_channel(motor.address, in1, _FULL if direction < 0 else 0)   # Waveshare: forward = IN1 low,
             self._set_channel(motor.address, in2, _FULL if direction > 0 else 0)   # IN2 high
             self._last[key] = direction
-        self._set_channel(motor.address, pwm, int(_FULL * abs(value) * self._max_duty))
+        duty = 0.0 if value == 0.0 else min(self._max_duty, self._min_duty + abs(value) * (1.0 - self._min_duty))
+        self._set_channel(motor.address, pwm, int(_FULL * duty))
 
     def drive(self, left: float, right: float) -> None:
         for side, value in zip(self._sides, (left, right)):
@@ -265,7 +272,8 @@ def make_backend(name: str, config: dict, module: Optional[Any] = None) -> Motor
             int(config['pca9685_bus']),
             parse_hat_motors(config['pca9685_left_motors'], config['pca9685_inverted']),
             parse_hat_motors(config['pca9685_right_motors'], config['pca9685_inverted']),
-            float(config['pca9685_frequency_hz']), float(config['pca9685_max_duty']), smbus_module=module)
+            float(config['pca9685_frequency_hz']), float(config['pca9685_max_duty']),
+            float(config['pca9685_min_duty']), smbus_module=module)
     if name == 'serial':
         return SerialBackend(config['serial_port'], int(config['serial_baud']), config['serial_drive_format'],
                              config['serial_stop_command'], float(config['serial_scale']), serial_module=module)

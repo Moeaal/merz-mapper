@@ -414,8 +414,8 @@ def off(bus, address, channel):
 
 
 def hats(tmp_path, **kwargs):
-    left = parse_hat_motors('0x40:A,0x41:A', kwargs.pop('inverted', ''))
-    right = parse_hat_motors('0x40:B,0x41:B')
+    left = parse_hat_motors('0x40:A,0x40:B', kwargs.pop('inverted', ''))
+    right = parse_hat_motors('0x41:A,0x41:B')
     backend = Pca9685Backend(7, left, right, smbus_module=FakeSmbusModule, sysfs=str(tmp_path), **kwargs)
     return backend, FakeSmbusModule.last
 
@@ -428,21 +428,38 @@ def test_pca9685_starts_stopped_at_1khz(tmp_path):
         assert off(bus, address, 0) == 0 and off(bus, address, 5) == 0
 
 
-def test_pca9685_left_side_drives_motor_a_on_both_hats_and_caps_duty(tmp_path):
+def test_pca9685_left_side_is_hat_0x40_and_right_side_is_0x41(tmp_path):
+    backend, bus = hats(tmp_path, max_duty=1.0)
+    backend.drive(0.5, -0.25)
+    for channel, in1, in2 in ((0, 1, 2), (5, 3, 4)):
+        assert off(bus, 0x40, channel) == int(4095 * 0.5)                  # left forward
+        assert (off(bus, 0x40, in1), off(bus, 0x40, in2)) == (0, 4095)
+        assert off(bus, 0x41, channel) == int(4095 * 0.25)                 # right reverse
+        assert (off(bus, 0x41, in1), off(bus, 0x41, in2)) == (4095, 0)
+
+
+def test_pca9685_duty_is_capped(tmp_path):
     backend, bus = hats(tmp_path, max_duty=0.5)
-    backend.drive(1.0, -0.5)
-    for address in (0x40, 0x41):
-        assert off(bus, address, 0) == int(4095 * 0.5)                    # left: full command, capped at 50 %
-        assert (off(bus, address, 1), off(bus, address, 2)) == (0, 4095)  # forward: IN1 low, IN2 high
-        assert off(bus, address, 5) == int(4095 * 0.25)                   # right: half of the cap
-        assert (off(bus, address, 3), off(bus, address, 4)) == (4095, 0)  # reverse
+    backend.drive(1.0, 1.0)
+    assert off(bus, 0x40, 0) == int(4095 * 0.5) and off(bus, 0x41, 5) == int(4095 * 0.5)
 
 
-def test_pca9685_inverted_motor_turns_the_other_way(tmp_path):
-    backend, bus = hats(tmp_path, inverted='0x41:A')
-    backend.drive(0.4, 0.0)
-    assert (off(bus, 0x40, 1), off(bus, 0x40, 2)) == (0, 4095)
-    assert (off(bus, 0x41, 1), off(bus, 0x41, 2)) == (4095, 0)
+def test_pca9685_small_commands_jump_past_the_starting_duty(tmp_path):
+    backend, bus = hats(tmp_path, max_duty=0.5, min_duty=0.15)
+    backend.drive(0.1, 0.0)
+    assert off(bus, 0x40, 0) == int(4095 * (0.15 + 0.1 * 0.85))
+    assert off(bus, 0x41, 0) == 0                                          # zero stays zero
+
+
+def test_pca9685_tiny_commands_count_as_zero(tmp_path):
+    backend, bus = hats(tmp_path, min_duty=0.15)
+    backend.drive(0.005, -0.005)
+    assert off(bus, 0x40, 0) == 0 and off(bus, 0x41, 0) == 0
+
+
+def test_pca9685_min_duty_must_be_below_the_cap(tmp_path):
+    with pytest.raises(ValueError):
+        hats(tmp_path, max_duty=0.5, min_duty=0.5)
 
 
 def test_pca9685_cuts_pwm_before_reversing(tmp_path):
@@ -485,9 +502,10 @@ def test_pca9685_bad_duty_and_frequency_are_refused(tmp_path):
 
 def test_yaml_pca9685_config_matches_the_measured_wheel_map(tmp_path, monkeypatch):
     config = params()
-    assert config['pca9685_left_motors'] == '0x40:A,0x41:A'
-    assert config['pca9685_right_motors'] == '0x40:B,0x41:B'
+    assert config['pca9685_left_motors'] == '0x40:A,0x40:B'
+    assert config['pca9685_right_motors'] == '0x41:A,0x41:B'
     assert config['pca9685_max_duty'] <= 0.5
+    assert 0 < config['pca9685_min_duty'] < config['pca9685_max_duty']
     monkeypatch.setattr('merz_base.backends.i2c_address_owned_by_kernel', lambda *a, **k: False)
     backend = make_backend('pca9685', config, module=FakeSmbusModule)
     backend.drive(0.2, 0.2)
