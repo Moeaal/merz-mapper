@@ -10,11 +10,12 @@ from merz_base.base_controller import BaseController, BaseLimits, check_update_r
 
 _BACKEND_DEFAULTS = {
     'pca9685_bus': 7,
-    'pca9685_left_motors': '0x40:A,0x41:A',
-    'pca9685_right_motors': '0x40:B,0x41:B',
+    'pca9685_left_motors': '0x40:A,0x40:B',
+    'pca9685_right_motors': '0x41:A,0x41:B',
     'pca9685_inverted': '',
     'pca9685_frequency_hz': 1000.0,
     'pca9685_max_duty': 0.5,
+    'pca9685_min_duty': 0.15,
     'serial_port': '/dev/merz_motors',
     'serial_baud': 115200,
     'serial_drive_format': 'M {left:.3f} {right:.3f}\n',
