@@ -1,6 +1,7 @@
 """Manual mapping for gate G1: sensors, gamepad, base, localisation and SLAM.
 
     ros2 launch merz_bringup mapping.launch.py
+    ros2 launch merz_bringup mapping.launch.py d455:=false base:=false   # no D455 yet, rover moved by hand
 
 Save the map afterwards with:
     ros2 run nav2_map_server map_saver_cli -f ~/merz_data/maps/first_map
@@ -24,9 +25,12 @@ def _include(package: str, launch_file: str, **kwargs) -> IncludeLaunchDescripti
 def generate_launch_description() -> LaunchDescription:
     return LaunchDescription([
         DeclareLaunchArgument('c920', default_value='false', description='Not needed for the map itself.'),
+        DeclareLaunchArgument('d455', default_value='true',
+                              description='False until the D455 is fitted: the EKF then runs on scan odometry only.'),
         DeclareLaunchArgument('base', default_value='true', description='False when pushing the rover by hand.'),
         DeclareLaunchArgument('use_wheel_odom', default_value='false'),
-        _include('merz_bringup', 'sensors.launch.py', launch_arguments={'c920': LaunchConfiguration('c920')}.items()),
+        _include('merz_bringup', 'sensors.launch.py', launch_arguments={'c920': LaunchConfiguration('c920'),
+                                                            'd455': LaunchConfiguration('d455')}.items()),
         _include('merz_bringup', 'teleop.launch.py'),
         _include('merz_base', 'base.launch.py', condition=IfCondition(LaunchConfiguration('base'))),
         _include('merz_bringup', 'localisation.launch.py',
