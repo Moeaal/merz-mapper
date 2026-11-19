@@ -59,7 +59,7 @@
 2. ~~Build the whole workspace on the Jetson~~ DONE 2026-11-10 (rf2o `b38c68e`, explore_lite pin `926033f`, sllidar `3430009`). Optional: test m-explore `main` vs the pin (#19b).
 3. ~~LIDAR via the repo launch + bench bag~~ DONE 2026-11-10 (C1, 10.0 Hz, decisions #33).
 4. ~~C920 bring-up~~ DONE 2026-11-10. Still: photograph ~10 Merz Court door signs -> room format (OPEN_ISSUES #23).
-5. ~~Motor bench test~~ DONE 2026-11-16/19: HATs on bus 7; **wheel map corrected 2026-11-19: 0x40 = left (A RL, B FL), 0x41 = right (A FR, B RR)**; all "+" forward; lifted: start ~15% duty, 0.33 m/s at 30% (decisions #36, min-duty model). **PCA9685 backend** in `merz_base` IMPLEMENTED (decisions #35, unit tests only) -> next: `base_node backend:=pca9685` on the bench, then gamepad teleop (`/joy` axis check), then first drive.
+5. ~~Motor bench test~~ DONE 2026-11-16/19: HATs on bus 7; **wheel map corrected 2026-11-19: 0x40 = left (A RL, B FL), 0x41 = right (A FR, B RR)**; all "+" forward; lifted: start ~15% duty, 0.33 m/s at 30% (decisions #36, min-duty model). **ROS drives the motors** (`base_node backend:=pca9685`, forward/turn/timeout correct, lifted, 2026-11-19). DualSense mapped in `teleop.yaml` -> next: bench teleop, Bluetooth, first floor drive + floor calibration. **PCA9685 backend** in `merz_base` IMPLEMENTED (decisions #35, unit tests only) -> next: `base_node backend:=pca9685` on the bench, then gamepad teleop (`/joy` axis check), then first drive.
 6. Supervisor/technician: motor stall current (#28), LiPo rules + battery/buck loan (#29), rover CAD for mounts.
 7. Battery decision by ~end Nov (decisions #30).
 8. When the D455 arrives: librealsense RSUSB build (plan §5.2 Wed) and the **IMU go/no-go** (#22) the same day.

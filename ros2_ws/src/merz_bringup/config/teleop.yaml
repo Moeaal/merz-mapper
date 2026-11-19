@@ -1,5 +1,6 @@
-# Gamepad teleop. The gamepad is not yet bought, so axis and button numbers are guesses.
-# TODO: measure on rover (run `ros2 topic echo /joy` and press each control).
+# Gamepad teleop for a Sony DualSense (PS5) controller over USB-C. Indexes measured with `ros2 topic echo /joy`
+# on 2026-11-19 (logbook): axes 0 left stick L/R, 1 left stick up/down, 2 right stick L/R, 3 L2, 4 R2 (both rest at
+# 1.0), 5 right stick up/down, 6-7 d-pad; button 4 = L1.
 joy_node:
   ros__parameters:
     deadzone: 0.1
@@ -8,13 +9,13 @@ joy_node:
 teleop_node:
   ros__parameters:
     require_enable_button: true   # deadman: the robot only moves under teleop while this is held
-    enable_button: 4              # TODO: measure on rover (left shoulder on most pads)
+    enable_button: 4              # L1 (measured)
     enable_turbo_button: -1       # no turbo: the spec limit is 0.5 m/s
     axis_linear:
-      x: 1                        # TODO: measure on rover
+      x: 1                        # left stick up/down (measured). Up should give forward: check on the bench
     scale_linear:
       x: 0.3                      # m/s. Slower than the limit, as scan matching likes gentle motion. TODO: tune
     axis_angular:
-      yaw: 3                      # TODO: measure on rover
+      yaw: 2                      # right stick left/right (measured). Left should turn left: check on the bench
     scale_angular:
       yaw: 0.6                    # rad/s. TODO: tune
