@@ -3,7 +3,8 @@
 **Deadline: G1 / O1, Fri 18 Dec 2026** (last working day before leave on 19 Dec; OPEN_ISSUES #5). **Aim: first map by Fri 11 Dec.**
 O1 pass rule (`docs/planning/experiments.md`): *all sensors publishing at the same time; a map saved; the bag replays.*
 
-**Status: PLANNED.** Tick a box only when the result is written in `docs/logbook/` (date, versions, command, output).
+**Status: IN PROGRESS (checked 2026-11-19).** Tick a box only when the result is written in `docs/logbook/` (date, versions, command, output).
+`[x]` = done with logbook evidence; `-> *partly ...*` notes show what is still missing.
 How-to for each step: `docs/runbooks/jetson-bringup.md` (written as "runbook §n"). Day-by-day timing: `docs/planning/hardware-arrival-plan.md`.
 Markers: **[ROVER]** = depends on the unknown rover; **[MISSING]** = part not ordered; **[ASK]** = needs Dr Wright.
 
@@ -16,45 +17,45 @@ go on to the next Tier 1 item; do not start Tier 2. Tier 3 waits until Tier 1 is
 ## Tier 1: essentials for O1 (in this order)
 
 ### A. Decisions and orders (this week; no hardware needed)
-- [ ] **[ASK]** Distro agreed: JetPack 6.2.x + Ubuntu 22.04 + Humble (PROPOSED, `docs/research/distro-decision.md`), or the fallback
+- [x] **[ASK]** Distro agreed: JetPack 6.2.x + Ubuntu 22.04 + Humble (PROPOSED, `docs/research/distro-decision.md`), or the fallback -> *DONE 2026-11-10: student decision (STATE "Settled"); JetPack 6.2.x / L4T 36.4.7 + Humble, decisions #32*
 - [ ] **[ASK]** The IMU fallback in distro-decision.md §5 agreed (scan-only map for G1; separate IMU or not)
-- [ ] **[ASK]** Access to an x86_64 Ubuntu 20.04/22.04 PC for SDK Manager, or agreement to use the host-free route (runbook §2.2)
-- [ ] **[ASK]** Permission to test in Merz Court corridors, and which corridor to map first
-- [ ] **[MISSING]** Order a wireless gamepad (only needed for driving; a pushed map does not need it)
+- [x] **[ASK]** Access to an x86_64 Ubuntu 20.04/22.04 PC for SDK Manager, or agreement to use the host-free route (runbook §2.2) -> *DONE: host-free microSD route used 2026-11-10*
+- [ ] **[ASK]** Permission to test in Merz Court corridors, and which corridor to map first -> *testing allowed (STATE "Settled"); which corridor first: still to choose*
+- [x] **[MISSING]** Order a wireless gamepad (only needed for driving; a pushed map does not need it) -> *DONE: student owns a DualSense (PS5)*
 - [ ] A USB-C 3.x cable for the D455 (short, good quality) and, for route 2.2, a USB-to-M.2 NVMe enclosure, a 64 GB+ microSD card
       and a 16 GB+ USB stick. Check which ones the kit already has.
 
 ### B. Arrival and inspection (day 1)
 - [ ] Unpack; photograph every label (runbook §1)
-- [ ] Record the Jetson SKU, carrier and RAM **[SKU]**; check the camera is a D455 (not a D455f)
+- [ ] Record the Jetson SKU, carrier and RAM **[SKU]**; check the camera is a D455 (not a D455f) -> *Orin Nano 8 GB Developer Kit recorded 2026-11-09; D455 check when it arrives*
 - [ ] Each part checked against the parts list; anything missing reported to Dr Wright the same day
-- [ ] HARDWARE_REGISTER rows set to RECEIVED (via a PR; the register is not edited in this branch)
-- [ ] **[ROVER]** Rover inspected: motors, controller, encoders?, battery voltage/capacity, mounting points, any existing computer
+- [x] HARDWARE_REGISTER rows set to RECEIVED (via a PR; the register is not edited in this branch) -> *DONE 2026-11-10 (PR #18)*
+- [ ] **[ROVER]** Rover inspected: motors, controller, encoders?, battery voltage/capacity, mounting points, any existing computer -> *partly: 4 wheels, 12 V motors, no encoders, 2 HATs (2026-11-09/16); battery and mounting still open*
       (OPEN_ISSUES #1). Photos and notes in the logbook
 
 ### C. Jetson platform (week 2)
-- [ ] NVMe fitted; JetPack 6.2.x flashed; **root is on the NVMe** (`findmnt -n -o SOURCE /`) (runbook §2, gate 2.5)
-- [ ] Versions table filled in: L4T, JetPack, CUDA, TensorRT, power mode (runbook §1)
-- [ ] Power mode set and recorded; USB autosuspend off; SSH works (runbook §3)
-- [ ] ROS 2 Humble installed; the `/chatter` pub/echo gate passes (runbook §4.1)
+- [ ] NVMe fitted; JetPack 6.2.x flashed; **root is on the NVMe** (`findmnt -n -o SOURCE /`) (runbook §2, gate 2.5) -> *JetPack flashed 2026-11-10 but **root is on the microSD; NVMe not yet fitted/used** (simplest next step: NVMe as the data drive for `~/merz_data`)*
+- [ ] Versions table filled in: L4T, JetPack, CUDA, TensorRT, power mode (runbook §1) -> *L4T R36.4.7, Ubuntu 22.04.5 logged; CUDA, TensorRT and power mode still to log*
+- [ ] Power mode set and recorded; USB autosuspend off; SSH works (runbook §3) -> *SSH works (2026-11-10); MAXN SUPER set but `nvpmodel -q` not logged; USB autosuspend not yet off*
+- [x] ROS 2 Humble installed; the `/chatter` pub/echo gate passes (runbook §4.1) -> *DONE 2026-11-10 (talker/listener)*
 - [ ] librealsense **v2.59.1** built with RSUSB; `rs-enumerate-devices` shows the D455 on **USB 3.x** (runbook §4.2)
-- [ ] Workspace imported; `rf2o_laser_odometry`, `sllidar_ros2`, `realsense2_camera`, `explore_lite` each build alone (runbook §4.4)
-- [ ] Full `colcon build` and `colcon test` pass on the Jetson (OPEN_ISSUES #16); third-party commits recorded
-- [ ] udev rules installed with the real IDs; `/dev/rplidar` and `/dev/c920` survive a replug (runbook §5)
+- [ ] Workspace imported; `rf2o_laser_odometry`, `sllidar_ros2`, `realsense2_camera`, `explore_lite` each build alone (runbook §4.4) -> *rf2o, sllidar_ros2, explore_lite built 2026-11-10; realsense2_camera waits for the D455*
+- [x] Full `colcon build` and `colcon test` pass on the Jetson (OPEN_ISSUES #16); third-party commits recorded -> *DONE 2026-11-10 (12 packages; 41 third-party lint failures ignored; 1 ours fixed, PR #20); commits logged*
+- [ ] udev rules installed with the real IDs; `/dev/rplidar` and `/dev/c920` survive a replug (runbook §5) -> *`/dev/rplidar` works with the C1; C920 symlink and replug test not yet logged*
 
 ### D. Sensors one at a time, on the bench (week 3)
-- [ ] **RPLIDAR S2:** `/scan` at about 10 Hz for 5 min; outline correct in RViz (runbook §6.1)
+- [ ] **RPLIDAR S2:** `/scan` at about 10 Hz for 5 min; outline correct in RViz (runbook §6.1) -> *C1 stand-in (decisions #31/#33): `/scan` 10.0 Hz, bench bags 2026-11-10/19; S2 not yet arrived*
 - [ ] **D455 depth + colour:** colour and aligned depth at about 15 Hz for 10 min, direct port; 2 m wall reads about 2 m (runbook §6.2)
 - [ ] **D455 IMU: GO / NO-GO by the end of its time-boxed day** (runbook §6.3)
   - [ ] GO: `/camera/camera/imu` steady for 10 min; rotation shows on the right axis; firmware version logged
   - [ ] or NO-GO logged, with the fallback chosen (distro-decision.md §5) and Dr Wright told
-- [ ] **C920:** `/sign_cam/image_raw` at about 10 Hz, 1920x1080 MJPEG (runbook §6.4)
+- [ ] **C920:** `/sign_cam/image_raw` at about 10 Hz, 1920x1080 MJPEG (runbook §6.4) -> *running 2026-11-10 (student report); rate and resolution not yet logged*
 - [ ] **TF:** `description.launch.py` gives one connected tree (`view_frames`), placeholder poses accepted for the bench (runbook §6.6)
 - [ ] **All sensors together for 20 min** via `sensors.launch.py`: rates within about 10%, no USB resets in `dmesg`, peak temperature logged
       (runbook §6.7). **This is the first half of O1.**
 
 ### E. Bags (week 3, as soon as D passes)
-- [ ] 2-min bench bag recorded with `record_bag.launch.py`; `ros2 bag info` counts match the live rates (runbook §7)
+- [x] 2-min bench bag recorded with `record_bag.launch.py`; `ros2 bag info` counts match the live rates (runbook §7) -> *DONE 2026-11-10 (`lidar_bench`, 1371 scans in 136.8 s = 10.0 Hz)*
 - [ ] The bag replays, and `/scan` replays at about 10 Hz
 - [ ] Bags are on the NVMe; free space checked
 
@@ -66,6 +67,7 @@ go on to the next Tier 1 item; do not start Tier 2. Tier 3 waits until Tier 1 is
 - [ ] Sensor poses measured into `sensor_poses.yaml`, with their uncertainty logged (build-guide.md §2)
 
 ### G. First manual map (target Thu 10 Dec, latest Fri 18 Dec)
+*2026-11-19: practice map made at the bench, rover moved by hand (C1, no IMU): the pipeline works (logbook). Not the O1 map.*
 - [ ] Permission confirmed; people nearby told; a second person present
 - [ ] Choose the route: driven (needs Tier 2 motors + gamepad) **or pushed by hand** with `ros2 launch merz_bringup mapping.launch.py base:=false`
 - [ ] `record_bag.launch.py name:=first_map` running in a second terminal
@@ -83,10 +85,10 @@ go on to the next Tier 1 item; do not start Tier 2. Tier 3 waits until Tier 1 is
 ---
 
 ## Tier 2: makes the map better, or lets the rover drive (only after Tier 1 is complete)
-- [ ] **[ROVER]** Motor interface identified; `merz_base` backend chosen; wheels off the ground for the first tests
+- [x] **[ROVER]** Motor interface identified; `merz_base` backend chosen; wheels off the ground for the first tests -> *DONE 2026-11-16/19: 2 Waveshare HATs, `pca9685` backend (decisions #35/#36), wheels lifted*
 - [ ] **[ROVER]** Stop path that does not depend on the Jetson (decisions #19 R1, OPEN_ISSUES #19); physical power cut in reach
-- [ ] **[MISSING]** Gamepad: deadman works; switching the pad off stops the output (runbook §6.5; safety-review.md High finding)
-- [ ] Motors: right direction and sign; kill teleop with wheels turning, and they stop within `command_timeout_s` (build-guide.md §4)
+- [x] **[MISSING]** Gamepad: deadman works; switching the pad off stops the output (runbook §6.5; safety-review.md High finding) -> *DONE 2026-11-19 (DualSense, Bluetooth; lifted). Repeat on the floor*
+- [x] Motors: right direction and sign; kill teleop with wheels turning, and they stop within `command_timeout_s` (build-guide.md §4) -> *DONE 2026-11-19 (lifted): forward, turn and command timeout correct*
 - [ ] IMU noise: 60 s still bag; gyro bias and SD logged (build-guide.md §5) (skip if the IMU was NO-GO)
 - [ ] Scan odometry: measured 5 m straight line, 5 runs, against the laser meter (hardware-arrival-plan.md Tue 8 Dec)
 - [ ] **Long plain corridor bag**: does `/odom_scan` keep counting? If not, tell Dr Wright at once (OPEN_ISSUES #17)
