@@ -95,11 +95,12 @@ def other_motor_programs(proc: str = '/proc') -> list[str]:
             continue
         try:
             with open(os.path.join(proc, entry, 'cmdline'), 'rb') as handle:
-                cmdline = handle.read().replace(b'\0', b' ').decode(errors='replace')
+                args = handle.read().decode(errors='replace').split('\0')
         except OSError:
             continue
-        if 'merz_base/base_node' in cmdline:
-            found.append(f'{entry}: {cmdline.strip()[:100]}')
+        # Match the program path itself, not any command line that merely mentions it (e.g. a grep).
+        if any(arg.endswith('/merz_base/base_node') for arg in args[:2]):
+            found.append(f'{entry}: {" ".join(args).strip()[:100]}')
     return found
 
 

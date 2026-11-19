@@ -70,7 +70,7 @@ def test_finds_a_running_base_node(tmp_path):
     (tmp_path / '3974').mkdir()
     (tmp_path / '3974' / 'cmdline').write_bytes(b'/usr/bin/python3\0/home/moe/ros2_ws/install/merz_base/lib/merz_base/base_node\0')
     (tmp_path / '42').mkdir()
-    (tmp_path / '42' / 'cmdline').write_bytes(b'bash\0')
+    (tmp_path / '42' / 'cmdline').write_bytes(b'grep\0merz_base/base_node\0')
     (tmp_path / 'self').mkdir()
     found = m.other_motor_programs(str(tmp_path))
     assert len(found) == 1 and found[0].startswith('3974:')
