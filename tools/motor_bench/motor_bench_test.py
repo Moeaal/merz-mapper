@@ -86,6 +86,24 @@ def kernel_owns(bus_number: int, address: int, sysfs: str = '/sys/bus/i2c/device
     return os.path.exists(os.path.join(sysfs, f'{bus_number}-{address:04x}', 'driver'))
 
 
+def other_motor_programs(proc: str = '/proc') -> list[str]:
+    """Running merz_base base_node processes. Two programs driving the same HATs fight: on 2026-11-16 a forgotten
+    base_node sent "stop" 20 times a second and the bench test could not move any wheel."""
+    found = []
+    for entry in os.listdir(proc):
+        if not entry.isdigit() or int(entry) == os.getpid():
+            continue
+        try:
+            with open(os.path.join(proc, entry, 'cmdline'), 'rb') as handle:
+                args = handle.read().decode(errors='replace').split('\0')
+        except OSError:
+            continue
+        # Match the program path itself, not any command line that merely mentions it (e.g. a grep).
+        if any(arg.endswith('/merz_base/base_node') for arg in args[:2]):
+            found.append(f'{entry}: {" ".join(args).strip()[:100]}')
+    return found
+
+
 def open_bus(bus_number: int, dry_run: bool):
     if dry_run:
         return DryBus()
@@ -113,6 +131,10 @@ def main(argv: list[str] | None = None) -> int:
 
     addresses = [int(a, 0) for a in args.addresses.split(',')]
     if not args.dry_run:
+        others = other_motor_programs()
+        if others:
+            parser.error('base_node is already driving the motors. Stop it first (Ctrl+C in its window, or '
+                         'kill -INT <pid>):\n  ' + '\n  '.join(others))
         owned = [a for a in addresses if kernel_owns(args.bus, a)]
         if owned:
             parser.error(f'bus {args.bus} address(es) {", ".join(hex(a) for a in owned)} belong to a kernel driver '

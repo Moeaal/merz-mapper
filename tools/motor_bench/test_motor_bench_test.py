@@ -64,3 +64,19 @@ def test_refuses_an_address_a_kernel_driver_owns(tmp_path, monkeypatch):
     monkeypatch.setattr(m, 'kernel_owns', lambda bus, address: bus == 1 and address == 0x40)
     with pytest.raises(SystemExit):
         m.main(['--bus', '1', '--yes'])
+
+
+def test_finds_a_running_base_node(tmp_path):
+    (tmp_path / '3974').mkdir()
+    (tmp_path / '3974' / 'cmdline').write_bytes(b'/usr/bin/python3\0/home/moe/ros2_ws/install/merz_base/lib/merz_base/base_node\0')
+    (tmp_path / '42').mkdir()
+    (tmp_path / '42' / 'cmdline').write_bytes(b'grep\0merz_base/base_node\0')
+    (tmp_path / 'self').mkdir()
+    found = m.other_motor_programs(str(tmp_path))
+    assert len(found) == 1 and found[0].startswith('3974:')
+
+
+def test_refuses_to_run_while_base_node_runs(monkeypatch):
+    monkeypatch.setattr(m, 'other_motor_programs', lambda: ['3974: base_node'])
+    with pytest.raises(SystemExit):
+        m.main(['--bus', '7', '--yes'])
