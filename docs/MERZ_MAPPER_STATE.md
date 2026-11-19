@@ -59,14 +59,14 @@
 2. ~~Build the whole workspace on the Jetson~~ DONE 2026-11-10 (rf2o `b38c68e`, explore_lite pin `926033f`, sllidar `3430009`). Optional: test m-explore `main` vs the pin (#19b).
 3. ~~LIDAR via the repo launch + bench bag~~ DONE 2026-11-10 (C1, 10.0 Hz, decisions #33).
 4. ~~C920 bring-up~~ DONE 2026-11-10. Still: photograph ~10 Merz Court door signs -> room format (OPEN_ISSUES #23).
-5. ~~Motor bench test~~ DONE 2026-11-16/19: HATs on bus 7; **wheel map corrected 2026-11-19: 0x40 = left (A RL, B FL), 0x41 = right (A FR, B RR)**; all "+" forward; lifted: start ~15% duty, 0.33 m/s at 30% (decisions #36, min-duty model). **ROS drives the motors** (`base_node backend:=pca9685`, forward/turn/timeout correct, lifted, 2026-11-19). **Gamepad teleop working** (DualSense, Bluetooth; deadman, forward, turn correct; link-loss stop passed = safety review R2 TESTED, lifted). PCA9685 backend: decisions #35/#36. **Next: first floor drive (mains, tethered) + floor calibration (2 m timed run, starting duty), then a first manual map with the C1 (rf2o + SLAM Toolbox).**
+5. ~~Motor bench test~~ DONE 2026-11-16/19: HATs on bus 7; **wheel map corrected 2026-11-19: 0x40 = left (A RL, B FL), 0x41 = right (A FR, B RR)**; all "+" forward; lifted: start ~15% duty, 0.33 m/s at 30% (decisions #36, min-duty model). **ROS drives the motors** (`base_node backend:=pca9685`, forward/turn/timeout correct, lifted, 2026-11-19). **Gamepad teleop working** (DualSense, Bluetooth; deadman, forward, turn correct; link-loss stop passed = safety review R2 TESTED, lifted). PCA9685 backend: decisions #35/#36. **First map made 2026-11-19 (bench, moved by hand, C1, no IMU): pipeline LIDAR -> rf2o -> EKF -> SLAM Toolbox -> map_saver works**; map small and occluded by bench clutter. **Blocker now: rover not self-contained** (mains + breadboard + bench supply) -> battery/buck, wiring, mounting, then floor drive + calibration + first real map.
 6. Supervisor/technician: motor stall current (#28), LiPo rules + battery/buck loan (#29), rover CAD for mounts.
 7. Battery decision by ~end Nov (decisions #30).
 8. When the D455 arrives: librealsense RSUSB build (plan §5.2 Wed) and the **IMU go/no-go** (#22) the same day.
 
 ## Active blockers
 - D455 and S2 not yet arrived (D455 needed for the IMU in the EKF; not needed for a scan-only first map).
-- Battery not chosen (blocks untethered corridor driving) - OPEN_ISSUES #29.
+- **Rover not self-contained** (mains extension, breadboard, bench supply): blocks every floor test. Needs battery + buck (OPEN_ISSUES #29, decisions #30), wiring off the breadboard, mounting (rover CAD).
 - Motor stall current unknown - not a blocker for bench tests (HAT current limit + student's own supply); needed for battery wiring (OPEN_ISSUES #28).
 - Watch: D455 IMU on JetPack 6 (#22); L4T 36.4.7 vs planned 36.5.2 (#27).
 
