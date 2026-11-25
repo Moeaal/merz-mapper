@@ -14,12 +14,12 @@ from typing import Optional
 import numpy as np
 
 from merz_perception.engines import Detection, DetectorEngine, clip_box, make_engine
-from merz_perception.ocr import OcrEngine, make_ocr, prepare_crop, read_room_number
+from merz_perception.ocr import OcrEngine, make_ocr, prepare_crop, read_sign
 from merz_perception.room_numbers import RoomNumberValidator
 from merz_perception.sharpness import variance_of_laplacian
 
 CSV_COLUMNS = ['image', 'label', 'confidence', 'x_min', 'y_min', 'x_max', 'y_max', 'sharpness', 'sharp_enough',
-               'raw_text', 'ocr_confidence', 'room_number']
+               'raw_text', 'ocr_confidence', 'room_number', 'name']
 IMAGE_SUFFIXES = {'.jpg', '.jpeg', '.png', '.bmp'}
 # TODO: measure on rover (real sign format). A trailing letter is deliberately not allowed yet: it would let a misread
 # like "M2.1O" pass as valid instead of being repaired to "M2.10". If real signs have one, add it here and in the YAML.
@@ -40,17 +40,17 @@ def process_image(image_name: str, image: np.ndarray, detector: Optional[Detecto
         row = {
             'image': image_name, 'label': detection.label, 'confidence': round(detection.confidence, 4),
             'x_min': detection.x_min, 'y_min': detection.y_min, 'x_max': detection.x_max, 'y_max': detection.y_max,
-            'sharpness': '', 'sharp_enough': '', 'raw_text': '', 'ocr_confidence': '', 'room_number': '',
+            'sharpness': '', 'sharp_enough': '', 'raw_text': '', 'ocr_confidence': '', 'room_number': '', 'name': '',
         }
         if detection.label == sign_label and crop.size:
             sharpness = variance_of_laplacian(crop)
             sharp = sharpness >= min_sharpness
             row.update(sharpness=round(sharpness, 1), sharp_enough=sharp)
             if sharp and ocr is not None:
-                result, room = read_room_number(ocr, prepare_crop(crop), validator)
+                result, room, name = read_sign(ocr, prepare_crop(crop), validator)
                 if result is not None:
                     row.update(raw_text=result.text, ocr_confidence=round(result.confidence, 4),
-                               room_number=room or '')
+                               room_number=room or '', name=name)
         rows.append(row)
     return rows
 

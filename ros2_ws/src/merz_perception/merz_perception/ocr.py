@@ -6,6 +6,7 @@ formats differ between library versions, so parsing is kept in small functions t
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import re
 from typing import Any, Protocol, Sequence
 
 import numpy as np
@@ -104,14 +105,57 @@ def row_groups(lines: Sequence[OcrResult], gap_ratio: float = 0.6) -> list[Box]:
             for g in groups if len(g) > 1]
 
 
+# Text on Merz Court signs that is not a name: the blue-bar university number (e.g. "9.13", decisions #39) and the
+# word "Room" printed before some codes ("Room E4.25").
+DEFAULT_NAME_IGNORE = r'\d{1,2}[.,]\d{1,3}|ROOM'
+
+
+def sign_name(lines: Sequence[OcrResult], room: str | None, validator: Any, ignore: str = DEFAULT_NAME_IGNORE,
+              min_confidence: float = 0.5) -> str:
+    """The rest of the sign's text: the occupant's name or the room's use, e.g. "Dr Eni Oko" or "Cleaners".
+
+    Drops the room code, any other token that passes the room validator, tokens matching `ignore` (case-insensitive,
+    whole token) and lines below min_confidence. Lines are kept top to bottom (by box, when the engine gives boxes)
+    and joined with "; ", as on the sign. Returns '' when nothing is left. decisions #40.
+    """
+    skip = re.compile(ignore, re.IGNORECASE) if ignore else None
+    ordered = sorted(enumerate(lines), key=lambda il: (il[1].box[1] if il[1].box else 0, il[0]))
+    kept: list[str] = []
+    for _, line in ordered:
+        if line.confidence < min_confidence:
+            continue
+        words = []
+        for word in line.text.split():
+            bare = word.strip('.,:;-')
+            if not bare:
+                continue
+            if validator.validate(bare) is not None:     # the room code, or anything else that looks like one
+                continue
+            if skip is not None and skip.fullmatch(bare):
+                continue
+            words.append(word)
+        text = ' '.join(words).strip(' .,:;-')
+        if text and text not in kept:
+            kept.append(text)
+    return '; '.join(kept)
+
+
 def read_room_number(engine: OcrEngine, image_bgr: np.ndarray, validator: Any) -> tuple[OcrResult | None, str | None]:
-    """OCR an (already prepared) sign crop and return (line used, room number or None).
+    """OCR a sign crop and return (line used, room number or None). See read_sign, which also gives the name."""
+    line, room, _ = read_sign(engine, image_bgr, validator)
+    return line, room
+
+
+def read_sign(engine: OcrEngine, image_bgr: np.ndarray, validator: Any,
+              name_ignore: str = DEFAULT_NAME_IGNORE) -> tuple[OcrResult | None, str | None, str]:
+    """OCR an (already prepared) sign crop and return (line used, room number or None, name or '').
 
     1. Read every line (engines without read_lines give just their best line).
     2. Re-read rows the text detector split into pieces, if the engine can recognise without detection.
     3. Validate each line and each space-separated token; drop any room number that is part of a longer one
        found in the same crop ("14" when "M1.14" is also read), then take the most confident.
     If nothing validates, the most confident raw line is returned with None, so the caller can log what was rejected.
+    4. The name is every other line on the sign (sign_name); it is only returned with a room number.
     """
     read_lines = getattr(engine, 'read_lines', None)
     if read_lines is not None:
@@ -136,8 +180,8 @@ def read_room_number(engine: OcrEngine, image_bgr: np.ndarray, validator: Any) -
     kept = {room: line for room, line in found.items() if not any(room != other and room in other for other in found)}
     if kept:
         room = max(kept, key=lambda r: kept[r].confidence)
-        return kept[room], room
-    return _best(lines), None
+        return kept[room], room, sign_name(lines, room, validator, name_ignore)
+    return _best(lines), None, ''
 
 
 class PaddleEngine:

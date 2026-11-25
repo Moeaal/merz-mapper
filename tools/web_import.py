@@ -453,7 +453,8 @@ def build_places(db: Path, run: Path, out: Path, t0: float) -> dict:
     landmark_out = []
     for lm in landmarks:
         landmark_out.append({
-            'id': lm['id'], 'class': lm['class'], 'text': lm['text'], 'x': lm['x'], 'y': lm['y'], 'z': lm['z'],
+            'id': lm['id'], 'class': lm['class'], 'text': lm['text'], 'name': lm.get('name') or '',
+            'x': lm['x'], 'y': lm['y'], 'z': lm['z'],
             'sd': [math.sqrt(max(lm['var_x'], 0)), math.sqrt(max(lm['var_y'], 0))], 'confidence': lm['confidence'],
             'count': lm['observation_count'], 'first_seen_s': rel(lm['first_seen']), 'last_seen_s': rel(lm['last_seen']),
             'photo': photo(lm['photo_id']), 'observations': by_landmark.get(lm['id'], [])})
@@ -468,7 +469,9 @@ def build_places(db: Path, run: Path, out: Path, t0: float) -> dict:
     rooms = {}
     for lm in landmarks:
         if lm['text']:
-            rooms.setdefault(lm['text'], {'room': lm['text'], 'x': lm['x'], 'y': lm['y'], 'landmark_id': lm['id'],
+            # name: occupant or use read from the sign (decisions #40; supervisor approved names on the site)
+            rooms.setdefault(lm['text'], {'room': lm['text'], 'name': lm.get('name') or '', 'x': lm['x'], 'y': lm['y'],
+                                          'landmark_id': lm['id'],
                                           'entrances': sorted(e for e, z in zones.items() if lm['id'] in z['landmarks'])})
     graph = {'entrances': [{k: e[k] for k in ('id', 'name', 'x', 'y', 'yaw')} for e in entrances],
              'junctions': junction_out, 'edges': [[e['a'], e['b'], e['length_m']] for e in edges],

@@ -37,6 +37,7 @@ class TrackedLandmark:
     position: np.ndarray                 # metres, map frame
     count: int = 1
     text: str = ''
+    name: str = ''                       # occupant or use read from the sign (decisions #40)
     confidence: float = 0.0
     first_seen_s: float = 0.0
     last_seen_s: float = 0.0
@@ -78,7 +79,7 @@ class LandmarkMap:
             scatter = np.diag([row['var_x'], row['var_y'], row['var_z']]) * max(count - 1, 0)
             self.landmarks.append(TrackedLandmark(
                 landmark_id=int(row['id']), landmark_class=row['class'],
-                position=np.array([row['x'], row['y'], row['z']], dtype=float), count=count, text=row['text'],
+                position=np.array([row['x'], row['y'], row['z']], dtype=float), count=count, text=row['text'], name=row.get('name') or '',
                 confidence=row['confidence'], first_seen_s=row['first_seen'] or 0.0,
                 last_seen_s=row['last_seen'] or 0.0, _scatter=scatter))
             self._next_id = max(self._next_id, int(row['id']) + 1)
@@ -114,8 +115,11 @@ class LandmarkMap:
         landmark._scatter = landmark._scatter + np.outer(delta, position - landmark.position)
 
     def attach_text(self, text: str, box_in_sign_camera: BoundingBox, sign_intrinsics: Intrinsics,
-                    map_from_sign_camera: np.ndarray, sign_label: str = 'room_sign') -> Optional[TrackedLandmark]:
-        """Give a room number to the sign landmark that lands inside the box where OCR read it.
+                    map_from_sign_camera: np.ndarray, sign_label: str = 'room_sign',
+                    name: str = '') -> Optional[TrackedLandmark]:
+        """Give a room number (and the name read with it, if any) to the sign landmark inside the OCR box.
+
+        An empty name never overwrites a name already read, as one blurred frame can lose the name line.
 
         The C920 read the text and the D455 found the position, so they are joined by projecting each known sign into
         the C920 image. If several signs land in the box, the nearest to its centre wins. If none do, None is returned
@@ -136,4 +140,6 @@ class LandmarkMap:
                 best, best_distance = landmark, distance
         if best is not None:
             best.text = text
+            if name:
+                best.name = name
         return best

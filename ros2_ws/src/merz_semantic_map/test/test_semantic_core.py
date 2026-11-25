@@ -286,3 +286,40 @@ def test_junction_edge_stored_once_in_either_order(tmp_path):
         database.add_junction_edge(a, a, 1.0)
         rows = database.connection.execute('SELECT a, b, length_m FROM junction_edges').fetchall()
     assert rows == [(a, b, 5.5)]
+
+
+# ---- sign names (decisions #40)
+def test_name_goes_with_the_text_and_an_empty_name_never_erases_it():
+    landmarks = _sign_map()
+    chosen = landmarks.attach_text('C528', box_around(453, 240), K, IDENTITY, name='Dr Eni Oko')
+    assert chosen.text == 'C528' and chosen.name == 'Dr Eni Oko'
+    landmarks.attach_text('C528', box_around(453, 240), K, IDENTITY, name='')       # a blurred frame lost the name
+    assert chosen.name == 'Dr Eni Oko'
+
+
+def test_name_round_trips_through_the_database_and_restores(tmp_path):
+    with MerzDatabase(tmp_path / 'merz.sqlite') as database:
+        database.upsert_landmark(1, 'room_sign', 'C528', (1.0, 2.0, 1.5), name='Dr Eni Oko')
+        rows = database.landmarks()
+    assert rows[0]['name'] == 'Dr Eni Oko'
+    restored = LandmarkMap(CONFIG)
+    restored.restore(rows)
+    assert restored.landmarks[0].name == 'Dr Eni Oko'
+
+
+def test_a_version_1_database_gains_the_name_column(tmp_path):
+    path = tmp_path / 'old.sqlite'
+    old = sqlite3.connect(path)
+    old.executescript("""CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+        INSERT INTO meta VALUES ('schema_version', '1');
+        CREATE TABLE landmarks (id INTEGER PRIMARY KEY, class TEXT NOT NULL, text TEXT NOT NULL DEFAULT '',
+            x REAL NOT NULL, y REAL NOT NULL, z REAL NOT NULL, var_x REAL NOT NULL DEFAULT 0,
+            var_y REAL NOT NULL DEFAULT 0, var_z REAL NOT NULL DEFAULT 0, confidence REAL NOT NULL DEFAULT 0,
+            observation_count INTEGER NOT NULL DEFAULT 1, first_seen REAL, last_seen REAL, photo_id INTEGER);
+        INSERT INTO landmarks (id, class, text, x, y, z) VALUES (1, 'room_sign', 'C514', 0, 0, 1.5);""")
+    old.commit()
+    old.close()
+    with MerzDatabase(path) as database:
+        rows = database.landmarks()
+        version = database.connection.execute("SELECT value FROM meta WHERE key = 'schema_version'").fetchone()[0]
+    assert rows[0]['text'] == 'C514' and rows[0]['name'] == '' and version == '2'

@@ -4,7 +4,7 @@
 export interface Photo { src: string; thumb: string; w: number; h: number }
 export interface Entrance { id: string; name: string; x: number; y: number; yaw: number }
 export interface JunctionInfo { id: number; x: number; y: number; photo: Photo | null; taken_s: number | null }
-export interface RoomInfo { room: string; x: number; y: number; landmark_id: number; entrances: string[] }
+export interface RoomInfo { room: string; name?: string; x: number; y: number; landmark_id: number; entrances: string[] }
 export interface Graph {
   entrances: Entrance[];
   junctions: JunctionInfo[];

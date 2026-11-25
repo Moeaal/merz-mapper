@@ -2,6 +2,7 @@
 int64 id
 string landmark_class                     # "class" is a Python keyword, so it cannot be the field name
 string text                               # room number for room signs, otherwise empty
+string name                               # name/use read from the sign, e.g. "Dr Eni Oko"; may be empty
 geometry_msgs/Point position              # metres, in header frame of the LandmarkArray (normally map)
 float64[9] covariance                     # position covariance, m^2, row-major x y z
 float32 confidence                        # highest detector score seen, 0 to 1

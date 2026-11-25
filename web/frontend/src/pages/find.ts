@@ -37,6 +37,21 @@ export function score(query: string, room: string): number {
   return 0;
 }
 
+/** Name search (decisions #40): "oko", "dr oko" or "academics" finds the room whose sign reads "Dr Eni Oko". */
+export function scoreName(query: string, name: string | undefined): number {
+  const words = query.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter((w) => w && !['dr', 'prof', 'professor'].includes(w));
+  const target = (name ?? '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ');
+  if (!words.length || !target.trim()) return 0;
+  const tokens = target.split(/\s+/);
+  if (!words.every((w) => tokens.some((t) => t.startsWith(w)))) return 0;
+  return words.every((w) => tokens.includes(w)) ? 70 : 50;
+}
+
+/** Best of the room-code score and the name score. */
+export function scoreRoom(query: string, room: string, name?: string): number {
+  return Math.max(score(query, room), scoreName(query, name));
+}
+
 export default async function find(ctx: PageContext) {
   const { bundle, root, params } = ctx;
   const entranceId = params.get('entrance');
@@ -46,6 +61,7 @@ export default async function find(ctx: PageContext) {
   const zone = bundle.routes[entrance.id];
   const reachable = Object.keys(zone?.routes ?? {}).sort();
   const allRooms = bundle.graph.rooms;
+  const nameOf = new Map(allRooms.map((r) => [r.room, r.name ?? '']));
   let cleanup: (() => void)[] = [];
   let current: { room: string; route: Route } | null = null;
   let walk: ReturnType<typeof walkThrough> | null = null;
@@ -149,7 +165,7 @@ export default async function find(ctx: PageContext) {
     scene?.setRoute(null);
     flat?.setRoute(null);
     const input = h('input', { id: 'room-search', class: 'search-input', type: 'search', inputmode: 'search', autocomplete: 'off',
-      spellcheck: 'false', placeholder: 'Room number, e.g. S1.04', role: 'combobox', 'aria-expanded': 'true',
+      spellcheck: 'false', placeholder: 'Room or name, e.g. C528 or Oko', role: 'combobox', 'aria-expanded': 'true',
       'aria-controls': 'room-results', 'aria-autocomplete': 'list', 'aria-describedby': 'search-status' }) as HTMLInputElement;
     input.value = initial;
     const status = h('p', { id: 'search-status', class: 'search-status mono', 'aria-live': 'polite' });
@@ -157,13 +173,14 @@ export default async function find(ctx: PageContext) {
     const note = h('div', { class: 'search-note' });
     const draw = () => {
       const q = input.value.trim();
-      const ranked = reachable.map((room) => ({ room, s: score(q, room) })).filter((r) => r.s > 0)
+      const ranked = reachable.map((room) => ({ room, s: scoreRoom(q, room, nameOf.get(room)) })).filter((r) => r.s > 0)
         .sort((a, b) => b.s - a.s || a.room.localeCompare(b.room, 'en', { numeric: true }));
       results.replaceChildren(...ranked.map(({ room }, i) => {
         const r = zone.routes[room];
         const option = h('li', { role: 'option', id: `opt-${i}`, 'aria-selected': i === 0 && q ? 'true' : 'false' },
           h('button', { class: 'room-option', type: 'button', tabindex: '-1', onclick: () => choose(room) },
-            h('span', { class: 'room-num', text: room }),
+            h('span', { class: 'room-label' }, h('span', { class: 'room-num', text: room }),
+              nameOf.get(room) ? h('span', { class: 'room-name', text: nameOf.get(room)! }) : null),
             h('span', { class: 'room-meta mono', text: `${fmt(r.length_m)} m · ${Math.max(1, Math.round(r.length_m / WALK_SPEED / 60))} min` }),
             icon('arrow', 'icon room-go')));
         return option;
@@ -171,20 +188,20 @@ export default async function find(ctx: PageContext) {
       status.textContent = q ? `${ranked.length} of ${reachable.length} rooms match` : `${reachable.length} rooms reachable from here`;
       note.replaceChildren();
       if (q && !ranked.length) {
-        const elsewhere = allRooms.filter((r) => score(q, r.room) >= 60 && !reachable.includes(r.room));
+        const elsewhere = allRooms.filter((r) => scoreRoom(q, r.room, r.name) >= 60 && !reachable.includes(r.room));
         if (elsewhere.length) {
           const other = bundle.graph.entrances.find((e) => elsewhere[0].entrances.includes(e.id));
           note.append(h('div', { class: 'gentle' },
             h('span', { class: 'gentle-icon', icon: 'lock' }),
             h('div', {},
-              h('p', { class: 'gentle-title' }, `Room ${elsewhere[0].room} is behind a locked door from here`),
+              h('p', { class: 'gentle-title' }, `Room ${elsewhere[0].room}${elsewhere[0].name ? ` (${elsewhere[0].name})` : ''} is behind a locked door from here`),
               h('p', { class: 'muted small', text: `The robot mapped it, but could not reach it from the ${entrance!.name.toLowerCase()}, so it would not send you there.` }),
               other ? h('a', { class: 'button small-button', href: `find?entrance=${other.id}&room=${encodeURIComponent(elsewhere[0].room)}`, 'data-link': true },
                 `Directions from the ${other.name}`, icon('arrow')) : null)));
         } else {
           note.append(h('div', { class: 'gentle' }, h('span', { class: 'gentle-icon', icon: 'info' }),
-            h('div', {}, h('p', { class: 'gentle-title', text: `No room called “${q}” on the robot’s map` }),
-              h('p', { class: 'muted small', text: 'Try the number on the door, such as S1.04. Rooms the robot could not read are not listed yet.' }))));
+            h('div', {}, h('p', { class: 'gentle-title', text: `No room or name “${q}” on the robot’s map` }),
+              h('p', { class: 'muted small', text: 'Try the code on the door, such as C528, or a name. Rooms the robot could not read are not listed yet.' }))));
         }
       }
     };
