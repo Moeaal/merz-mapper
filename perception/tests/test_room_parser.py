@@ -98,6 +98,16 @@ def test_config_loads() -> None:
     assert settings.room_patterns and settings.detector['mode'] == 'none'
 
 
+def test_config_patterns_match_merz_court_signs() -> None:
+    # 2026-11-25 photo walk (decisions #39): the room code (C528) is the ID; the blue-bar number (9.13) is not.
+    settings = load_settings()
+    p = RoomParser(settings.room_patterns, settings.prefix_letters)
+    assert p.parse_token('C528') == ('C528', False)
+    assert p.parse_token('c514') == ('C514', False)
+    for not_a_room in ['9.13', '9.08', 'Dr', 'Cleaners']:
+        assert p.parse_token(not_a_room) is None
+
+
 class FakeOcr:
     def __init__(self, lines: list[OcrLine]) -> None:
         self.lines = lines

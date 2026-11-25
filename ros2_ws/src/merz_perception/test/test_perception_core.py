@@ -215,11 +215,14 @@ def test_process_folder_writes_a_readable_csv_in_name_order(tmp_path):
 
 
 # ---- config
-def test_config_regex_matches_the_default_and_compiles():
+def test_config_regex_matches_merz_court_room_codes():
+    # Real format from the 2026-11-25 photo walk (decisions #39): room code C + 3 digits; blue-bar 9.xx is ignored.
     params = yaml.safe_load((PACKAGE / 'config' / 'perception.yaml').read_text())
-    regex = params['sign_reader']['ros__parameters']['room_regex']
-    assert regex == DEFAULT_ROOM_REGEX
-    re.compile(regex)
+    validator = RoomNumberValidator(params['sign_reader']['ros__parameters']['room_regex'])
+    for code in ['C514', 'C515', 'C516', 'C519', 'C520', 'C524', 'C527', 'C528', 'c528']:
+        assert validator.validate(code) == code.upper()
+    for not_a_room in ['9.13', '9.08', '913', 'Dr', 'Cleaners', 'C52', 'C5281']:
+        assert validator.validate(not_a_room) is None
 
 
 def test_c920_detector_only_looks_for_signs():

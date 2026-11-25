@@ -1,13 +1,14 @@
-# PROPOSED. Room-number formats for Merz Court door signs.
-# The real format is UNKNOWN until signs are photographed (perception/PHOTO_CHECKLIST.md). After the photo walk,
-# list every distinct format seen, replace the placeholder patterns below, and re-run tests + score_ocr.py.
+# Room-number formats for Merz Court door signs.
+# Set from the 2026-11-25 photo walk (floor 9 corridor, 11 doors, 87 photos; OPEN_ISSUES #23, decisions #39).
+# Each sign shows two codes: a university number in the blue bar (e.g. 9.13, internal use only, NOT stored) and
+# the room code below it (e.g. C528), which is the room ID. Seen: C514-C528. One sign reads "Room E4.25" (to check).
 #
 # Each pattern must match a whole token (Python re.fullmatch) after normalising: uppercase, spaces removed,
 # only A-Z 0-9 . - kept. Keep patterns tight: a loose pattern turns random words into "room numbers".
 room_patterns:
-  # Placeholder, same as ros2_ws/src/merz_perception/config/perception.yaml (room_regex): an optional letter,
-  # 1-2 digits, an optional dot, then 1-3 digits, e.g. M4.13, 2.07, M413.
-  - '[A-Z]?\d{1,2}\.?\d{1,3}'
+  # Same as ros2_ws/src/merz_perception/config/perception.yaml (room_regex): the letter C, then 3 digits, e.g. C528.
+  # Deliberately does not match the blue-bar numbers (9.13), so they are never stored as rooms.
+  - 'C\d{3}'
   # Example of a second format, disabled until seen on a real sign (letter suffix, e.g. M4.13A):
   # - '[A-Z]\d{1,2}\.\d{1,3}[A-Z]'
 
