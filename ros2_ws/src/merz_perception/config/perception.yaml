@@ -23,7 +23,7 @@ detector_c920:
 sign_reader:
   ros__parameters:
     ocr_engine: auto
-    room_regex: '[A-Z]?\d{1,2}\.?\d{1,3}'                # TODO: measure on rover (match the real sign format)
+    room_regex: 'C\d{3}'                                  # room code, e.g. C528 (photo walk 2026-11-25, decisions #39)
     min_sharpness: 100.0                                 # TODO: measure on rover (from real C920 crops)
     sign_label: room_sign
     min_agreement: 2
