@@ -8,7 +8,7 @@ from pathlib import Path
 import sqlite3
 from typing import Iterable, Optional
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2    # 2: landmarks.name (decisions #40)
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS landmarks (
     id     INTEGER PRIMARY KEY,
     class  TEXT NOT NULL,
     text   TEXT NOT NULL DEFAULT '',
+    name   TEXT NOT NULL DEFAULT '',
     x      REAL NOT NULL,
     y      REAL NOT NULL,
     z      REAL NOT NULL,
@@ -91,8 +92,15 @@ class MerzDatabase:
         self.connection = sqlite3.connect(path)
         self.connection.execute('PRAGMA foreign_keys = ON')
         self.connection.executescript(SCHEMA)
-        self.connection.execute('INSERT OR IGNORE INTO meta VALUES (?, ?)', ('schema_version', str(SCHEMA_VERSION)))
+        self._migrate()
+        self.connection.execute('INSERT OR REPLACE INTO meta VALUES (?, ?)', ('schema_version', str(SCHEMA_VERSION)))
         self.connection.commit()
+
+    def _migrate(self) -> None:
+        """Bring a database from an earlier schema version up to date, so older runs still load."""
+        columns = {row[1] for row in self.connection.execute('PRAGMA table_info(landmarks)')}
+        if 'name' not in columns:                                   # version 1 -> 2
+            self.connection.execute("ALTER TABLE landmarks ADD COLUMN name TEXT NOT NULL DEFAULT ''")
 
     def close(self) -> None:
         self.connection.commit()
@@ -130,19 +138,19 @@ class MerzDatabase:
     def upsert_landmark(self, landmark_id: int, landmark_class: str, text: str, position: Iterable[float],
                         variances: Iterable[float] = (0.0, 0.0, 0.0), confidence: float = 0.0,
                         observation_count: int = 1, first_seen: Optional[float] = None,
-                        last_seen: Optional[float] = None, photo_id: Optional[int] = None) -> None:
+                        last_seen: Optional[float] = None, photo_id: Optional[int] = None, name: str = '') -> None:
         x, y, z = position
         var_x, var_y, var_z = variances
         self.connection.execute(
-            """INSERT INTO landmarks (id, class, text, x, y, z, var_x, var_y, var_z, confidence, observation_count,
-                                      first_seen, last_seen, photo_id)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """INSERT INTO landmarks (id, class, text, name, x, y, z, var_x, var_y, var_z, confidence,
+                                      observation_count, first_seen, last_seen, photo_id)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                ON CONFLICT(id) DO UPDATE SET
-                 class=excluded.class, text=excluded.text, x=excluded.x, y=excluded.y, z=excluded.z,
+                 class=excluded.class, text=excluded.text, name=excluded.name, x=excluded.x, y=excluded.y, z=excluded.z,
                  var_x=excluded.var_x, var_y=excluded.var_y, var_z=excluded.var_z, confidence=excluded.confidence,
                  observation_count=excluded.observation_count, first_seen=excluded.first_seen,
                  last_seen=excluded.last_seen, photo_id=COALESCE(excluded.photo_id, landmarks.photo_id)""",
-            (landmark_id, landmark_class, text, float(x), float(y), float(z), float(var_x), float(var_y), float(var_z),
+            (landmark_id, landmark_class, text, name, float(x), float(y), float(z), float(var_x), float(var_y), float(var_z),
              float(confidence), int(observation_count), first_seen, last_seen, photo_id))
         self.connection.commit()
 

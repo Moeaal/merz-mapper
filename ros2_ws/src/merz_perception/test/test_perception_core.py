@@ -303,3 +303,47 @@ def test_line_parsers_keep_boxes():
     assert parse_paddle_lines(v2)[0].box == (0, 0, 5, 5)
     rapid = ([[[[1, 2], [9, 2], [9, 8], [1, 8]], 'M2.14', 0.7]], [0.1])
     assert parse_rapidocr_lines(rapid)[0].box == (1, 2, 9, 8)
+
+
+# ---- sign names (decisions #40): the rest of the sign, e.g. "Dr Eni Oko", is kept with the room code
+from merz_perception.ocr import read_sign, sign_name  # noqa: E402
+
+MERZ = RoomNumberValidator(r'C\d{3}')
+
+
+class MerzSign:
+    """Fake engine giving the three lines of a real Merz Court sign (photo walk 2026-11-25), top to bottom."""
+    def __init__(self, *lines):
+        self.lines = [OcrResult(text, conf, (0, 20 * i, 100, 20 * i + 15)) for i, (text, conf) in enumerate(lines)]
+
+    def read_lines(self, image):
+        return list(reversed(self.lines))        # out of order on purpose: the name must still read top to bottom
+
+
+@pytest.mark.parametrize('lines, room, name', [
+    ([('9.13', .99), ('C528', .95), ('Dr Eni Oko', .9)], 'C528', 'Dr Eni Oko'),
+    ([('9.15', .99), ('C527', .95), ('Visiting Academics Office', .9), ('Prof. Carles Oliet', .9)],
+     'C527', 'Visiting Academics Office; Prof. Carles Oliet'),
+    ([('9.12', .99), ('C515 Dr. Dana Ofiteru', .9)], 'C515', 'Dr. Dana Ofiteru'),     # code and name on one line
+    ([('9,14', .99), ('C516', .95)], 'C516', ''),                                   # no name: empty, not "9,14"
+])
+def test_read_sign_returns_room_code_and_name(lines, room, name):
+    line, got_room, got_name = read_sign(MerzSign(*lines), np.zeros((10, 10, 3), np.uint8), MERZ)
+    assert got_room == room and got_name == name
+
+
+def test_no_name_without_a_room_code():
+    # Cleaners / Plant Room 7 have no C-code: nothing is published, so no orphan name either.
+    _, room, name = read_sign(MerzSign(('9.40', .99), ('Cleaners', .9)), np.zeros((10, 10, 3), np.uint8), MERZ)
+    assert room is None and name == ''
+
+
+def test_low_confidence_lines_and_the_word_room_are_left_out_of_the_name():
+    lines = [OcrResult('9.08', .99), OcrResult('Room C514', .9), OcrResult('Dr Colin Hare', .8), OcrResult('~~', .2)]
+    assert sign_name(lines, 'C514', MERZ) == 'Dr Colin Hare'
+
+
+def test_offline_batch_writes_the_name_column():
+    rows = process_image('a.png', np.zeros((80, 80, 3), np.uint8), None,
+                         MerzSign(('9.13', .99), ('C528', .95), ('Dr Eni Oko', .9)), MERZ, 0.0)
+    assert 'name' in CSV_COLUMNS and rows[0]['room_number'] == 'C528' and rows[0]['name'] == 'Dr Eni Oko'

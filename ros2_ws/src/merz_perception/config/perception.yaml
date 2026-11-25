@@ -26,6 +26,7 @@ sign_reader:
     room_regex: 'C\d{3}'                                  # room code, e.g. C528 (photo walk 2026-11-25, decisions #39)
     min_sharpness: 100.0                                 # TODO: measure on rover (from real C920 crops)
     sign_label: room_sign
+    name_ignore_regex: '\d{1,2}[.,]\d{1,3}|ROOM'       # not part of the name: blue-bar 9.xx, the word Room (decisions #40)
     min_agreement: 2
     agreement_window_s: 10.0
     sync_queue_size: 20                                  # 2 s at 10 Hz; must exceed the detector's latency

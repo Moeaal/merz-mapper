@@ -8,7 +8,7 @@ from sensor_msgs.msg import Image
 
 from merz_interfaces.msg import DetectionArray, SignReading
 from merz_perception.engines import Detection, clip_box
-from merz_perception.ocr import make_ocr, prepare_crop, read_room_number
+from merz_perception.ocr import DEFAULT_NAME_IGNORE, make_ocr, prepare_crop, read_sign
 from merz_perception.room_numbers import ReadAgreement, RoomNumberValidator
 from merz_perception.sharpness import is_sharp
 
@@ -21,6 +21,7 @@ class SignReaderNode(Node):
         self._validator = RoomNumberValidator(self.declare_parameter('room_regex', '').value)
         self._min_sharpness = self.declare_parameter('min_sharpness', 100.0).value
         self._sign_label = self.declare_parameter('sign_label', 'room_sign').value
+        self._name_ignore = self.declare_parameter('name_ignore_regex', DEFAULT_NAME_IGNORE).value
         self._agreement = ReadAgreement(self.declare_parameter('min_agreement', 2).value,
                                         self.declare_parameter('agreement_window_s', 10.0).value)
         queue_size = self.declare_parameter('sync_queue_size', 20).value
@@ -47,7 +48,7 @@ class SignReaderNode(Node):
             crop = image[y0:y1, x0:x1]
             if crop.size == 0 or not is_sharp(crop, self._min_sharpness):
                 continue
-            result, text = read_room_number(self._ocr, prepare_crop(crop), self._validator)
+            result, text, name = read_sign(self._ocr, prepare_crop(crop), self._validator, self._name_ignore)
             if result is None:
                 continue
             if text is None:
@@ -55,7 +56,7 @@ class SignReaderNode(Node):
                 continue
             if self._agreement.add(text, now_s):
                 self._publisher.publish(SignReading(
-                    header=image_msg.header, text=text, raw_text=result.text,
+                    header=image_msg.header, text=text, raw_text=result.text, name=name,
                     confidence=float(result.confidence), detection=sign))
 
 

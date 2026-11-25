@@ -118,7 +118,7 @@ class LandmarkNode(Node):
             return
         d = reading.detection
         landmark = self._landmarks.attach_text(reading.text, BoundingBox(d.x_min, d.y_min, d.x_max, d.y_max),
-                                               self._sign_intrinsics, pose)
+                                               self._sign_intrinsics, pose, name=reading.name)
         if landmark is None:
             self.get_logger().info(f"Read '{reading.text}' but no sign landmark projects into its box yet")
             return
@@ -129,7 +129,7 @@ class LandmarkNode(Node):
         self._database.upsert_landmark(
             landmark.landmark_id, landmark.landmark_class, landmark.text, landmark.position,
             (covariance[0, 0], covariance[1, 1], covariance[2, 2]), landmark.confidence, landmark.count,
-            landmark.first_seen_s, landmark.last_seen_s)
+            landmark.first_seen_s, landmark.last_seen_s, name=landmark.name)
 
     def _publish(self, stamp: Time) -> None:
         output = LandmarkArray()
@@ -138,7 +138,7 @@ class LandmarkNode(Node):
         for landmark in self._landmarks.landmarks:
             x, y, z = (float(v) for v in landmark.position)
             output.landmarks.append(Landmark(
-                id=landmark.landmark_id, landmark_class=landmark.landmark_class, text=landmark.text,
+                id=landmark.landmark_id, landmark_class=landmark.landmark_class, text=landmark.text, name=landmark.name,
                 position=Point(x=x, y=y, z=z), covariance=[float(v) for v in landmark.covariance.flatten()],
                 confidence=float(landmark.confidence), observation_count=landmark.count,
                 photo_path=landmark.photo_path, first_seen=seconds_to_stamp(landmark.first_seen_s),

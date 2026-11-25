@@ -63,7 +63,7 @@ def run(tmp_path_factory):
         j2 = db.add_junction(-14.0, 20.0, p2)
         db.add_junction_edge(j1, j2, 12.5)
         db.upsert_landmark(1, 'room_sign', 'S1.02', (-8.15, 21.15, 1.5), (0.01, 0.02, 0.01), 0.9, 2,
-                           first_seen=T0 + 20, last_seen=T0 + 21, photo_id=p3)
+                           first_seen=T0 + 20, last_seen=T0 + 21, photo_id=p3, name='Dr Test Name')
         db.upsert_landmark(2, 'lift', '', (-13.0, 21.1, 1.2), (0.01, 0.01, 0.01), 0.8, 1, first_seen=T0 + 30, last_seen=T0 + 30)
         db.add_observation(1, (-8.1, 21.1, 1.5), confidence=0.9, stamp=T0 + 20)
         db.add_observation(1, (-8.2, 21.2, 1.5), confidence=0.9, stamp=T0 + 21)
@@ -165,6 +165,7 @@ def test_places_routes_and_photos(bundle):
     landmarks = load(bundle / 'landmarks.json')
     routes = load(bundle / 'routes.json')
     assert [r['room'] for r in graph['rooms']] == ['S1.02']
+    assert graph['rooms'][0]['name'] == 'Dr Test Name'          # decisions #40: names reach the website data
     sign = next(lm for lm in landmarks if lm['class'] == 'room_sign')
     assert sign['photo']['src'].endswith('.webp') and (bundle / sign['photo']['src']).is_file()
     assert sign['first_seen_s'] == pytest.approx(20.0, abs=0.2)

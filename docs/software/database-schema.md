@@ -11,7 +11,7 @@ see "One map frame" below.
 | --- | --- | --- | --- |
 | `meta` | Setting | `key`, `value`; holds `schema_version` | database.py |
 | `entrances` | Building entrance | `id` (used in the QR URL), `name`, `x`, `y`, `yaw` (start pose) | access zone code |
-| `landmarks` | Physical landmark | `class`, `text` (room number), `x y z`, `var_x var_y var_z` (m^2), `confidence`, `observation_count`, `first_seen`, `last_seen`, `photo_id` | `landmark_node` |
+| `landmarks` | Physical landmark | `class`, `text` (room code, e.g. C528), `name` (rest of the sign, e.g. "Dr Eni Oko"; schema v2, decisions #40), `x y z`, `var_x var_y var_z` (m^2), `confidence`, `observation_count`, `first_seen`, `last_seen`, `photo_id` | `landmark_node` |
 | `observations` | One sighting of a landmark | `landmark_id`, `x y z`, `depth_m`, `confidence`, `stamp` | `landmark_node` |
 | `access_zones` | (entrance, landmark) reachable | `entrance_id`, `landmark_id` | access zone code |
 | `junctions` | Corridor junction | `x`, `y`, `photo_id` | `junction_photo_node` |
